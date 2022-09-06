@@ -5,7 +5,7 @@ DSN := postgres://restuwahyu13:restuwahyu13@localhost:5433/postgres?sslmode=fals
 MIGDIR := file:databases/migrations/
 
 start:
-	${NODEMON} -x go run main.go --signal ${SIGNAL}
+	${NODEMON} -v -x go run main.go --signal ${SIGNAL}
 
 migmake:
 ifdef name

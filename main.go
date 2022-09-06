@@ -11,6 +11,7 @@ import (
 
 	"github.com/restuwahyu13/go-trakteer-api/configs"
 	"github.com/restuwahyu13/go-trakteer-api/packages"
+	"github.com/restuwahyu13/go-trakteer-api/routes"
 )
 
 func main() {
@@ -21,6 +22,8 @@ func main() {
 
 	db := SetupDatabase()
 	router := SetupRouter()
+
+	routes.UsersRoute("/api/v1/users", db, router)
 
 	httpErr := http.ListenAndServe(viper.GetString("PORT"), router)
 	if httpErr != nil {
