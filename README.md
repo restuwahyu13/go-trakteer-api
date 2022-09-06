@@ -1,4 +1,4 @@
-# go-trakteer-api (On Progress)
+# Go Trakteer API (On Progress)
 
 This tutorial for you if you currently learn golang programming language.
 
