@@ -1,2 +1,3 @@
-# go-trakteer-api
-Building simple trakteer app like trakteer.id or saweria
+# go-trakteer-api (On Progress)
+
+![](https://imgur.com/SCNzWEP.png)
