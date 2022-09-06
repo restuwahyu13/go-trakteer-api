@@ -1,7 +1,7 @@
 MIG := @migrate
 NODEMON := @nodemon
 SIGNAL := SIGTERM
-DSN := postgres://restuwahyu13:restuwahyu13@localhost:5433/postgres?sslmode=false
+DSN := postgres://restuwahyu13:restuwahyu13@localhost:5433/postgres?sslmode=disable
 MIGDIR := file:databases/migrations/
 
 start:
