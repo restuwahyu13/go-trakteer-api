@@ -10,44 +10,23 @@ require (
 )
 
 require (
-	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
+	github.com/mattn/go-sqlite3 v1.14.10 // indirect
+	github.com/rogpeppe/go-internal v1.8.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
 require (
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
-	github.com/go-chi/render v1.0.1 // indirect
-	github.com/go-playground/locales v0.14.0 // indirect
-	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/go-playground/validator/v10 v10.11.0 // indirect
-	github.com/go-redis/redis/v8 v8.11.5 // indirect
-	github.com/go-redis/redis/v9 v9.0.0-beta.2 // indirect
-	github.com/gofrs/uuid v4.2.0+incompatible // indirect
-	github.com/golang-jwt/jwt/v4 v4.4.1 // indirect
-	github.com/golang-migrate/migrate/v4 v4.15.2
-	github.com/gomodule/redigo v1.8.8 // indirect
-	github.com/googollee/go-socket.io v1.6.2 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
-	github.com/rabbitmq/amqp091-go v1.3.4 // indirect
-	github.com/restuwahyu13/go-playground-converter v0.0.6 // indirect
-	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/afero v1.9.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
-	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	github.com/xendit/xendit-go v1.0.8 // indirect
-	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect
 	golang.org/x/sys v0.0.0-20220906135438-9e1f76180b77 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
