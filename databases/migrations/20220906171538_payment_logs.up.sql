@@ -1,4 +1,4 @@
-CREATE TABLE IF EXISTS "payment_logs" (
+CREATE TABLE IF NOT EXISTS "payment_logs" (
   "id" serial PRIMARY KEY,
   "transaction_id" varchar(255) NULL,
   "external_id" varchar(255) NULL,

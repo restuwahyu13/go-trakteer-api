@@ -4,8 +4,11 @@ SIGNAL := SIGTERM
 DSN := postgres://restuwahyu13:restuwahyu13@localhost:5432/postgres?sslmode=disable
 MIGDIR := databases/migrations/
 
-start:
+dev:
 	${NODEMON} -V -x go run main.go --signal ${SIGNAL}
+
+build:
+	go build -v -race main.go
 
 migmake:
 ifdef name
