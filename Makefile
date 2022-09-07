@@ -1,32 +1,32 @@
 MIG := @migrate
 NODEMON := @nodemon
 SIGNAL := SIGTERM
-DSN := postgres://restuwahyu13:restuwahyu13@localhost:5433/postgres?sslmode=disable
-MIGDIR := file:databases/migrations/
+DSN := postgres://restuwahyu13:restuwahyu13@localhost:5432/postgres?sslmode=disable
+MIGDIR := databases/migrations/
 
 start:
-	${NODEMON} -v -x go run main.go --signal ${SIGNAL}
+	${NODEMON} -V -x go run main.go --signal ${SIGNAL}
 
 migmake:
 ifdef name
-		${MIG} --verbose create -ext sql -dir databases/migrations ${name}
+		${MIG} -verbose create -ext sql -dir ${MIGDIR} ${name}
 endif
 
 migup:
-		${MIG} -path databases/migrations --verbose up --all
+		${MIG} -database ${DSN} -path ${MIGDIR} -verbose up
 
 migdown:
-		${MIG} -database ${DSN} -source ${MIGDIR} --verbose down --all
+		${MIG} -database ${DSN} -path ${MIGDIR} -verbose down -all
 
 migupspec:
 ifdef target
-		${MIG} -database ${DSN} -source ${MIGDIR} --verbose down ${target}
+		${MIG} -database ${DSN} -path ${MIGDIR} -verbose down ${target}
 endif
 
 migdownspec:
 ifdef target
-		${MIG} -database ${DSN} -source ${MIGDIR} --verbose down ${target}
+		${MIG} -database ${DSN} -path ${MIGDIR} -verbose down ${target}
 endif
 
 migdrop:
-		${MIG} -database ${DSN} -source ${MIGDIR} --verbose drop -f
+		${MIG} -database ${DSN} -path ${MIGDIR} -verbose drop -f

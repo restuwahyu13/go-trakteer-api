@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -25,7 +26,7 @@ func main() {
 
 	routes.UsersRoute("/api/v1/users", db, router)
 
-	httpErr := http.ListenAndServe(viper.GetString("PORT"), router)
+	httpErr := http.ListenAndServe(fmt.Sprintf(":%s", viper.GetString("PORT")), router)
 	if httpErr != nil {
 		log.Fatalf("http server not listening: %v", httpErr)
 	}
