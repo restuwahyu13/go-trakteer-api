@@ -7,5 +7,5 @@ CREATE TABLE IF NOT EXISTS "donation_pricing" (
   "updated_at" NULL DEFAULT (now())
 );
 
-ALTER TABLE "donation_pricing" ADD FOREIGN KEY user_id REFERENCES "users" ON DELETE CASCADE;
-ALTER TABLE "donation_pricing" ADD FOREIGN KEY donation_type_id REFERENCES "donation_type" ON DELETE CASCADE;
+ALTER TABLE "donation_pricing" ADD FOREIGN KEY user_id REFERENCES "users" ON DELETE RESCRICT;
+ALTER TABLE "donation_pricing" ADD FOREIGN KEY donation_type_id REFERENCES "donation_type" ON DELETE RESCRICT;

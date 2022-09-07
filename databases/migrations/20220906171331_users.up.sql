@@ -17,5 +17,5 @@ CREATE TABLE IF NOT EXISTS "users" (
   "deleted_at" timestamp NULL
 );
 
-ALTER TABLE "users" ADD FOREIGN KEY (role_id) REFERENCES "roles" ON DELETE CASCADE;
-ALTER TABLE "users" ADD FOREIGN KEY (categorie_id) REFERENCES "categories" ON DELETE CASCADE;
+ALTER TABLE "users" ADD FOREIGN KEY (role_id) REFERENCES "roles" ON DELETE RESCRICT;
+ALTER TABLE "users" ADD FOREIGN KEY (categorie_id) REFERENCES "categories" ON DELETE RESCRICT;
