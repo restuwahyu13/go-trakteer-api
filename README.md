@@ -2,4 +2,4 @@
 
 This tutorial for you if you currently learn golang programming language.
 
-![](https://imgur.com/SCNzWEP.png)
+[![dfd.png](https://i.postimg.cc/1twf139c/dfd.png)](https://postimg.cc/ZBYTrZvC)
