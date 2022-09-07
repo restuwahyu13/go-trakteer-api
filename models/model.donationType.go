@@ -3,7 +3,7 @@ package models
 import "time"
 
 type DonationTypes struct {
-	ID        int       `db:"id"`
+	ID        uint      `db:"id"`
 	Name      string    `db:"name"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`

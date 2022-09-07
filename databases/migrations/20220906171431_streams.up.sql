@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "streams" (
   "id" serial PRIMARY KEY,
   "notification" jsonb NULL,
-  "leaderboared" jsonb NULL,
+  "leaderboard" jsonb NULL,
   "last_supporter" jsonb NULL,
   "target" jsonb NULL,
   "running_text" jsonb NULL,

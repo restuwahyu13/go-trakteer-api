@@ -2,6 +2,22 @@ package models
 
 import "time"
 
+type rolesRelation struct {
+	ID        int       `db:"id"`
+	Name      string    `db:"name"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"created_at"`
+	DeletedAt time.Time `db:"created_at"`
+}
+
+type categoriesRelation struct {
+	ID        uint      `db:"id"`
+	Name      string    `db:"name"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
+	DeletedAt time.Time `db:"deleted_at"`
+}
+
 type Users struct {
 	ID          int       `db:"id"`
 	Username    string    `db:"username"`
@@ -13,6 +29,6 @@ type Users struct {
 	CreatedAt   time.Time `db:"created_at"`
 	UpdatedAt   time.Time `db:"created_at"`
 	DeletedAt   time.Time `db:"created_at"`
-	Role        Roles
-	Categorie   Categories
+	Role        rolesRelation
+	Categorie   categoriesRelation
 }
