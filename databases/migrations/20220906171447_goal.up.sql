@@ -7,4 +7,6 @@ CREATE TABLE IF NOT EXISTS "goal" (
   "progress" varchar(5) NULL DEFAULT ("0")
   "created_at" timestamp NULL DEFAULT (now())
   "updated_at" timestamp NULL DEFAULT (now())
-)
+);
+
+ALTER TABLE "goal" ADD FOREIGN KEY (goal_id) REFERENCES "streams" ON DELETE CASCADE;
