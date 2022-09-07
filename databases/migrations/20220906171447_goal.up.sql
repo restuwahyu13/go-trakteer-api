@@ -9,4 +9,4 @@ CREATE TABLE IF NOT EXISTS "goal" (
   "updated_at" timestamp NULL DEFAULT (now())
 );
 
-ALTER TABLE "goal" ADD FOREIGN KEY (goal_id) REFERENCES "streams" ON DELETE CASCADE;
+ALTER TABLE "goal" ADD FOREIGN KEY (stream_id) REFERENCES "streams" ON DELETE CASCADE;
