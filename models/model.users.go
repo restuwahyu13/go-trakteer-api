@@ -3,7 +3,7 @@ package models
 import "time"
 
 type rolesRelation struct {
-	ID        int       `db:"id"`
+	ID        uint      `db:"id"`
 	Name      string    `db:"name"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"created_at"`
@@ -19,7 +19,7 @@ type categoriesRelation struct {
 }
 
 type Users struct {
-	ID          int       `db:"id"`
+	ID          uint      `db:"id"`
 	Username    string    `db:"username"`
 	Name        string    `db:"name"`
 	Email       string    `db:"email"`
