@@ -28,7 +28,7 @@ func (ctx *UsersRepository) RegisterRepository(payload dtos.DTOLogin) helpers.AP
 
 func (ctx *UsersRepository) LoginRepository(payload dtos.DTOLogin) helpers.APIResponse {
 	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
+		StatCode: http.StatusBadRequest,
 		StatMsg:  "Respon from login repository",
 	}
 

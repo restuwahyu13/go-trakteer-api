@@ -33,6 +33,11 @@ func (ctx *CategoriesController) CreateController(rw http.ResponseWriter, r *htt
 	}
 
 	res := ctx.service.CreateService(req)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
@@ -51,6 +56,11 @@ func (ctx *CategoriesController) GetAllController(rw http.ResponseWriter, r *htt
 	}
 
 	res := ctx.service.GetAllService(req)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
@@ -69,6 +79,11 @@ func (ctx *CategoriesController) GetByIdController(rw http.ResponseWriter, r *ht
 	}
 
 	res := ctx.service.GetByIdService(req)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
@@ -87,6 +102,11 @@ func (ctx *CategoriesController) DeleteByIdController(rw http.ResponseWriter, r 
 	}
 
 	res := ctx.service.DeleteByIdService(req)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
@@ -105,5 +125,10 @@ func (ctx *CategoriesController) UpdatedByIdController(rw http.ResponseWriter, r
 	}
 
 	res := ctx.service.UpdatedByIdService(req)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	helpers.Send(rw, helpers.ApiResponse(res))
 }

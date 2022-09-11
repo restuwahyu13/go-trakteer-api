@@ -33,6 +33,10 @@ func (ctx *CustomersController) RegisterController(rw http.ResponseWriter, r *ht
 	}
 
 	res := ctx.service.RegisterService(req)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
 
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
@@ -52,6 +56,10 @@ func (ctx *CustomersController) LoginController(rw http.ResponseWriter, r *http.
 	}
 
 	res := ctx.service.LoginService(req)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
 
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
@@ -71,6 +79,10 @@ func (ctx *CustomersController) ActivationController(rw http.ResponseWriter, r *
 	}
 
 	res := ctx.service.ActivationService(req)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
 
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
@@ -90,6 +102,10 @@ func (ctx *CustomersController) ResendActivationController(rw http.ResponseWrite
 	}
 
 	res := ctx.service.ResendActivationService(req)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
 
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
@@ -110,6 +126,11 @@ func (ctx *CustomersController) ForgotPasswordController(rw http.ResponseWriter,
 	}
 
 	res := ctx.service.ForgotPasswordService(req)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
@@ -128,6 +149,11 @@ func (ctx *CustomersController) ResetPasswordController(rw http.ResponseWriter, 
 	}
 
 	res := ctx.service.ResetPasswordService(req)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
@@ -146,6 +172,10 @@ func (ctx *CustomersController) ChangePasswordController(rw http.ResponseWriter,
 	}
 
 	res := ctx.service.ChangePasswordService(req)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
 
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
@@ -165,6 +195,10 @@ func (ctx *CustomersController) GetProfileController(rw http.ResponseWriter, r *
 	}
 
 	res := ctx.service.GetProfileService(req)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
 
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
@@ -184,6 +218,10 @@ func (ctx *CustomersController) UpdateProfileController(rw http.ResponseWriter, 
 	}
 
 	res := ctx.service.UpdateProfileService(req)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
 
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
