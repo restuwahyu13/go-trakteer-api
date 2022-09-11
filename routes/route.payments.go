@@ -7,9 +7,9 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func StreamsRoute(prefix string, db *sqlx.DB, router *chi.Mux) {
+func PaymentsRoute(prefix string, db *sqlx.DB, router *chi.Mux) {
 	router.Route(prefix, func(r chi.Router) {
-		r.Get("/", func(rw http.ResponseWriter, r *http.Request) {
+		r.Post("/notification", func(rw http.ResponseWriter, r *http.Request) {
 			rw.Write([]byte("hello wordl"))
 		})
 	})

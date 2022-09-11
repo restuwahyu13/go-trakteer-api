@@ -1,62 +1,21 @@
 package routes
 
 import (
-	"encoding/json"
-	"net/http"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/restuwahyu13/go-trakteer-api/controllers"
+	"github.com/restuwahyu13/go-trakteer-api/repositorys"
+	"github.com/restuwahyu13/go-trakteer-api/services"
 )
 
 func UsersRoute(prefix string, db *sqlx.DB, router *chi.Mux) {
+
+	repository := repositorys.NewUsersRepository(db)
+	service := services.NewUsersService(repository)
+	controller := controllers.NewUsersController(service)
+
 	router.Route(prefix, func(r chi.Router) {
-
-		r.Post("/login", func(rw http.ResponseWriter, r *http.Request) {
-			res, _ := json.Marshal(map[string]string{"message": "hello wordl"})
-			rw.Write(res)
-
-		})
-
-		r.Post("/register", func(rw http.ResponseWriter, r *http.Request) {
-			res, _ := json.Marshal(map[string]string{"message": "hello wordl"})
-			rw.Write(res)
-
-		})
-
-		r.Get("/activation", func(rw http.ResponseWriter, r *http.Request) {
-			res, _ := json.Marshal(map[string]string{"message": "hello wordl"})
-			rw.Write(res)
-
-		})
-
-		r.Post("/forgot-password", func(rw http.ResponseWriter, r *http.Request) {
-			res, _ := json.Marshal(map[string]string{"message": "hello wordl"})
-			rw.Write(res)
-
-		})
-
-		r.Put("/reset-password", func(rw http.ResponseWriter, r *http.Request) {
-			res, _ := json.Marshal(map[string]string{"message": "hello wordl"})
-			rw.Write(res)
-
-		})
-
-		r.Put("/change-password", func(rw http.ResponseWriter, r *http.Request) {
-			res, _ := json.Marshal(map[string]string{"message": "hello wordl"})
-			rw.Write(res)
-
-		})
-
-		r.Get("/profile/:id", func(rw http.ResponseWriter, r *http.Request) {
-			res, _ := json.Marshal(map[string]string{"message": "hello wordl"})
-			rw.Write(res)
-
-		})
-
-		r.Put("/profile/:id", func(rw http.ResponseWriter, r *http.Request) {
-			res, _ := json.Marshal(map[string]string{"message": "hello wordl"})
-			rw.Write(res)
-
-		})
+		r.Post("/login", controller.LoginController)
 	})
 }

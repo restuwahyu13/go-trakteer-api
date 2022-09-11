@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
 	"github.com/restuwahyu13/go-trakteer-api/configs"
@@ -28,7 +29,7 @@ func main() {
 
 	httpErr := http.ListenAndServe(fmt.Sprintf(":%s", viper.GetString("PORT")), router)
 	if httpErr != nil {
-		log.Fatalf("http server not listening: %v", httpErr)
+		logrus.Errorf("http server not listening: %v", httpErr)
 	}
 }
 
@@ -38,11 +39,11 @@ func SetupDatabase() *sqlx.DB {
 
 	if err != nil {
 		defer db.Close()
-		log.Fatalf("database not connected: %v", err)
+		logrus.Errorf("database not connected: %v", err)
 	}
 
 	if viper.GetString("GO_ENV") == "development" {
-		log.Print("database is connected")
+		logrus.Info("database is connected")
 	}
 
 	return db
@@ -52,7 +53,7 @@ func SetupRouter() *chi.Mux {
 	router := chi.NewRouter()
 
 	if viper.GetString("GO_ENV") == "development" {
-		log.Println("server is running on port: " + viper.GetString("PORT"))
+		logrus.Info("server is running on port: " + viper.GetString("PORT"))
 	}
 
 	return router
