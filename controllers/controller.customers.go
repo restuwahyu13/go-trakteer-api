@@ -10,19 +10,19 @@ import (
 	"github.com/restuwahyu13/go-trakteer-api/services"
 )
 
-type UsersController struct {
-	service *services.UsersService
+type CustomersController struct {
+	service *services.CustomersService
 }
 
-func NewUsersController(service *services.UsersService) *UsersController {
-	return &UsersController{service: service}
+func NewCustomersController(service *services.CustomersService) *CustomersController {
+	return &CustomersController{service: service}
 }
 
 /**
 * @description RegisterController
 **/
 
-func (ctx *UsersController) RegisterController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *CustomersController) RegisterController(rw http.ResponseWriter, r *http.Request) {
 	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -43,7 +43,7 @@ func (ctx *UsersController) RegisterController(rw http.ResponseWriter, r *http.R
 * @description LoginController
 **/
 
-func (ctx *UsersController) LoginController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *CustomersController) LoginController(rw http.ResponseWriter, r *http.Request) {
 	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -64,7 +64,7 @@ func (ctx *UsersController) LoginController(rw http.ResponseWriter, r *http.Requ
 * @description ActivationController
 **/
 
-func (ctx *UsersController) ActivationController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *CustomersController) ActivationController(rw http.ResponseWriter, r *http.Request) {
 	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -82,10 +82,31 @@ func (ctx *UsersController) ActivationController(rw http.ResponseWriter, r *http
 }
 
 /**
+* @description ResendActivationController
+**/
+
+func (ctx *CustomersController) ResendActivationController(rw http.ResponseWriter, r *http.Request) {
+	apiResponse := make(chan helpers.APIResponse, 1)
+	req := dtos.DTOLogin{}
+	err := json.NewDecoder(r.Body).Decode(&req)
+
+	if err != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	res := ctx.service.ResendActivationService(req)
+	apiResponse <- res
+
+	helpers.Send(rw, helpers.ApiResponse(<-apiResponse))
+}
+
+/**
 * @description ForgotPasswordController
 **/
 
-func (ctx *UsersController) ForgotPasswordController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *CustomersController) ForgotPasswordController(rw http.ResponseWriter, r *http.Request) {
 	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -106,7 +127,7 @@ func (ctx *UsersController) ForgotPasswordController(rw http.ResponseWriter, r *
 * @description ResetPasswordController
 **/
 
-func (ctx *UsersController) ResetPasswordController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *CustomersController) ResetPasswordController(rw http.ResponseWriter, r *http.Request) {
 	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -127,7 +148,7 @@ func (ctx *UsersController) ResetPasswordController(rw http.ResponseWriter, r *h
 * @description ChangePasswordController
 **/
 
-func (ctx *UsersController) ChangePasswordController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *CustomersController) ChangePasswordController(rw http.ResponseWriter, r *http.Request) {
 	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -148,7 +169,7 @@ func (ctx *UsersController) ChangePasswordController(rw http.ResponseWriter, r *
 * @description GetProfileController
 **/
 
-func (ctx *UsersController) GetProfileController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *CustomersController) GetProfileController(rw http.ResponseWriter, r *http.Request) {
 	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -169,7 +190,7 @@ func (ctx *UsersController) GetProfileController(rw http.ResponseWriter, r *http
 * @description UpdateProfileController
 **/
 
-func (ctx *UsersController) UpdateProfileController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *CustomersController) UpdateProfileController(rw http.ResponseWriter, r *http.Request) {
 	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)

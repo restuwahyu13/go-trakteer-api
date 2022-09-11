@@ -1,32 +1,23 @@
 package routes
 
 import (
-	"net/http"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/restuwahyu13/go-trakteer-api/controllers"
+	"github.com/restuwahyu13/go-trakteer-api/helpers"
+	"github.com/restuwahyu13/go-trakteer-api/repositorys"
+	"github.com/restuwahyu13/go-trakteer-api/services"
 )
 
 func RolesRoute(prefix string, db *sqlx.DB, router *chi.Mux) {
-	router.Route(prefix, func(r chi.Router) {
-		r.Post("/", func(rw http.ResponseWriter, r *http.Request) {
-			rw.Write([]byte("hello wordl"))
-		})
+	repository := repositorys.NewRolesRepository(db)
+	service := services.NewRolesService(repository)
+	controller := controllers.NewRolesController(service)
 
-		r.Get("/", func(rw http.ResponseWriter, r *http.Request) {
-			rw.Write([]byte("hello wordl"))
-		})
-
-		r.Get("/:id", func(rw http.ResponseWriter, r *http.Request) {
-			rw.Write([]byte("hello wordl"))
-		})
-
-		r.Delete("/:id", func(rw http.ResponseWriter, r *http.Request) {
-			rw.Write([]byte("hello wordl"))
-		})
-
-		r.Put("/", func(rw http.ResponseWriter, r *http.Request) {
-			rw.Write([]byte("hello wordl"))
-		})
-	})
+	router.Post(helpers.Endpoint(prefix, "/"), controller.CreateController)
+	router.Get(helpers.Endpoint(prefix, "/"), controller.GetAllController)
+	router.Get(helpers.Endpoint(prefix, "/:id"), controller.GetByIdController)
+	router.Delete(helpers.Endpoint(prefix, "/:id"), controller.DeleteByIdController)
+	router.Put(helpers.Endpoint(prefix, "/:id"), controller.UpdatedByIdController)
 }

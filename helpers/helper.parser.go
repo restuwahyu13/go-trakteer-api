@@ -14,9 +14,9 @@ func Stringify(data any) any {
 		logrus.Errorf("Create json format error: %v", err)
 	}
 
-	err = json.Unmarshal(res, data)
+	errM := json.Unmarshal(res, data)
 
-	if err != nil {
+	if errM != nil {
 		logrus.Errorf("Create json format error: %v", err)
 	}
 
@@ -32,5 +32,5 @@ func BodyParser(reader io.Reader, body any) {
 }
 
 func Endpoint(prefix string, path string) string {
-	return fmt.Sprintf("%s/%s", prefix, path)
+	return fmt.Sprintf("%s%s", prefix, path)
 }

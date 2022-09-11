@@ -9,15 +9,15 @@ import (
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
 )
 
-type UsersRepository struct {
+type CustomersRepository struct {
 	db *sqlx.DB
 }
 
-func NewUsersRepository(db *sqlx.DB) *UsersRepository {
-	return &UsersRepository{db: db}
+func NewCustomersRepository(db *sqlx.DB) *CustomersRepository {
+	return &CustomersRepository{db: db}
 }
 
-func (ctx *UsersRepository) RegisterRepository(payload dtos.DTOLogin) helpers.APIResponse {
+func (ctx *CustomersRepository) RegisterRepository(payload dtos.DTOLogin) helpers.APIResponse {
 	res := helpers.APIResponse{
 		StatCode: http.StatusOK,
 		StatMsg:  "Respon from register repository",
@@ -26,7 +26,7 @@ func (ctx *UsersRepository) RegisterRepository(payload dtos.DTOLogin) helpers.AP
 	return res
 }
 
-func (ctx *UsersRepository) LoginRepository(payload dtos.DTOLogin) helpers.APIResponse {
+func (ctx *CustomersRepository) LoginRepository(payload dtos.DTOLogin) helpers.APIResponse {
 	res := helpers.APIResponse{
 		StatCode: http.StatusOK,
 		StatMsg:  "Respon from login repository",
@@ -35,7 +35,7 @@ func (ctx *UsersRepository) LoginRepository(payload dtos.DTOLogin) helpers.APIRe
 	return res
 }
 
-func (ctx *UsersRepository) ActivationRepository(payload dtos.DTOLogin) helpers.APIResponse {
+func (ctx *CustomersRepository) ActivationRepository(payload dtos.DTOLogin) helpers.APIResponse {
 	res := helpers.APIResponse{
 		StatCode: http.StatusOK,
 		StatMsg:  "Respon from activation repository",
@@ -44,7 +44,16 @@ func (ctx *UsersRepository) ActivationRepository(payload dtos.DTOLogin) helpers.
 	return res
 }
 
-func (ctx *UsersRepository) ForgotPasswordRepository(payload dtos.DTOLogin) helpers.APIResponse {
+func (ctx *CustomersRepository) ResendActivationRepository(payload dtos.DTOLogin) helpers.APIResponse {
+	res := helpers.APIResponse{
+		StatCode: http.StatusOK,
+		StatMsg:  "Respon from resend activation repository",
+	}
+
+	return res
+}
+
+func (ctx *CustomersRepository) ForgotPasswordRepository(payload dtos.DTOLogin) helpers.APIResponse {
 	res := helpers.APIResponse{
 		StatCode: http.StatusOK,
 		StatMsg:  "Respon from forgot password repository",
@@ -53,7 +62,7 @@ func (ctx *UsersRepository) ForgotPasswordRepository(payload dtos.DTOLogin) help
 	return res
 }
 
-func (ctx *UsersRepository) ResetPasswordRepository(payload dtos.DTOLogin) helpers.APIResponse {
+func (ctx *CustomersRepository) ResetPasswordRepository(payload dtos.DTOLogin) helpers.APIResponse {
 	res := helpers.APIResponse{
 		StatCode: http.StatusOK,
 		StatMsg:  "Respon from reset password repository",
@@ -62,7 +71,7 @@ func (ctx *UsersRepository) ResetPasswordRepository(payload dtos.DTOLogin) helpe
 	return res
 }
 
-func (ctx *UsersRepository) ChangePasswordRepository(payload dtos.DTOLogin) helpers.APIResponse {
+func (ctx *CustomersRepository) ChangePasswordRepository(payload dtos.DTOLogin) helpers.APIResponse {
 	res := helpers.APIResponse{
 		StatCode: http.StatusOK,
 		StatMsg:  "Respon from change password repository",
@@ -71,7 +80,7 @@ func (ctx *UsersRepository) ChangePasswordRepository(payload dtos.DTOLogin) help
 	return res
 }
 
-func (ctx *UsersRepository) GetProfileRepository(payload dtos.DTOLogin) helpers.APIResponse {
+func (ctx *CustomersRepository) GetProfileRepository(payload dtos.DTOLogin) helpers.APIResponse {
 	res := helpers.APIResponse{
 		StatCode: http.StatusOK,
 		StatMsg:  "Respon from get profile repository",
@@ -80,7 +89,7 @@ func (ctx *UsersRepository) GetProfileRepository(payload dtos.DTOLogin) helpers.
 	return res
 }
 
-func (ctx *UsersRepository) UpdateProfileRepository(payload dtos.DTOLogin) helpers.APIResponse {
+func (ctx *CustomersRepository) UpdateProfileRepository(payload dtos.DTOLogin) helpers.APIResponse {
 	res := helpers.APIResponse{
 		StatCode: http.StatusOK,
 		StatMsg:  "Respon from update profile repository",

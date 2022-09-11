@@ -26,6 +26,9 @@ func main() {
 	router := SetupRouter()
 
 	routes.UsersRoute("/api/v1/users", db, router)
+	routes.CustomersRoute("/api/v1/customers", db, router)
+	routes.RolesRoute("/api/v1/roles", db, router)
+	routes.CategoriesRoute("/api/v1/categories", db, router)
 
 	httpErr := http.ListenAndServe(fmt.Sprintf(":%s", viper.GetString("PORT")), router)
 	if httpErr != nil {
