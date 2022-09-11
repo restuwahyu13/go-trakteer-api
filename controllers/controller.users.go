@@ -23,7 +23,6 @@ func NewUsersController(service *services.UsersService) *UsersController {
 **/
 
 func (ctx *UsersController) RegisterController(rw http.ResponseWriter, r *http.Request) {
-	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -34,9 +33,7 @@ func (ctx *UsersController) RegisterController(rw http.ResponseWriter, r *http.R
 	}
 
 	res := ctx.service.RegisterService(req)
-	apiResponse <- res
-
-	helpers.Send(rw, helpers.ApiResponse(<-apiResponse))
+	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
 /**
@@ -44,7 +41,6 @@ func (ctx *UsersController) RegisterController(rw http.ResponseWriter, r *http.R
 **/
 
 func (ctx *UsersController) LoginController(rw http.ResponseWriter, r *http.Request) {
-	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -55,9 +51,7 @@ func (ctx *UsersController) LoginController(rw http.ResponseWriter, r *http.Requ
 	}
 
 	res := ctx.service.LoginService(req)
-	apiResponse <- res
-
-	helpers.Send(rw, helpers.ApiResponse(<-apiResponse))
+	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
 /**
@@ -65,7 +59,6 @@ func (ctx *UsersController) LoginController(rw http.ResponseWriter, r *http.Requ
 **/
 
 func (ctx *UsersController) ActivationController(rw http.ResponseWriter, r *http.Request) {
-	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -76,9 +69,7 @@ func (ctx *UsersController) ActivationController(rw http.ResponseWriter, r *http
 	}
 
 	res := ctx.service.ActivationService(req)
-	apiResponse <- res
-
-	helpers.Send(rw, helpers.ApiResponse(<-apiResponse))
+	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
 /**
@@ -86,7 +77,6 @@ func (ctx *UsersController) ActivationController(rw http.ResponseWriter, r *http
 **/
 
 func (ctx *UsersController) ForgotPasswordController(rw http.ResponseWriter, r *http.Request) {
-	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -97,9 +87,7 @@ func (ctx *UsersController) ForgotPasswordController(rw http.ResponseWriter, r *
 	}
 
 	res := ctx.service.ForgotPasswordService(req)
-	apiResponse <- res
-
-	helpers.Send(rw, helpers.ApiResponse(<-apiResponse))
+	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
 /**
@@ -107,7 +95,6 @@ func (ctx *UsersController) ForgotPasswordController(rw http.ResponseWriter, r *
 **/
 
 func (ctx *UsersController) ResetPasswordController(rw http.ResponseWriter, r *http.Request) {
-	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -118,9 +105,7 @@ func (ctx *UsersController) ResetPasswordController(rw http.ResponseWriter, r *h
 	}
 
 	res := ctx.service.ResetPasswordService(req)
-	apiResponse <- res
-
-	helpers.Send(rw, helpers.ApiResponse(<-apiResponse))
+	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
 /**
@@ -128,7 +113,6 @@ func (ctx *UsersController) ResetPasswordController(rw http.ResponseWriter, r *h
 **/
 
 func (ctx *UsersController) ChangePasswordController(rw http.ResponseWriter, r *http.Request) {
-	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -139,9 +123,7 @@ func (ctx *UsersController) ChangePasswordController(rw http.ResponseWriter, r *
 	}
 
 	res := ctx.service.ChangePasswordService(req)
-	apiResponse <- res
-
-	helpers.Send(rw, helpers.ApiResponse(<-apiResponse))
+	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
 /**
@@ -149,7 +131,6 @@ func (ctx *UsersController) ChangePasswordController(rw http.ResponseWriter, r *
 **/
 
 func (ctx *UsersController) GetProfileController(rw http.ResponseWriter, r *http.Request) {
-	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -160,9 +141,7 @@ func (ctx *UsersController) GetProfileController(rw http.ResponseWriter, r *http
 	}
 
 	res := ctx.service.GetProfileService(req)
-	apiResponse <- res
-
-	helpers.Send(rw, helpers.ApiResponse(<-apiResponse))
+	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
 /**
@@ -170,7 +149,6 @@ func (ctx *UsersController) GetProfileController(rw http.ResponseWriter, r *http
 **/
 
 func (ctx *UsersController) UpdateProfileController(rw http.ResponseWriter, r *http.Request) {
-	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -181,7 +159,5 @@ func (ctx *UsersController) UpdateProfileController(rw http.ResponseWriter, r *h
 	}
 
 	res := ctx.service.UpdateProfileService(req)
-	apiResponse <- res
-
-	helpers.Send(rw, helpers.ApiResponse(<-apiResponse))
+	helpers.Send(rw, helpers.ApiResponse(res))
 }

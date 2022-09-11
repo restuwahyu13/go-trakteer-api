@@ -12,7 +12,6 @@ func Send(rw http.ResponseWriter, data []byte) {
 	rw.Header().Set("Content-Type", "application/json")
 	if res.StatCode >= 400 {
 		rw.WriteHeader(int(res.StatCode))
-
 	}
 	rw.Write(data)
 }

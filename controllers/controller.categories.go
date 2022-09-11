@@ -23,7 +23,6 @@ func NewCategoriesController(service *services.CategoriesService) *CategoriesCon
 **/
 
 func (ctx *CategoriesController) CreateController(rw http.ResponseWriter, r *http.Request) {
-	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -34,9 +33,7 @@ func (ctx *CategoriesController) CreateController(rw http.ResponseWriter, r *htt
 	}
 
 	res := ctx.service.CreateService(req)
-	apiResponse <- res
-
-	helpers.Send(rw, helpers.ApiResponse(<-apiResponse))
+	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
 /**
@@ -44,7 +41,6 @@ func (ctx *CategoriesController) CreateController(rw http.ResponseWriter, r *htt
 **/
 
 func (ctx *CategoriesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
-	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -55,9 +51,7 @@ func (ctx *CategoriesController) GetAllController(rw http.ResponseWriter, r *htt
 	}
 
 	res := ctx.service.GetAllService(req)
-	apiResponse <- res
-
-	helpers.Send(rw, helpers.ApiResponse(<-apiResponse))
+	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
 /**
@@ -65,7 +59,6 @@ func (ctx *CategoriesController) GetAllController(rw http.ResponseWriter, r *htt
 **/
 
 func (ctx *CategoriesController) GetByIdController(rw http.ResponseWriter, r *http.Request) {
-	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -76,9 +69,7 @@ func (ctx *CategoriesController) GetByIdController(rw http.ResponseWriter, r *ht
 	}
 
 	res := ctx.service.GetByIdService(req)
-	apiResponse <- res
-
-	helpers.Send(rw, helpers.ApiResponse(<-apiResponse))
+	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
 /**
@@ -86,7 +77,6 @@ func (ctx *CategoriesController) GetByIdController(rw http.ResponseWriter, r *ht
 **/
 
 func (ctx *CategoriesController) DeleteByIdController(rw http.ResponseWriter, r *http.Request) {
-	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -97,9 +87,7 @@ func (ctx *CategoriesController) DeleteByIdController(rw http.ResponseWriter, r 
 	}
 
 	res := ctx.service.DeleteByIdService(req)
-	apiResponse <- res
-
-	helpers.Send(rw, helpers.ApiResponse(<-apiResponse))
+	helpers.Send(rw, helpers.ApiResponse(res))
 }
 
 /**
@@ -107,7 +95,6 @@ func (ctx *CategoriesController) DeleteByIdController(rw http.ResponseWriter, r 
 **/
 
 func (ctx *CategoriesController) UpdatedByIdController(rw http.ResponseWriter, r *http.Request) {
-	apiResponse := make(chan helpers.APIResponse, 1)
 	req := dtos.DTOLogin{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -118,7 +105,5 @@ func (ctx *CategoriesController) UpdatedByIdController(rw http.ResponseWriter, r
 	}
 
 	res := ctx.service.UpdatedByIdService(req)
-	apiResponse <- res
-
-	helpers.Send(rw, helpers.ApiResponse(<-apiResponse))
+	helpers.Send(rw, helpers.ApiResponse(res))
 }
