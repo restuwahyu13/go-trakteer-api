@@ -17,7 +17,7 @@ func CategoriesRoute(prefix string, db *sqlx.DB, router *chi.Mux) {
 
 	router.Post(helpers.Endpoint(prefix, "/"), controller.CreateController)
 	router.Get(helpers.Endpoint(prefix, "/"), controller.GetAllController)
-	router.Get(helpers.Endpoint(prefix, "/:id"), controller.GetByIdController)
-	router.Delete(helpers.Endpoint(prefix, "/:id"), controller.DeleteByIdController)
-	router.Put(helpers.Endpoint(prefix, "/:id"), controller.UpdatedByIdController)
+	router.Get(helpers.Endpoint(prefix, "/{id}"), controller.GetByIdController)
+	router.Delete(helpers.Endpoint(prefix, "/{id}"), controller.DeleteByIdController)
+	router.Put(helpers.Endpoint(prefix, "/{id}"), controller.UpdatedByIdController)
 }

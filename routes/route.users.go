@@ -21,6 +21,6 @@ func UsersRoute(prefix string, db *sqlx.DB, router *chi.Mux) {
 	router.Post(helpers.Endpoint(prefix, "/forgot-password"), controller.ForgotPasswordController)
 	router.Post(helpers.Endpoint(prefix, "/reset-password"), controller.ResetPasswordController)
 	router.Put(helpers.Endpoint(prefix, "/change-password"), controller.ChangePasswordController)
-	router.Get(helpers.Endpoint(prefix, "/profile/:id"), controller.GetProfileController)
-	router.Put(helpers.Endpoint(prefix, "/profile/:id"), controller.UpdateProfileController)
+	router.Get(helpers.Endpoint(prefix, "/profile/{id}"), controller.GetProfileController)
+	router.Put(helpers.Endpoint(prefix, "/profile/{id}"), controller.UpdateProfileController)
 }
