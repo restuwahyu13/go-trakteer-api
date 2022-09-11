@@ -5,6 +5,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/restuwahyu13/go-trakteer-api/controllers"
+	"github.com/restuwahyu13/go-trakteer-api/helpers"
 	"github.com/restuwahyu13/go-trakteer-api/repositorys"
 	"github.com/restuwahyu13/go-trakteer-api/services"
 )
@@ -15,7 +16,5 @@ func UsersRoute(prefix string, db *sqlx.DB, router *chi.Mux) {
 	service := services.NewUsersService(repository)
 	controller := controllers.NewUsersController(service)
 
-	router.Route(prefix, func(r chi.Router) {
-		r.Post("/login", controller.LoginController)
-	})
+	router.Post(helpers.Endpoint(prefix, "login"), controller.LoginController)
 }

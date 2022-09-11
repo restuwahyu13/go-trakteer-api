@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 
 	"github.com/sirupsen/logrus"
@@ -28,4 +29,8 @@ func BodyParser(reader io.Reader, body any) {
 	if err != nil {
 		logrus.Errorf("Parse body data error: %v", err)
 	}
+}
+
+func Endpoint(prefix string, path string) string {
+	return fmt.Sprintf("%s/%s", prefix, path)
 }
