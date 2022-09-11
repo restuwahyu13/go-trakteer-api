@@ -12,5 +12,5 @@ type Goal struct {
 	Progress      string    `db:"progress"`
 	CreatedAt     time.Time `db:"created_at"`
 	UpdatedAt     time.Time `db:"updated_at"`
-	Stream        Streams
+	Payments      []Payments
 }

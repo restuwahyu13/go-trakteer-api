@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS "payments" (
   "status" varchar(50) NOT NULL,
   "amount" bigint NOT NULL,
   "is_paid" boolean NULL DEFAULT (false),
-  "type" varchar(50) NOT NULL,
+  "categorie" varchar(50) NOT NULL,
   "goal_id" int NULL,
   "supporter_id" int NULL,
   "created_at" timestamp NULL DEFAULT (now())
