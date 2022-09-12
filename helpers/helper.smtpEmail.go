@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func SmtpEmail(from []string, template string) error {
+func SmtpEmail(to []string, template string) error {
 	smtp_host := viper.GetString("SMTP_HOST")
 	smtp_port, _ := strconv.Atoi(viper.GetString("SMTP_PORT"))
 	smtp_username := viper.GetString("SMTP_USERNAME")
@@ -19,7 +19,7 @@ func SmtpEmail(from []string, template string) error {
 	smtpAddress := fmt.Sprintf("%s:%d", smtp_host, smtp_port)
 	smtpFromEmail := viper.GetString("SMTP_EMAIL")
 
-	smtpEmailError := smtp.SendMail(smtpAddress, smtpAuth, smtpFromEmail, from, []byte(template))
+	smtpEmailError := smtp.SendMail(smtpAddress, smtpAuth, smtpFromEmail, to, []byte(template))
 	if smtpEmailError != nil {
 		logrus.Errorf("Sending email using SMTP error: %v", smtpEmailError)
 	}
