@@ -18,11 +18,11 @@ func (ctx *CategoriesService) CreateService(payload dtos.DTOLogin) helpers.APIRe
 	return ctx.repository.CreateRepository(payload)
 }
 
-func (ctx *CategoriesService) GetAllService(payload dtos.DTOLogin) helpers.APIResponse {
+func (ctx *CategoriesService) GetAllService(payload dtos.DTOCategoriesPagination) helpers.APIResponse {
 	return ctx.repository.GetAllRepository(payload)
 }
 
-func (ctx *CategoriesService) GetByIdService(payload dtos.DTOLogin) helpers.APIResponse {
+func (ctx *CategoriesService) GetByIdService(payload dtos.DTORolesById) helpers.APIResponse {
 	return ctx.repository.GetByIdRepository(payload)
 }
 

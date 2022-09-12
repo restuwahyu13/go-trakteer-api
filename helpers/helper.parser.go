@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 
 	"github.com/sirupsen/logrus"
 )
@@ -32,5 +33,17 @@ func BodyParser(reader io.Reader, body any) {
 }
 
 func Endpoint(prefix string, path string) string {
-	return fmt.Sprintf("%s%s", prefix, path)
+	if path == "/" {
+		return prefix
+	} else {
+		return fmt.Sprintf("%s%s", prefix, path)
+	}
+}
+
+func QueryParser(r *http.Request, key string) string {
+	return r.URL.Query().Get(key)
+}
+
+func Strings(format string, arg any) string {
+	return fmt.Sprintf(format, arg)
 }

@@ -14,22 +14,22 @@ func NewRolesService(repository *repositorys.RolesRepository) *RolesService {
 	return &RolesService{repository: repository}
 }
 
-func (ctx *RolesService) CreateService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.CreateRepository(payload)
+func (ctx *RolesService) CreateService(body dtos.DTORoles) helpers.APIResponse {
+	return ctx.repository.CreateRepository(body)
 }
 
-func (ctx *RolesService) GetAllService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.GetAllRepository(payload)
+func (ctx *RolesService) GetAllService(query dtos.DTORolePagination) helpers.APIResponse {
+	return ctx.repository.GetAllRepository(query)
 }
 
-func (ctx *RolesService) GetByIdService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.GetByIdRepository(payload)
+func (ctx *RolesService) GetByIdService(params dtos.DTORolesById) helpers.APIResponse {
+	return ctx.repository.GetByIdRepository(params)
 }
 
-func (ctx *RolesService) DeleteByIdService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.DeleteByIdRepository(payload)
+func (ctx *RolesService) DeleteByIdService(params dtos.DTORolesById) helpers.APIResponse {
+	return ctx.repository.DeleteByIdRepository(params)
 }
 
-func (ctx *RolesService) UpdatedByIdService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.UpdatedByIdRepository(payload)
+func (ctx *RolesService) UpdatedByIdService(body dtos.DTORoles, params dtos.DTORolesById) helpers.APIResponse {
+	return ctx.repository.UpdatedByIdRepository(body, params)
 }

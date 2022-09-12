@@ -4,6 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
+
+	"github.com/go-chi/chi/v5"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
@@ -46,13 +50,18 @@ func (ctx *CategoriesController) CreateController(rw http.ResponseWriter, r *htt
 **/
 
 func (ctx *CategoriesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	limit, _ := strconv.Atoi(helpers.QueryParser(r, "limit"))
+	offset, _ := strconv.Atoi(helpers.QueryParser(r, "offset"))
+	per_page, _ := strconv.Atoi(helpers.QueryParser(r, "per_page"))
+	current_page, _ := strconv.Atoi(helpers.QueryParser(r, "current_page"))
+	sort := helpers.QueryParser(r, "sort")
 
-	if err != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
-		helpers.Send(rw, helpers.ApiResponse(res))
-		return
+	req := dtos.DTOCategoriesPagination{
+		Limit:       limit,
+		Offset:      offset,
+		Sort:        strings.ToUpper(sort),
+		Perpage:     per_page,
+		CurrentPage: current_page,
 	}
 
 	res := ctx.service.GetAllService(req)
@@ -69,14 +78,8 @@ func (ctx *CategoriesController) GetAllController(rw http.ResponseWriter, r *htt
 **/
 
 func (ctx *CategoriesController) GetByIdController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
-
-	if err != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
-		helpers.Send(rw, helpers.ApiResponse(res))
-		return
-	}
+	params, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	req := dtos.DTORolesById{Id: params}
 
 	res := ctx.service.GetByIdService(req)
 	if res.StatCode >= 400 {

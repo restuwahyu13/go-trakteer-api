@@ -3,10 +3,10 @@ package models
 import "time"
 
 type Roles struct {
-	ID        int       `db:"id"`
-	Name      string    `db:"name"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"created_at"`
-	DeletedAt time.Time `db:"created_at"`
-	Users     []Users
+	ID        uint      `json:"id" db:"id"`
+	Name      string    `json:"name" db:"name"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+	DeletedAt any       `json:"deleted_at" db:"deleted_at"`
+	// Users     []Users
 }

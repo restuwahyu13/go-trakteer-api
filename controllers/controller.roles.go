@@ -4,6 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
+
+	"github.com/go-chi/chi/v5"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
@@ -23,8 +27,8 @@ func NewRolesController(service *services.RolesService) *RolesController {
 **/
 
 func (ctx *RolesController) CreateController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	body := dtos.DTORoles{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -32,7 +36,7 @@ func (ctx *RolesController) CreateController(rw http.ResponseWriter, r *http.Req
 		return
 	}
 
-	res := ctx.service.CreateService(req)
+	res := ctx.service.CreateService(body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -46,16 +50,21 @@ func (ctx *RolesController) CreateController(rw http.ResponseWriter, r *http.Req
 **/
 
 func (ctx *RolesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	limit, _ := strconv.Atoi(helpers.QueryParser(r, "limit"))
+	offset, _ := strconv.Atoi(helpers.QueryParser(r, "offset"))
+	per_page, _ := strconv.Atoi(helpers.QueryParser(r, "per_page"))
+	current_page, _ := strconv.Atoi(helpers.QueryParser(r, "current_page"))
+	sort := helpers.QueryParser(r, "sort")
 
-	if err != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
-		helpers.Send(rw, helpers.ApiResponse(res))
-		return
+	query := dtos.DTORolePagination{
+		Limit:       limit,
+		Offset:      offset,
+		Sort:        strings.ToUpper(sort),
+		Perpage:     per_page,
+		CurrentPage: current_page,
 	}
 
-	res := ctx.service.GetAllService(req)
+	res := ctx.service.GetAllService(query)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -69,16 +78,10 @@ func (ctx *RolesController) GetAllController(rw http.ResponseWriter, r *http.Req
 **/
 
 func (ctx *RolesController) GetByIdController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTORolesById{Id: Id}
 
-	if err != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
-		helpers.Send(rw, helpers.ApiResponse(res))
-		return
-	}
-
-	res := ctx.service.GetByIdService(req)
+	res := ctx.service.GetByIdService(params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -92,16 +95,10 @@ func (ctx *RolesController) GetByIdController(rw http.ResponseWriter, r *http.Re
 **/
 
 func (ctx *RolesController) DeleteByIdController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTORolesById{Id: Id}
 
-	if err != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
-		helpers.Send(rw, helpers.ApiResponse(res))
-		return
-	}
-
-	res := ctx.service.DeleteByIdService(req)
+	res := ctx.service.DeleteByIdService(params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -115,8 +112,11 @@ func (ctx *RolesController) DeleteByIdController(rw http.ResponseWriter, r *http
 **/
 
 func (ctx *RolesController) UpdatedByIdController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTORolesById{Id: Id}
+
+	body := dtos.DTORoles{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -124,7 +124,7 @@ func (ctx *RolesController) UpdatedByIdController(rw http.ResponseWriter, r *htt
 		return
 	}
 
-	res := ctx.service.UpdatedByIdService(req)
+	res := ctx.service.UpdatedByIdService(body, params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
