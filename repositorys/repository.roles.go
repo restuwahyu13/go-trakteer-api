@@ -37,11 +37,12 @@ func (ctx *RolesRepository) CreateRepository(payload dtos.DTORoles) helpers.APIR
 		return res
 	}
 
-	_, err := ctx.db.NamedQuery("INSERT INTO roles (name) VALUES (:name)", &roles)
+	_, createdRoleErr := ctx.db.NamedQuery("INSERT INTO roles (name) VALUES (:name)", &roles)
 
-	if err != nil {
+	if createdRoleErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Created new role failed"
+		res.Error = createdRoleErr
 		return res
 	}
 
@@ -74,6 +75,7 @@ func (ctx *RolesRepository) GetAllRepository(query dtos.DTORolePagination) helpe
 	if <-getAllRolesChan != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = "Roles data not exist"
+		res.Error = <-getAllRolesChan
 		return res
 	}
 
@@ -97,6 +99,7 @@ func (ctx *RolesRepository) GetByIdRepository(params dtos.DTORolesById) helpers.
 	if getRoleId != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
+		res.Error = getRoleId
 		return res
 	}
 
@@ -119,19 +122,21 @@ func (ctx *RolesRepository) DeleteByIdRepository(params dtos.DTORolesById) helpe
 	if checkRoleId != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
+		res.Error = checkRoleId
 		return res
 	}
 
-	_, err := ctx.db.NamedQuery("DELETE FROM roles WHERE id = :id", params.Id)
+	_, deletedRoleErr := ctx.db.NamedQuery("DELETE FROM roles WHERE id = :id", params.Id)
 
-	if err != nil {
+	if deletedRoleErr != nil {
 		res.StatCode = http.StatusNotFound
-		res.StatMsg = fmt.Sprintf("Deleted role for this id %s failed", params.Id)
+		res.StatMsg = fmt.Sprintf("Deleted role for this id %d failed", params.Id)
+		res.Error = deletedRoleErr
 		return res
 	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = fmt.Sprintf("Deleted role for this id %s success", roles.ID)
+	res.StatMsg = fmt.Sprintf("Deleted role for this id %d success", roles.ID)
 	res.Data = roles
 	return res
 }
@@ -149,6 +154,7 @@ func (ctx *RolesRepository) UpdatedByIdRepository(body dtos.DTORoles, params dto
 	if checkRoleId != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
+		res.Error = checkRoleId
 		return res
 	}
 
@@ -156,11 +162,12 @@ func (ctx *RolesRepository) UpdatedByIdRepository(body dtos.DTORoles, params dto
 	roles.Name = body.Name
 	roles.UpdatedAt = time.Now()
 
-	_, err := ctx.db.NamedQuery("UPDATE roles SET name = :name WHERE id = :id", &roles)
+	_, updatedRoleErr := ctx.db.NamedQuery("UPDATE roles SET name = :name WHERE id = :id", &roles)
 
-	if err != nil {
+	if updatedRoleErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Updated old role failed"
+		res.Error = updatedRoleErr
 		return res
 	}
 

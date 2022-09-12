@@ -37,11 +37,12 @@ func (ctx *CategoriesRepository) CreateRepository(body dtos.DTOCategories) helpe
 		return res
 	}
 
-	_, err := ctx.db.NamedQuery("INSERT INTO categories (name) VALUES (:name)", &categories)
+	_, createdCategorieErr := ctx.db.NamedQuery("INSERT INTO categories (name) VALUES (:name)", &categories)
 
-	if err != nil {
+	if createdCategorieErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Created new categorie failed"
+		res.Error = createdCategorieErr
 		return res
 	}
 
@@ -75,6 +76,7 @@ func (ctx *CategoriesRepository) GetAllRepository(query dtos.DTOCategoriesPagina
 	if <-getAllCategoriesChan != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = "Categories data not exist"
+		res.Error = <-getAllCategoriesChan
 		return res
 	}
 
@@ -98,6 +100,7 @@ func (ctx *CategoriesRepository) GetByIdRepository(params dtos.DTOCategoriesId) 
 	if getRoleId != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Categorie data for this id %d, not exist", params.Id)
+		res.Error = getRoleId
 		return res
 	}
 
@@ -120,14 +123,16 @@ func (ctx *CategoriesRepository) DeleteByIdRepository(params dtos.DTOCategoriesI
 	if checkCategorieId != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
+		res.Error = checkCategorieId
 		return res
 	}
 
-	_, err := ctx.db.NamedQuery("DELETE FROM categories WHERE id = :id", params.Id)
+	_, deletedCategorieErr := ctx.db.NamedQuery("DELETE FROM categories WHERE id = :id", params.Id)
 
-	if err != nil {
+	if deletedCategorieErr != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Deleted categorie for this id %d failed", params.Id)
+		res.Error = deletedCategorieErr
 		return res
 	}
 
@@ -150,6 +155,7 @@ func (ctx *CategoriesRepository) UpdatedByIdRepository(body dtos.DTOCategories, 
 	if checkRoleId != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
+		res.Error = checkRoleId
 		return res
 	}
 
@@ -157,11 +163,12 @@ func (ctx *CategoriesRepository) UpdatedByIdRepository(body dtos.DTOCategories, 
 	catagories.Name = body.Name
 	catagories.UpdatedAt = time.Now()
 
-	_, err := ctx.db.NamedQuery("UPDATE catagories SET name = :name WHERE id = :id", &catagories)
+	_, updatedCategorieErr := ctx.db.NamedQuery("UPDATE catagories SET name = :name WHERE id = :id", &catagories)
 
-	if err != nil {
+	if updatedCategorieErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Updated old categorie failed"
+		res.Error = updatedCategorieErr
 		return res
 	}
 

@@ -10,6 +10,7 @@ type APIResponse struct {
 	StatMsg    string `json:"stat_msg"`
 	Data       any    `json:"data,omitempty"`
 	Pagination any    `json:"pagination,omitempty"`
+	Error      error  `json:"error,omitempty"`
 }
 
 func ApiResponse(data APIResponse) []byte {

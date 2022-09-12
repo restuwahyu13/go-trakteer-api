@@ -71,21 +71,25 @@ func (ctx *UsersRepository) RegisterRepository(body dtos.DTORegister) helpers.AP
 	if <-checkRoleIdChan != nil {
 		res.StatCode = http.StatusConflict
 		res.StatMsg = "Role name is not exist"
+		res.Error = <-checkRoleIdChan
 		return res
 	}
 
 	if <-checkCategorieIdChan != nil {
 		res.StatCode = http.StatusConflict
 		res.StatMsg = "Categorie name is not exist"
+		res.Error = <-checkCategorieIdChan
 		return res
 	}
 
-	_, err := ctx.db.NamedQuery(`INSERT INTO users (name, username, email, password, active, verified, social_link, role_id, categorie_id)
+	_, err := ctx.db.NamedQuery(`
+		INSERT INTO users (name, username, email, password, active, verified, social_link, role_id, categorie_id)
 		VALUES(:name, :username, :email, :password, :active, :verified, :social_link, :role_id, :categorie_id)`, users)
 
 	if err != nil {
 		res.StatCode = http.StatusConflict
 		res.StatMsg = "Create new user account failed"
+		res.Error = err
 	}
 
 	res.StatCode = http.StatusCreated
@@ -115,6 +119,7 @@ func (ctx *UsersRepository) LoginRepository(body dtos.DTOLogin) helpers.APIRespo
 	if err != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Users email %v not registered", users.Email)
+		res.Error = err
 		return res
 	}
 
@@ -134,20 +139,28 @@ func (ctx *UsersRepository) LoginRepository(body dtos.DTOLogin) helpers.APIRespo
 	refrehToken := packages.SignToken(jwtPayload, 86400) // 2 months
 	expiredAt := time.Now().Add(time.Duration(time.Minute * 60)).Local()
 
-	token.ResourceID = users.ID
-	token.ResourceBy = "login"
+	token.ResourceId = users.ID
+	token.ResourceType = "login"
 	token.AccessToken = accessToken
 	token.RefreshToken = refrehToken
 	token.ExpiredAt = expiredAt
+
+	_, insertTokenErr := ctx.db.NamedQuery(`
+	INSERT INTO token (resource_id, resource_type, access_token, refresh_token, expired_at)
+	VALUES (:resource_id, :resource_type, :access_token, :refresh_token, :expired_at)`, &token)
+
+	if insertTokenErr != nil {
+		res.StatCode = http.StatusNotFound
+		res.StatMsg = "Insert token into database failed"
+		res.Error = insertTokenErr
+		return res
+	}
 
 	accessTokenPayload := usersToken{
 		AccessToken:  accessToken,
 		RefreshToken: refrehToken,
 		Role:         users.Role.Name,
 	}
-
-	ctx.db.NamedQuery(`INSERT INTO token (resource_id, resource_by, access_token, refresh_token, expired_at)
-	VALUES (:resource_id, :resource_by. :access_token, :refresh_token, :expired_At)`, &token)
 
 	res.StatCode = http.StatusOK
 	res.StatMsg = "Login successfully"
