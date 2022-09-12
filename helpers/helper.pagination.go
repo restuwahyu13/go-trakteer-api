@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
 )
 
@@ -18,13 +17,10 @@ type paginationOptions struct {
 
 func Pagination(pagination interface{}, count int) paginationOptions {
 	payload := make(map[string]any)
+	pagin := paginationOptions{}
 
 	jsn, _ := json.Marshal(pagination)
 	json.Unmarshal(jsn, &payload)
-
-	fmt.Print(payload["limit"])
-
-	pagin := paginationOptions{}
 
 	pagin.Limit = int(payload["limit"].(float64))
 	pagin.Offset = int(payload["offset"].(float64))
@@ -41,6 +37,5 @@ func Pagination(pagination interface{}, count int) paginationOptions {
 
 	pagin.TotalPage = int(math.Abs(math.Ceil(float64(pagin.Count) / float64(pagin.Perpage))))
 
-	pagin.Limit = 10
 	return pagin
 }
