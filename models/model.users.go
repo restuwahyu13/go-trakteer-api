@@ -1,34 +1,35 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
-type rolesRelation struct {
-	ID        uint      `db:"id"`
-	Name      string    `db:"name"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"created_at"`
-	DeletedAt time.Time `db:"created_at"`
-}
-
-type categoriesRelation struct {
-	ID        uint      `db:"id"`
-	Name      string    `db:"name"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
-	DeletedAt time.Time `db:"deleted_at"`
+type UsersSocialLink struct {
+	FacebookLink  string `db:"facebook_link"`
+	YoutubeLink   string `db:"youtube_link"`
+	InstagramLink string `db:"instagram_link"`
+	LinkendinLink string `db:"linkedin_link"`
+	GithubLink    string `db:"github_link"`
+	DribbleLink   string `db:"dribble_link"`
 }
 
 type Users struct {
-	ID          uint      `db:"id"`
-	Username    string    `db:"username"`
-	Name        string    `db:"name"`
-	Email       string    `db:"email"`
-	Password    string    `db:"password"`
-	RoleId      uint      `db:"role_id"`
-	CategorieId uint      `db:"categorie_id"`
-	CreatedAt   time.Time `db:"created_at"`
-	UpdatedAt   time.Time `db:"created_at"`
-	DeletedAt   time.Time `db:"created_at"`
-	Role        rolesRelation
-	Categorie   categoriesRelation
+	ID          uint        `json:"id" db:"id"`
+	Username    string      `json:"username" db:"username"`
+	Name        string      `json:"name" db:"name"`
+	Email       string      `json:"email" db:"email"`
+	Password    string      `json:"password" db:"password"`
+	Active      bool        `json:"active" db:"active"`
+	Verified    bool        `json:"verified" db:"verified"`
+	SocialLink  *string     `json:"social_link,omitempty" db:"social_link"`
+	VideoLink   *string     `json:"video_link,omitempty" db:"video_link"`
+	Banner      *string     `json:"banner,omitempty" db:"banner"`
+	Photo       *string     `json:"photo,omitempty" db:"photo"`
+	RoleId      *uint       `json:"role_id" db:"role_id"`
+	CategorieId *uint       `json:"categorie_id" db:"categorie_id"`
+	CreatedAt   time.Time   `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at" db:"updated_at"`
+	DeletedAt   *time.Time  `json:"deleted_at" db:"deleted_at"`
+	Role        *Roles      `json:"role"`
+	Categorie   *Categories `json:"categorie"`
 }

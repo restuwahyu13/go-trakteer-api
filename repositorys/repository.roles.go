@@ -1,6 +1,7 @@
 package repositorys
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -57,22 +58,29 @@ func (ctx *RolesRepository) GetAllRepository(query dtos.DTORolePagination) helpe
 	roles := []models.Roles{}
 	res := helpers.APIResponse{}
 
-	getAllRoles := ctx.db.Select(&roles, helpers.Strings("SELECT * FROM roles ORDER BY id %s LIMIT $1 OFFSET $2", query.Sort), query.Limit, query.Offset)
+	getAllRolesChan := make(chan error)
+	countChan := make(chan int)
 
-	if getAllRoles != nil {
+	go func() {
+		getAllRoles := ctx.db.Select(&roles, fmt.Sprintf("SELECT * FROM roles ORDER BY id %s LIMIT $1 OFFSET $2", query.Sort), query.Limit, query.Offset)
+		getAllRolesChan <- getAllRoles
+
+		count := 0
+		countRoles := ctx.db.QueryRowx("SELECT COUNT(id) FROM roles")
+		countRoles.Scan(&countRoles)
+		countChan <- count
+	}()
+
+	if <-getAllRolesChan != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = "Roles data not exist"
 		return res
 	}
 
-	count := 0
-	countRoles := ctx.db.QueryRowx("SELECT COUNT(id) FROM roles")
-	countRoles.Scan(&countRoles)
-
 	res.StatCode = http.StatusOK
 	res.StatMsg = "Roles already to use"
 	res.Data = roles
-	res.Pagination = helpers.Stringify(helpers.Pagination(query, count))
+	res.Pagination = helpers.Stringify(helpers.Pagination(query, <-countChan))
 	return res
 }
 
@@ -88,7 +96,7 @@ func (ctx *RolesRepository) GetByIdRepository(params dtos.DTORolesById) helpers.
 
 	if getRoleId != nil {
 		res.StatCode = http.StatusNotFound
-		res.StatMsg = helpers.Strings("Role data for this id %d, not exist", params.Id)
+		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
 		return res
 	}
 
@@ -110,7 +118,7 @@ func (ctx *RolesRepository) DeleteByIdRepository(params dtos.DTORolesById) helpe
 
 	if checkRoleId != nil {
 		res.StatCode = http.StatusNotFound
-		res.StatMsg = helpers.Strings("Role data for this id %d, not exist", params.Id)
+		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
 		return res
 	}
 
@@ -118,12 +126,12 @@ func (ctx *RolesRepository) DeleteByIdRepository(params dtos.DTORolesById) helpe
 
 	if err != nil {
 		res.StatCode = http.StatusNotFound
-		res.StatMsg = helpers.Strings("Deleted role for this id %s failed", params.Id)
+		res.StatMsg = fmt.Sprintf("Deleted role for this id %s failed", params.Id)
 		return res
 	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = helpers.Strings("Deleted role for this id %s success", roles.ID)
+	res.StatMsg = fmt.Sprintf("Deleted role for this id %s success", roles.ID)
 	res.Data = roles
 	return res
 }
@@ -140,7 +148,7 @@ func (ctx *RolesRepository) UpdatedByIdRepository(body dtos.DTORoles, params dto
 
 	if checkRoleId != nil {
 		res.StatCode = http.StatusNotFound
-		res.StatMsg = helpers.Strings("Role data for this id %d, not exist", params.Id)
+		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
 		return res
 	}
 

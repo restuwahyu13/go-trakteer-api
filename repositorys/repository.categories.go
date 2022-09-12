@@ -1,6 +1,7 @@
 package repositorys
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -57,22 +58,30 @@ func (ctx *CategoriesRepository) GetAllRepository(query dtos.DTOCategoriesPagina
 	categories := []models.Categories{}
 	res := helpers.APIResponse{}
 
-	getAllCategories := ctx.db.Select(&categories, helpers.Strings("SELECT * FROM categories ORDER BY id %s LIMIT $1 OFFSET $2", query.Sort), query.Limit, query.Offset)
+	getAllCategoriesChan := make(chan error)
+	countChan := make(chan int)
 
-	if getAllCategories != nil {
+	go (func() {
+		getAllCategories := ctx.db.Select(&categories, fmt.Sprintf("SELECT * FROM categories ORDER BY id %s LIMIT $1 OFFSET $2", query.Sort), query.Limit, query.Offset)
+		getAllCategoriesChan <- getAllCategories
+
+		count := 0
+		countCategories := ctx.db.QueryRowx("SELECT COUNT(id) FROM categories")
+		countCategories.Scan(&countCategories)
+
+		countChan <- count
+	})()
+
+	if <-getAllCategoriesChan != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = "Categories data not exist"
 		return res
 	}
 
-	count := 0
-	countCategories := ctx.db.QueryRowx("SELECT COUNT(id) FROM categories")
-	countCategories.Scan(&countCategories)
-
 	res.StatCode = http.StatusOK
 	res.StatMsg = "Categories already to use"
 	res.Data = categories
-	res.Pagination = helpers.Stringify(helpers.Pagination(query, count))
+	res.Pagination = helpers.Stringify(helpers.Pagination(query, <-countChan))
 	return res
 }
 
@@ -88,7 +97,7 @@ func (ctx *CategoriesRepository) GetByIdRepository(params dtos.DTOCategoriesId) 
 
 	if getRoleId != nil {
 		res.StatCode = http.StatusNotFound
-		res.StatMsg = helpers.Strings("Categorie data for this id %d, not exist", params.Id)
+		res.StatMsg = fmt.Sprintf("Categorie data for this id %d, not exist", params.Id)
 		return res
 	}
 
@@ -110,7 +119,7 @@ func (ctx *CategoriesRepository) DeleteByIdRepository(params dtos.DTOCategoriesI
 
 	if checkCategorieId != nil {
 		res.StatCode = http.StatusNotFound
-		res.StatMsg = helpers.Strings("Role data for this id %d, not exist", params.Id)
+		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
 		return res
 	}
 
@@ -118,12 +127,12 @@ func (ctx *CategoriesRepository) DeleteByIdRepository(params dtos.DTOCategoriesI
 
 	if err != nil {
 		res.StatCode = http.StatusNotFound
-		res.StatMsg = helpers.Strings("Deleted categorie for this id %s failed", params.Id)
+		res.StatMsg = fmt.Sprintf("Deleted categorie for this id %d failed", params.Id)
 		return res
 	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = helpers.Strings("Deleted categorie for this id %s success", categories.ID)
+	res.StatMsg = fmt.Sprintf("Deleted categorie for this id %d success", categories.Id)
 	res.Data = categories
 	return res
 }
@@ -140,7 +149,7 @@ func (ctx *CategoriesRepository) UpdatedByIdRepository(body dtos.DTOCategories, 
 
 	if checkRoleId != nil {
 		res.StatCode = http.StatusNotFound
-		res.StatMsg = helpers.Strings("Role data for this id %d, not exist", params.Id)
+		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
 		return res
 	}
 

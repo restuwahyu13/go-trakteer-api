@@ -9,8 +9,10 @@ require (
 )
 
 require (
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/jackskj/carta v0.2.0 // indirect
 	github.com/lib/pq v1.10.7 // indirect
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
