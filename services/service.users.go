@@ -14,8 +14,8 @@ func NewUsersService(repository *repositorys.UsersRepository) *UsersService {
 	return &UsersService{repository: repository}
 }
 
-func (ctx *UsersService) RegisterService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.RegisterRepository(payload)
+func (ctx *UsersService) RegisterService(body dtos.DTORegister) helpers.APIResponse {
+	return ctx.repository.RegisterRepository(body)
 }
 
 func (ctx *UsersService) LoginService(payload dtos.DTOLogin) helpers.APIResponse {

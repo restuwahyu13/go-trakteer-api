@@ -23,8 +23,8 @@ func NewUsersController(service *services.UsersService) *UsersController {
 **/
 
 func (ctx *UsersController) RegisterController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	body := dtos.DTORegister{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -32,7 +32,7 @@ func (ctx *UsersController) RegisterController(rw http.ResponseWriter, r *http.R
 		return
 	}
 
-	res := ctx.service.RegisterService(req)
+	res := ctx.service.RegisterService(body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return

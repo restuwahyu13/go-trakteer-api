@@ -5,8 +5,8 @@ type DTORegister struct {
 	Name        string `validate:"required,alpha" json:"name"`
 	Email       string `validate:"required,email" json:"email"`
 	Password    string `validate:"required,alphanumunicode" json:"password"`
-	RoleID      int    `validate:"required,number" json:"role_id"`
-	CategorieID int    `validate:"required,number" json:"categorie_id"`
+	RoleId      uint   `validate:"required,number" json:"role_id"`
+	CategorieId uint   `validate:"required,number" json:"categorie_id"`
 }
 
 type DTOLogin struct {

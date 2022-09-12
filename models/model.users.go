@@ -24,8 +24,8 @@ type Users struct {
 	Name        string    `db:"name"`
 	Email       string    `db:"email"`
 	Password    string    `db:"password"`
-	RoleID      int       `db:"role_id"`
-	CategorieID int       `db:"categorie_id"`
+	RoleId      uint      `db:"role_id"`
+	CategorieId uint      `db:"categorie_id"`
 	CreatedAt   time.Time `db:"created_at"`
 	UpdatedAt   time.Time `db:"created_at"`
 	DeletedAt   time.Time `db:"created_at"`
