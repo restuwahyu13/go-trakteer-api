@@ -42,7 +42,7 @@ func (ctx *RolesRepository) CreateRepository(payload dtos.DTORoles) helpers.APIR
 	if createdRoleErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Created new role failed"
-		res.Error = createdRoleErr
+		res.SqlError = createdRoleErr
 		return res
 	}
 
@@ -75,7 +75,7 @@ func (ctx *RolesRepository) GetAllRepository(query dtos.DTORolePagination) helpe
 	if <-getAllRolesChan != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = "Roles data not exist"
-		res.Error = <-getAllRolesChan
+		res.SqlError = <-getAllRolesChan
 		return res
 	}
 
@@ -99,7 +99,7 @@ func (ctx *RolesRepository) GetByIdRepository(params dtos.DTORolesById) helpers.
 	if getRoleId != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
-		res.Error = getRoleId
+		res.SqlError = getRoleId
 		return res
 	}
 
@@ -122,7 +122,7 @@ func (ctx *RolesRepository) DeleteByIdRepository(params dtos.DTORolesById) helpe
 	if checkRoleId != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
-		res.Error = checkRoleId
+		res.SqlError = checkRoleId
 		return res
 	}
 
@@ -131,7 +131,7 @@ func (ctx *RolesRepository) DeleteByIdRepository(params dtos.DTORolesById) helpe
 	if deletedRoleErr != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Deleted role for this id %d failed", params.Id)
-		res.Error = deletedRoleErr
+		res.SqlError = deletedRoleErr
 		return res
 	}
 
@@ -154,7 +154,7 @@ func (ctx *RolesRepository) UpdatedByIdRepository(body dtos.DTORoles, params dto
 	if checkRoleId != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
-		res.Error = checkRoleId
+		res.SqlError = checkRoleId
 		return res
 	}
 
@@ -167,7 +167,7 @@ func (ctx *RolesRepository) UpdatedByIdRepository(body dtos.DTORoles, params dto
 	if updatedRoleErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Updated old role failed"
-		res.Error = updatedRoleErr
+		res.SqlError = updatedRoleErr
 		return res
 	}
 

@@ -71,14 +71,14 @@ func (ctx *UsersRepository) RegisterRepository(body dtos.DTORegister) helpers.AP
 	if <-checkRoleIdChan != nil {
 		res.StatCode = http.StatusConflict
 		res.StatMsg = "Role name is not exist"
-		res.Error = <-checkRoleIdChan
+		res.SqlError = <-checkRoleIdChan
 		return res
 	}
 
 	if <-checkCategorieIdChan != nil {
 		res.StatCode = http.StatusConflict
 		res.StatMsg = "Categorie name is not exist"
-		res.Error = <-checkCategorieIdChan
+		res.SqlError = <-checkCategorieIdChan
 		return res
 	}
 
@@ -89,7 +89,7 @@ func (ctx *UsersRepository) RegisterRepository(body dtos.DTORegister) helpers.AP
 	if err != nil {
 		res.StatCode = http.StatusConflict
 		res.StatMsg = "Create new user account failed"
-		res.Error = err
+		res.SqlError = err
 	}
 
 	res.StatCode = http.StatusCreated
@@ -119,7 +119,7 @@ func (ctx *UsersRepository) LoginRepository(body dtos.DTOLogin) helpers.APIRespo
 	if err != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Users email %v not registered", users.Email)
-		res.Error = err
+		res.SqlError = err
 		return res
 	}
 
@@ -152,7 +152,7 @@ func (ctx *UsersRepository) LoginRepository(body dtos.DTOLogin) helpers.APIRespo
 	if insertTokenErr != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = "Insert token into database failed"
-		res.Error = insertTokenErr
+		res.SqlError = insertTokenErr
 		return res
 	}
 

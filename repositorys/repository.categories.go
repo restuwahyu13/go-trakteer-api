@@ -42,7 +42,7 @@ func (ctx *CategoriesRepository) CreateRepository(body dtos.DTOCategories) helpe
 	if createdCategorieErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Created new categorie failed"
-		res.Error = createdCategorieErr
+		res.SqlError = createdCategorieErr
 		return res
 	}
 
@@ -76,7 +76,7 @@ func (ctx *CategoriesRepository) GetAllRepository(query dtos.DTOCategoriesPagina
 	if <-getAllCategoriesChan != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = "Categories data not exist"
-		res.Error = <-getAllCategoriesChan
+		res.SqlError = <-getAllCategoriesChan
 		return res
 	}
 
@@ -100,7 +100,7 @@ func (ctx *CategoriesRepository) GetByIdRepository(params dtos.DTOCategoriesId) 
 	if getRoleId != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Categorie data for this id %d, not exist", params.Id)
-		res.Error = getRoleId
+		res.SqlError = getRoleId
 		return res
 	}
 
@@ -123,7 +123,7 @@ func (ctx *CategoriesRepository) DeleteByIdRepository(params dtos.DTOCategoriesI
 	if checkCategorieId != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
-		res.Error = checkCategorieId
+		res.SqlError = checkCategorieId
 		return res
 	}
 
@@ -132,7 +132,7 @@ func (ctx *CategoriesRepository) DeleteByIdRepository(params dtos.DTOCategoriesI
 	if deletedCategorieErr != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Deleted categorie for this id %d failed", params.Id)
-		res.Error = deletedCategorieErr
+		res.SqlError = deletedCategorieErr
 		return res
 	}
 
@@ -155,7 +155,7 @@ func (ctx *CategoriesRepository) UpdatedByIdRepository(body dtos.DTOCategories, 
 	if checkRoleId != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
-		res.Error = checkRoleId
+		res.SqlError = checkRoleId
 		return res
 	}
 
@@ -168,7 +168,7 @@ func (ctx *CategoriesRepository) UpdatedByIdRepository(body dtos.DTOCategories, 
 	if updatedCategorieErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Updated old categorie failed"
-		res.Error = updatedCategorieErr
+		res.SqlError = updatedCategorieErr
 		return res
 	}
 
