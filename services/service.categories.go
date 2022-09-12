@@ -14,22 +14,22 @@ func NewCategoriesService(repository *repositorys.CategoriesRepository) *Categor
 	return &CategoriesService{repository: repository}
 }
 
-func (ctx *CategoriesService) CreateService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.CreateRepository(payload)
+func (ctx *CategoriesService) CreateService(body dtos.DTOCategories) helpers.APIResponse {
+	return ctx.repository.CreateRepository(body)
 }
 
-func (ctx *CategoriesService) GetAllService(payload dtos.DTOCategoriesPagination) helpers.APIResponse {
-	return ctx.repository.GetAllRepository(payload)
+func (ctx *CategoriesService) GetAllService(query dtos.DTOCategoriesPagination) helpers.APIResponse {
+	return ctx.repository.GetAllRepository(query)
 }
 
-func (ctx *CategoriesService) GetByIdService(payload dtos.DTORolesById) helpers.APIResponse {
-	return ctx.repository.GetByIdRepository(payload)
+func (ctx *CategoriesService) GetByIdService(params dtos.DTOCategoriesId) helpers.APIResponse {
+	return ctx.repository.GetByIdRepository(params)
 }
 
-func (ctx *CategoriesService) DeleteByIdService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.DeleteByIdRepository(payload)
+func (ctx *CategoriesService) DeleteByIdService(params dtos.DTOCategoriesId) helpers.APIResponse {
+	return ctx.repository.DeleteByIdRepository(params)
 }
 
-func (ctx *CategoriesService) UpdatedByIdService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.UpdatedByIdRepository(payload)
+func (ctx *CategoriesService) UpdatedByIdService(body dtos.DTOCategories, params dtos.DTOCategoriesId) helpers.APIResponse {
+	return ctx.repository.UpdatedByIdRepository(body, params)
 }

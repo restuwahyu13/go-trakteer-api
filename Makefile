@@ -18,6 +18,11 @@ endif
 migup:
 		${MIG} -database ${DSN} -path ${MIGDIR} -verbose up
 
+migupf:
+ifdef id
+		${MIG} -database ${DSN} -path ${MIGDIR} -verbose force ${id}
+endif
+
 migdown:
 		${MIG} -database ${DSN} -path ${MIGDIR} -verbose down -all
 

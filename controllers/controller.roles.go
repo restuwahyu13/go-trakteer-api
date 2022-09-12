@@ -52,7 +52,6 @@ func (ctx *RolesController) CreateController(rw http.ResponseWriter, r *http.Req
 func (ctx *RolesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
 	limit, _ := strconv.Atoi(helpers.QueryParser(r, "limit"))
 	offset, _ := strconv.Atoi(helpers.QueryParser(r, "offset"))
-	per_page, _ := strconv.Atoi(helpers.QueryParser(r, "per_page"))
 	current_page, _ := strconv.Atoi(helpers.QueryParser(r, "current_page"))
 	sort := helpers.QueryParser(r, "sort")
 
@@ -60,7 +59,6 @@ func (ctx *RolesController) GetAllController(rw http.ResponseWriter, r *http.Req
 		Limit:       limit,
 		Offset:      offset,
 		Sort:        strings.ToUpper(sort),
-		Perpage:     per_page,
 		CurrentPage: current_page,
 	}
 

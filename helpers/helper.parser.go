@@ -10,14 +10,14 @@ import (
 )
 
 func Stringify(data any) any {
-	res, err := json.Marshal(data)
+	marshal, err := json.Marshal(data)
 	if err != nil {
 		logrus.Errorf("Create json format error: %v", err)
 	}
 
-	errM := json.Unmarshal(res, data)
+	unmarshal := json.Unmarshal(marshal, &data)
 
-	if errM != nil {
+	if unmarshal != nil {
 		logrus.Errorf("Create json format error: %v", err)
 	}
 

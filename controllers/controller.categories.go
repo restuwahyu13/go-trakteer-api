@@ -27,8 +27,8 @@ func NewCategoriesController(service *services.CategoriesService) *CategoriesCon
 **/
 
 func (ctx *CategoriesController) CreateController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	body := dtos.DTOCategories{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -36,7 +36,7 @@ func (ctx *CategoriesController) CreateController(rw http.ResponseWriter, r *htt
 		return
 	}
 
-	res := ctx.service.CreateService(req)
+	res := ctx.service.CreateService(body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -52,19 +52,17 @@ func (ctx *CategoriesController) CreateController(rw http.ResponseWriter, r *htt
 func (ctx *CategoriesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
 	limit, _ := strconv.Atoi(helpers.QueryParser(r, "limit"))
 	offset, _ := strconv.Atoi(helpers.QueryParser(r, "offset"))
-	per_page, _ := strconv.Atoi(helpers.QueryParser(r, "per_page"))
 	current_page, _ := strconv.Atoi(helpers.QueryParser(r, "current_page"))
 	sort := helpers.QueryParser(r, "sort")
 
-	req := dtos.DTOCategoriesPagination{
+	query := dtos.DTOCategoriesPagination{
 		Limit:       limit,
 		Offset:      offset,
 		Sort:        strings.ToUpper(sort),
-		Perpage:     per_page,
 		CurrentPage: current_page,
 	}
 
-	res := ctx.service.GetAllService(req)
+	res := ctx.service.GetAllService(query)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -78,10 +76,10 @@ func (ctx *CategoriesController) GetAllController(rw http.ResponseWriter, r *htt
 **/
 
 func (ctx *CategoriesController) GetByIdController(rw http.ResponseWriter, r *http.Request) {
-	params, _ := strconv.Atoi(chi.URLParam(r, "id"))
-	req := dtos.DTORolesById{Id: params}
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTOCategoriesId{Id: Id}
 
-	res := ctx.service.GetByIdService(req)
+	res := ctx.service.GetByIdService(params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -95,16 +93,10 @@ func (ctx *CategoriesController) GetByIdController(rw http.ResponseWriter, r *ht
 **/
 
 func (ctx *CategoriesController) DeleteByIdController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTOCategoriesId{Id: Id}
 
-	if err != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
-		helpers.Send(rw, helpers.ApiResponse(res))
-		return
-	}
-
-	res := ctx.service.DeleteByIdService(req)
+	res := ctx.service.DeleteByIdService(params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -118,8 +110,11 @@ func (ctx *CategoriesController) DeleteByIdController(rw http.ResponseWriter, r 
 **/
 
 func (ctx *CategoriesController) UpdatedByIdController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTOCategoriesId{Id: Id}
+
+	body := dtos.DTOCategories{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -127,7 +122,7 @@ func (ctx *CategoriesController) UpdatedByIdController(rw http.ResponseWriter, r
 		return
 	}
 
-	res := ctx.service.UpdatedByIdService(req)
+	res := ctx.service.UpdatedByIdService(body, params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
