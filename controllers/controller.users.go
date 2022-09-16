@@ -4,26 +4,32 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
+
+	"github.com/go-chi/chi/v5"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
+	"github.com/restuwahyu13/go-trakteer-api/interfaces"
 	"github.com/restuwahyu13/go-trakteer-api/services"
 )
 
-type UsersController struct {
-	service *services.UsersService
+type UsersController = interfaces.IUsersController
+type usersController struct {
+	service services.UsersService
 }
 
-func NewUsersController(service *services.UsersService) *UsersController {
-	return &UsersController{service: service}
+func NewUsersController(service services.UsersService) *usersController {
+	return &usersController{service: service}
 }
 
 /**
-* @description RegisterController
+* @description LoginController
 **/
 
-func (ctx *UsersController) RegisterController(rw http.ResponseWriter, r *http.Request) {
-	body := dtos.DTORegister{}
+func (ctx *usersController) LoginController(rw http.ResponseWriter, r *http.Request) {
+	body := dtos.DTOUsersLogin{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
@@ -32,53 +38,7 @@ func (ctx *UsersController) RegisterController(rw http.ResponseWriter, r *http.R
 		return
 	}
 
-	res := ctx.service.RegisterService(body)
-	if res.StatCode >= 400 {
-		helpers.Send(rw, helpers.ApiResponse(res))
-		return
-	}
-
-	helpers.Send(rw, helpers.ApiResponse(res))
-}
-
-/**
-* @description LoginController
-**/
-
-func (ctx *UsersController) LoginController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
-
-	if err != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
-		helpers.Send(rw, helpers.ApiResponse(res))
-		return
-	}
-
-	res := ctx.service.LoginService(req)
-	if res.StatCode >= 400 {
-		helpers.Send(rw, helpers.ApiResponse(res))
-		return
-	}
-
-	helpers.Send(rw, helpers.ApiResponse(res))
-}
-
-/**
-* @description ActivationController
-**/
-
-func (ctx *UsersController) ActivationController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
-
-	if err != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
-		helpers.Send(rw, helpers.ApiResponse(res))
-		return
-	}
-
-	res := ctx.service.ActivationService(req)
+	res := ctx.service.LoginService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -91,9 +51,9 @@ func (ctx *UsersController) ActivationController(rw http.ResponseWriter, r *http
 * @description ForgotPasswordController
 **/
 
-func (ctx *UsersController) ForgotPasswordController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+func (ctx *usersController) ForgotPasswordController(rw http.ResponseWriter, r *http.Request) {
+	body := dtos.DTOUsersForgotPassword{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -101,7 +61,7 @@ func (ctx *UsersController) ForgotPasswordController(rw http.ResponseWriter, r *
 		return
 	}
 
-	res := ctx.service.ForgotPasswordService(req)
+	res := ctx.service.ForgotPasswordService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -114,9 +74,9 @@ func (ctx *UsersController) ForgotPasswordController(rw http.ResponseWriter, r *
 * @description ResetPasswordController
 **/
 
-func (ctx *UsersController) ResetPasswordController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+func (ctx *usersController) ResetPasswordController(rw http.ResponseWriter, r *http.Request) {
+	body := dtos.DTOUsersResetPassword{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -124,7 +84,7 @@ func (ctx *UsersController) ResetPasswordController(rw http.ResponseWriter, r *h
 		return
 	}
 
-	res := ctx.service.ResetPasswordService(req)
+	res := ctx.service.ResetPasswordService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -137,9 +97,9 @@ func (ctx *UsersController) ResetPasswordController(rw http.ResponseWriter, r *h
 * @description ChangePasswordController
 **/
 
-func (ctx *UsersController) ChangePasswordController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+func (ctx *usersController) ChangePasswordController(rw http.ResponseWriter, r *http.Request) {
+	body := dtos.DTOUsersChangePassword{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -147,7 +107,7 @@ func (ctx *UsersController) ChangePasswordController(rw http.ResponseWriter, r *
 		return
 	}
 
-	res := ctx.service.ChangePasswordService(req)
+	res := ctx.service.ChangePasswordService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -157,12 +117,12 @@ func (ctx *UsersController) ChangePasswordController(rw http.ResponseWriter, r *
 }
 
 /**
-* @description GetProfileController
+* @description GetProfileByIdController
 **/
 
-func (ctx *UsersController) GetProfileController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+func (ctx *usersController) GetProfileByIdController(rw http.ResponseWriter, r *http.Request) {
+	body := dtos.DTOUsersGetProfileById{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -170,7 +130,7 @@ func (ctx *UsersController) GetProfileController(rw http.ResponseWriter, r *http
 		return
 	}
 
-	res := ctx.service.GetProfileService(req)
+	res := ctx.service.GetProfileByIdService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -180,12 +140,15 @@ func (ctx *UsersController) GetProfileController(rw http.ResponseWriter, r *http
 }
 
 /**
-* @description UpdateProfileController
+* @description UpdateProfileByIdController
 **/
 
-func (ctx *UsersController) UpdateProfileController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+func (ctx *usersController) UpdateProfileByIdController(rw http.ResponseWriter, r *http.Request) {
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTOUsersGetProfileById{Id: Id}
+
+	body := dtos.DTOUsersUpdateProfileById{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -193,7 +156,116 @@ func (ctx *UsersController) UpdateProfileController(rw http.ResponseWriter, r *h
 		return
 	}
 
-	res := ctx.service.UpdateProfileService(req)
+	res := ctx.service.UpdateProfileByIdService(&body, &params)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	helpers.Send(rw, helpers.ApiResponse(res))
+}
+
+/**
+* @description CreateUsersController
+**/
+
+func (ctx *usersController) CreateUsersController(rw http.ResponseWriter, r *http.Request) {
+	body := dtos.DTOUsersCreate{}
+	err := json.NewDecoder(r.Body).Decode(&body)
+
+	if err != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	res := ctx.service.CreateUsersService(&body)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	helpers.Send(rw, helpers.ApiResponse(res))
+}
+
+/**
+* @description GetAllUsersController
+**/
+
+func (ctx *usersController) GetAllUsersController(rw http.ResponseWriter, r *http.Request) {
+	limit, _ := strconv.Atoi(helpers.QueryParser(r, "limit"))
+	offset, _ := strconv.Atoi(helpers.QueryParser(r, "offset"))
+	current_page, _ := strconv.Atoi(helpers.QueryParser(r, "current_page"))
+	sort := helpers.QueryParser(r, "sort")
+
+	query := dtos.DTOUsersPagination{
+		Limit:       limit,
+		Offset:      offset,
+		Sort:        strings.ToUpper(sort),
+		CurrentPage: current_page,
+	}
+
+	res := ctx.service.GetAllUsersService(&query)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	helpers.Send(rw, helpers.ApiResponse(res))
+}
+
+/**
+* @description GetUsersByIdController
+**/
+
+func (ctx *usersController) GetUsersByIdController(rw http.ResponseWriter, r *http.Request) {
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTOUsersById{Id: Id}
+
+	res := ctx.service.GetUsersByIdService(&params)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	helpers.Send(rw, helpers.ApiResponse(res))
+}
+
+/**
+* @description DeleteUsersByIdController
+**/
+
+func (ctx *usersController) DeleteUsersByIdController(rw http.ResponseWriter, r *http.Request) {
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTOUsersById{Id: Id}
+
+	res := ctx.service.DeleteUsersByIdService(&params)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	helpers.Send(rw, helpers.ApiResponse(res))
+}
+
+/**
+* @description UpdateUsersByIdController
+**/
+
+func (ctx *usersController) UpdateUsersByIdController(rw http.ResponseWriter, r *http.Request) {
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTOUsersById{Id: Id}
+
+	body := dtos.DTOUsersUpdate{}
+	err := json.NewDecoder(r.Body).Decode(&body)
+
+	if err != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	res := ctx.service.UpdateUsersByIdService(&body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return

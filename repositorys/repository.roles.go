@@ -9,27 +9,29 @@ import (
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
+	"github.com/restuwahyu13/go-trakteer-api/interfaces"
 	"github.com/restuwahyu13/go-trakteer-api/models"
 )
 
-type RolesRepository struct {
+type RolesRepository = interfaces.IRolesRepository
+type rolesRepository struct {
 	db *sqlx.DB
 }
 
-func NewRolesRepository(db *sqlx.DB) *RolesRepository {
-	return &RolesRepository{db: db}
+func NewRolesRepository(db *sqlx.DB) *rolesRepository {
+	return &rolesRepository{db: db}
 }
 
 /**
 * @description CreateRepository
 **/
 
-func (ctx *RolesRepository) CreateRepository(payload dtos.DTORoles) helpers.APIResponse {
+func (ctx *rolesRepository) CreateRepository(body *dtos.DTORoles) helpers.APIResponse {
 	roles := models.Roles{}
 	res := helpers.APIResponse{}
 
-	roles.Name = payload.Name
-	checkRoleName := ctx.db.Get(&roles, "SELECT name FROM roles WHERE name = $1", payload.Name)
+	roles.Name = body.Name
+	checkRoleName := ctx.db.Get(&roles, "SELECT name FROM roles WHERE name = $1", body.Name)
 
 	if checkRoleName == nil {
 		res.StatCode = http.StatusBadRequest
@@ -55,7 +57,7 @@ func (ctx *RolesRepository) CreateRepository(payload dtos.DTORoles) helpers.APIR
 * @description GetAllRepository
 **/
 
-func (ctx *RolesRepository) GetAllRepository(query dtos.DTORolePagination) helpers.APIResponse {
+func (ctx *rolesRepository) GetAllRepository(query *dtos.DTORolePagination) helpers.APIResponse {
 	roles := []models.Roles{}
 	res := helpers.APIResponse{}
 
@@ -90,7 +92,7 @@ func (ctx *RolesRepository) GetAllRepository(query dtos.DTORolePagination) helpe
 * @description GetByIdRepository
 **/
 
-func (ctx *RolesRepository) GetByIdRepository(params dtos.DTORolesById) helpers.APIResponse {
+func (ctx *rolesRepository) GetByIdRepository(params *dtos.DTORolesById) helpers.APIResponse {
 	roles := models.Roles{}
 	res := helpers.APIResponse{}
 
@@ -113,7 +115,7 @@ func (ctx *RolesRepository) GetByIdRepository(params dtos.DTORolesById) helpers.
 * @description DeleteByIdRepository
 **/
 
-func (ctx *RolesRepository) DeleteByIdRepository(params dtos.DTORolesById) helpers.APIResponse {
+func (ctx *rolesRepository) DeleteByIdRepository(params *dtos.DTORolesById) helpers.APIResponse {
 	roles := models.Roles{}
 	res := helpers.APIResponse{}
 
@@ -145,7 +147,7 @@ func (ctx *RolesRepository) DeleteByIdRepository(params dtos.DTORolesById) helpe
 * @description UpdatedByIdRepository
 **/
 
-func (ctx *RolesRepository) UpdatedByIdRepository(body dtos.DTORoles, params dtos.DTORolesById) helpers.APIResponse {
+func (ctx *rolesRepository) UpdatedByIdRepository(body *dtos.DTORoles, params *dtos.DTORolesById) helpers.APIResponse {
 	roles := models.Roles{}
 	res := helpers.APIResponse{}
 

@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+
+	"github.com/go-chi/chi/v5"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
@@ -23,8 +26,8 @@ func NewCustomersController(service *services.CustomersService) *CustomersContro
 **/
 
 func (ctx *CustomersController) RegisterController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	body := dtos.DTOCustomersRegister{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -32,7 +35,7 @@ func (ctx *CustomersController) RegisterController(rw http.ResponseWriter, r *ht
 		return
 	}
 
-	res := ctx.service.RegisterService(req)
+	res := ctx.service.RegisterService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -46,8 +49,8 @@ func (ctx *CustomersController) RegisterController(rw http.ResponseWriter, r *ht
 **/
 
 func (ctx *CustomersController) LoginController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	body := dtos.DTOCustomersLogin{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -55,7 +58,7 @@ func (ctx *CustomersController) LoginController(rw http.ResponseWriter, r *http.
 		return
 	}
 
-	res := ctx.service.LoginService(req)
+	res := ctx.service.LoginService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -69,8 +72,8 @@ func (ctx *CustomersController) LoginController(rw http.ResponseWriter, r *http.
 **/
 
 func (ctx *CustomersController) ActivationController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	body := dtos.DTOCustomersActivation{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -78,7 +81,7 @@ func (ctx *CustomersController) ActivationController(rw http.ResponseWriter, r *
 		return
 	}
 
-	res := ctx.service.ActivationService(req)
+	res := ctx.service.ActivationService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -92,8 +95,8 @@ func (ctx *CustomersController) ActivationController(rw http.ResponseWriter, r *
 **/
 
 func (ctx *CustomersController) ResendActivationController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	body := dtos.DTOCustomersResendActivation{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -101,7 +104,7 @@ func (ctx *CustomersController) ResendActivationController(rw http.ResponseWrite
 		return
 	}
 
-	res := ctx.service.ResendActivationService(req)
+	res := ctx.service.ResendActivationService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -115,9 +118,8 @@ func (ctx *CustomersController) ResendActivationController(rw http.ResponseWrite
 **/
 
 func (ctx *CustomersController) ForgotPasswordController(rw http.ResponseWriter, r *http.Request) {
-
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	body := dtos.DTOCustomersForgotPassword{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -125,7 +127,7 @@ func (ctx *CustomersController) ForgotPasswordController(rw http.ResponseWriter,
 		return
 	}
 
-	res := ctx.service.ForgotPasswordService(req)
+	res := ctx.service.ForgotPasswordService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -139,8 +141,8 @@ func (ctx *CustomersController) ForgotPasswordController(rw http.ResponseWriter,
 **/
 
 func (ctx *CustomersController) ResetPasswordController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	body := dtos.DTOCustomersResetPassword{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -148,7 +150,7 @@ func (ctx *CustomersController) ResetPasswordController(rw http.ResponseWriter, 
 		return
 	}
 
-	res := ctx.service.ResetPasswordService(req)
+	res := ctx.service.ResetPasswordService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -162,8 +164,8 @@ func (ctx *CustomersController) ResetPasswordController(rw http.ResponseWriter, 
 **/
 
 func (ctx *CustomersController) ChangePasswordController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	body := dtos.DTOCustomersChangePassword{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -171,7 +173,7 @@ func (ctx *CustomersController) ChangePasswordController(rw http.ResponseWriter,
 		return
 	}
 
-	res := ctx.service.ChangePasswordService(req)
+	res := ctx.service.ChangePasswordService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -185,16 +187,10 @@ func (ctx *CustomersController) ChangePasswordController(rw http.ResponseWriter,
 **/
 
 func (ctx *CustomersController) GetProfileController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTOCustomersGetProfileById{Id: Id}
 
-	if err != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
-		helpers.Send(rw, helpers.ApiResponse(res))
-		return
-	}
-
-	res := ctx.service.GetProfileService(req)
+	res := ctx.service.GetProfileByIdService(&params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -208,8 +204,11 @@ func (ctx *CustomersController) GetProfileController(rw http.ResponseWriter, r *
 **/
 
 func (ctx *CustomersController) UpdateProfileController(rw http.ResponseWriter, r *http.Request) {
-	req := dtos.DTOLogin{}
-	err := json.NewDecoder(r.Body).Decode(&req)
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTOCustomersGetProfileById{Id: Id}
+
+	body := dtos.DTOCustomersUpdateProfileById{}
+	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
@@ -217,7 +216,7 @@ func (ctx *CustomersController) UpdateProfileController(rw http.ResponseWriter, 
 		return
 	}
 
-	res := ctx.service.UpdateProfileService(req)
+	res := ctx.service.UpdateProfileByIdService(&body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return

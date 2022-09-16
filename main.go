@@ -25,10 +25,10 @@ func main() {
 	db := SetupDatabase()
 	router := SetupRouter()
 
-	routes.UsersRoute("/api/v1/users", db, router)
+	routes.NewUsersRoute("/api/v1/users", db, router).UsersRoute()
 	routes.CustomersRoute("/api/v1/customers", db, router)
-	routes.RolesRoute("/api/v1/roles", db, router)
-	routes.CategoriesRoute("/api/v1/categories", db, router)
+	routes.NewRolesRoute("/api/v1/roles", db, router).RolesRoute()
+	routes.NewCategoriesRoute("/api/v1/categories", db, router).CategoriesRoute()
 
 	httpErr := http.ListenAndServe(fmt.Sprintf(":%s", viper.GetString("PORT")), router)
 	if httpErr != nil {

@@ -10,14 +10,24 @@ import (
 	"github.com/restuwahyu13/go-trakteer-api/services"
 )
 
-func RolesRoute(prefix string, db *sqlx.DB, router *chi.Mux) {
+type rolesRoute struct {
+	controller controllers.RolesController
+	prefix     string
+	router     *chi.Mux
+}
+
+func NewRolesRoute(prefix string, db *sqlx.DB, router *chi.Mux) *rolesRoute {
 	repository := repositorys.NewRolesRepository(db)
 	service := services.NewRolesService(repository)
 	controller := controllers.NewRolesController(service)
 
-	router.Post(helpers.Endpoint(prefix, "/"), controller.CreateController)
-	router.Get(helpers.Endpoint(prefix, "/"), controller.GetAllController)
-	router.Get(helpers.Endpoint(prefix, "/{id}"), controller.GetByIdController)
-	router.Delete(helpers.Endpoint(prefix, "/{id}"), controller.DeleteByIdController)
-	router.Put(helpers.Endpoint(prefix, "/{id}"), controller.UpdatedByIdController)
+	return &rolesRoute{controller: controller, prefix: prefix, router: router}
+}
+
+func (ctx *rolesRoute) RolesRoute() {
+	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/"), ctx.controller.CreateController)
+	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/"), ctx.controller.GetAllController)
+	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/{id}"), ctx.controller.GetByIdController)
+	ctx.router.Delete(helpers.Endpoint(ctx.prefix, "/{id}"), ctx.controller.DeleteByIdController)
+	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/{id}"), ctx.controller.UpdatedByIdController)
 }

@@ -11,22 +11,24 @@ import (
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
+	"github.com/restuwahyu13/go-trakteer-api/interfaces"
 	"github.com/restuwahyu13/go-trakteer-api/services"
 )
 
-type CategoriesController struct {
-	service *services.CategoriesService
+type CategoriesController = interfaces.ICategoriesController
+type categoriesController struct {
+	service services.CategoriesService
 }
 
-func NewCategoriesController(service *services.CategoriesService) *CategoriesController {
-	return &CategoriesController{service: service}
+func NewCategoriesController(service services.CategoriesService) *categoriesController {
+	return &categoriesController{service: service}
 }
 
 /**
 * @description CreateController
 **/
 
-func (ctx *CategoriesController) CreateController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *categoriesController) CreateController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOCategories{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -36,7 +38,7 @@ func (ctx *CategoriesController) CreateController(rw http.ResponseWriter, r *htt
 		return
 	}
 
-	res := ctx.service.CreateService(body)
+	res := ctx.service.CreateService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -49,7 +51,7 @@ func (ctx *CategoriesController) CreateController(rw http.ResponseWriter, r *htt
 * @description GetAllController
 **/
 
-func (ctx *CategoriesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *categoriesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
 	limit, _ := strconv.Atoi(helpers.QueryParser(r, "limit"))
 	offset, _ := strconv.Atoi(helpers.QueryParser(r, "offset"))
 	current_page, _ := strconv.Atoi(helpers.QueryParser(r, "current_page"))
@@ -62,7 +64,7 @@ func (ctx *CategoriesController) GetAllController(rw http.ResponseWriter, r *htt
 		CurrentPage: current_page,
 	}
 
-	res := ctx.service.GetAllService(query)
+	res := ctx.service.GetAllService(&query)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -75,11 +77,11 @@ func (ctx *CategoriesController) GetAllController(rw http.ResponseWriter, r *htt
 * @description GetByIdController
 **/
 
-func (ctx *CategoriesController) GetByIdController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *categoriesController) GetByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOCategoriesId{Id: Id}
 
-	res := ctx.service.GetByIdService(params)
+	res := ctx.service.GetByIdService(&params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -92,11 +94,11 @@ func (ctx *CategoriesController) GetByIdController(rw http.ResponseWriter, r *ht
 * @description DeleteByIdController
 **/
 
-func (ctx *CategoriesController) DeleteByIdController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *categoriesController) DeleteByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOCategoriesId{Id: Id}
 
-	res := ctx.service.DeleteByIdService(params)
+	res := ctx.service.DeleteByIdService(&params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -109,7 +111,7 @@ func (ctx *CategoriesController) DeleteByIdController(rw http.ResponseWriter, r 
 * @description UpdatedByIdController
 **/
 
-func (ctx *CategoriesController) UpdatedByIdController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *categoriesController) UpdatedByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOCategoriesId{Id: Id}
 
@@ -122,7 +124,7 @@ func (ctx *CategoriesController) UpdatedByIdController(rw http.ResponseWriter, r
 		return
 	}
 
-	res := ctx.service.UpdatedByIdService(body, params)
+	res := ctx.service.UpdatedByIdService(&body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return

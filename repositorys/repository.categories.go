@@ -9,22 +9,24 @@ import (
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
+	"github.com/restuwahyu13/go-trakteer-api/interfaces"
 	"github.com/restuwahyu13/go-trakteer-api/models"
 )
 
-type CategoriesRepository struct {
+type CategoriesRepository = interfaces.ICategoriesRepository
+type categoriesRepository struct {
 	db *sqlx.DB
 }
 
-func NewCategoriesRepository(db *sqlx.DB) *CategoriesRepository {
-	return &CategoriesRepository{db: db}
+func NewCategoriesRepository(db *sqlx.DB) *categoriesRepository {
+	return &categoriesRepository{db: db}
 }
 
 /**
 * @description CreateRepository
 **/
 
-func (ctx *CategoriesRepository) CreateRepository(body dtos.DTOCategories) helpers.APIResponse {
+func (ctx *categoriesRepository) CreateRepository(body *dtos.DTOCategories) helpers.APIResponse {
 	categories := models.Roles{}
 	res := helpers.APIResponse{}
 
@@ -55,7 +57,7 @@ func (ctx *CategoriesRepository) CreateRepository(body dtos.DTOCategories) helpe
 * @description GetAllRepository
 **/
 
-func (ctx *CategoriesRepository) GetAllRepository(query dtos.DTOCategoriesPagination) helpers.APIResponse {
+func (ctx *categoriesRepository) GetAllRepository(query *dtos.DTOCategoriesPagination) helpers.APIResponse {
 	categories := []models.Categories{}
 	res := helpers.APIResponse{}
 
@@ -91,7 +93,7 @@ func (ctx *CategoriesRepository) GetAllRepository(query dtos.DTOCategoriesPagina
 * @description GetByIdRepository
 **/
 
-func (ctx *CategoriesRepository) GetByIdRepository(params dtos.DTOCategoriesId) helpers.APIResponse {
+func (ctx *categoriesRepository) GetByIdRepository(params *dtos.DTOCategoriesId) helpers.APIResponse {
 	catagories := models.Categories{}
 	res := helpers.APIResponse{}
 
@@ -114,7 +116,7 @@ func (ctx *CategoriesRepository) GetByIdRepository(params dtos.DTOCategoriesId) 
 * @description DeleteByIdRepository
 **/
 
-func (ctx *CategoriesRepository) DeleteByIdRepository(params dtos.DTOCategoriesId) helpers.APIResponse {
+func (ctx *categoriesRepository) DeleteByIdRepository(params *dtos.DTOCategoriesId) helpers.APIResponse {
 	categories := models.Categories{}
 	res := helpers.APIResponse{}
 
@@ -146,7 +148,7 @@ func (ctx *CategoriesRepository) DeleteByIdRepository(params dtos.DTOCategoriesI
 * @description UpdatedByIdRepository
 **/
 
-func (ctx *CategoriesRepository) UpdatedByIdRepository(body dtos.DTOCategories, params dtos.DTOCategoriesId) helpers.APIResponse {
+func (ctx *categoriesRepository) UpdatedByIdRepository(body *dtos.DTOCategories, params *dtos.DTOCategoriesId) helpers.APIResponse {
 	catagories := models.Roles{}
 	res := helpers.APIResponse{}
 

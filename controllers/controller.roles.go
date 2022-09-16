@@ -11,22 +11,24 @@ import (
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
+	"github.com/restuwahyu13/go-trakteer-api/interfaces"
 	"github.com/restuwahyu13/go-trakteer-api/services"
 )
 
-type RolesController struct {
-	service *services.RolesService
+type RolesController = interfaces.IRolesController
+type rolesController struct {
+	service services.RolesService
 }
 
-func NewRolesController(service *services.RolesService) *RolesController {
-	return &RolesController{service: service}
+func NewRolesController(service services.RolesService) *rolesController {
+	return &rolesController{service: service}
 }
 
 /**
 * @description CreateController
 **/
 
-func (ctx *RolesController) CreateController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *rolesController) CreateController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTORoles{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -36,7 +38,7 @@ func (ctx *RolesController) CreateController(rw http.ResponseWriter, r *http.Req
 		return
 	}
 
-	res := ctx.service.CreateService(body)
+	res := ctx.service.CreateService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -49,7 +51,7 @@ func (ctx *RolesController) CreateController(rw http.ResponseWriter, r *http.Req
 * @description GetAllController
 **/
 
-func (ctx *RolesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *rolesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
 	limit, _ := strconv.Atoi(helpers.QueryParser(r, "limit"))
 	offset, _ := strconv.Atoi(helpers.QueryParser(r, "offset"))
 	current_page, _ := strconv.Atoi(helpers.QueryParser(r, "current_page"))
@@ -62,7 +64,7 @@ func (ctx *RolesController) GetAllController(rw http.ResponseWriter, r *http.Req
 		CurrentPage: current_page,
 	}
 
-	res := ctx.service.GetAllService(query)
+	res := ctx.service.GetAllService(&query)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -75,11 +77,11 @@ func (ctx *RolesController) GetAllController(rw http.ResponseWriter, r *http.Req
 * @description GetByIdController
 **/
 
-func (ctx *RolesController) GetByIdController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *rolesController) GetByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTORolesById{Id: Id}
 
-	res := ctx.service.GetByIdService(params)
+	res := ctx.service.GetByIdService(&params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -92,11 +94,11 @@ func (ctx *RolesController) GetByIdController(rw http.ResponseWriter, r *http.Re
 * @description DeleteByIdController
 **/
 
-func (ctx *RolesController) DeleteByIdController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *rolesController) DeleteByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTORolesById{Id: Id}
 
-	res := ctx.service.DeleteByIdService(params)
+	res := ctx.service.DeleteByIdService(&params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -109,7 +111,7 @@ func (ctx *RolesController) DeleteByIdController(rw http.ResponseWriter, r *http
 * @description UpdatedByIdController
 **/
 
-func (ctx *RolesController) UpdatedByIdController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *rolesController) UpdatedByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTORolesById{Id: Id}
 
@@ -122,7 +124,7 @@ func (ctx *RolesController) UpdatedByIdController(rw http.ResponseWriter, r *htt
 		return
 	}
 
-	res := ctx.service.UpdatedByIdService(body, params)
+	res := ctx.service.UpdatedByIdService(&body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return

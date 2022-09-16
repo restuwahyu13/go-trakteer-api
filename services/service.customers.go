@@ -14,38 +14,38 @@ func NewCustomersService(repository *repositorys.CustomersRepository) *Customers
 	return &CustomersService{repository: repository}
 }
 
-func (ctx *CustomersService) RegisterService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.RegisterRepository(payload)
+func (ctx *CustomersService) RegisterService(body *dtos.DTOCustomersRegister) helpers.APIResponse {
+	return ctx.repository.RegisterRepository(body)
 }
 
-func (ctx *CustomersService) LoginService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.LoginRepository(payload)
+func (ctx *CustomersService) LoginService(body *dtos.DTOCustomersLogin) helpers.APIResponse {
+	return ctx.repository.LoginRepository(body)
 }
 
-func (ctx *CustomersService) ActivationService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.ActivationRepository(payload)
+func (ctx *CustomersService) ActivationService(params *dtos.DTOCustomersActivation) helpers.APIResponse {
+	return ctx.repository.ActivationRepository(params)
 }
 
-func (ctx *CustomersService) ResendActivationService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.ResendActivationRepository(payload)
+func (ctx *CustomersService) ResendActivationService(body *dtos.DTOCustomersResendActivation) helpers.APIResponse {
+	return ctx.repository.ResendActivationRepository(body)
 }
 
-func (ctx *CustomersService) ForgotPasswordService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.ActivationRepository(payload)
+func (ctx *CustomersService) ForgotPasswordService(body *dtos.DTOCustomersForgotPassword) helpers.APIResponse {
+	return ctx.repository.ForgotPasswordRepository(body)
 }
 
-func (ctx *CustomersService) ResetPasswordService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.ResetPasswordRepository(payload)
+func (ctx *CustomersService) ResetPasswordService(body *dtos.DTOCustomersResetPassword) helpers.APIResponse {
+	return ctx.repository.ResetPasswordRepository(body)
 }
 
-func (ctx *CustomersService) ChangePasswordService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.ChangePasswordRepository(payload)
+func (ctx *CustomersService) ChangePasswordService(body *dtos.DTOCustomersChangePassword) helpers.APIResponse {
+	return ctx.repository.ChangePasswordRepository(body)
 }
 
-func (ctx *CustomersService) GetProfileService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.GetProfileRepository(payload)
+func (ctx *CustomersService) GetProfileByIdService(params *dtos.DTOCustomersGetProfileById) helpers.APIResponse {
+	return ctx.repository.GetProfileByIdRepository(params)
 }
 
-func (ctx *CustomersService) UpdateProfileService(payload dtos.DTOLogin) helpers.APIResponse {
-	return ctx.repository.UpdateProfileRepository(payload)
+func (ctx *CustomersService) UpdateProfileByIdService(body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse {
+	return ctx.repository.UpdateProfileByIdRepository(body, params)
 }
