@@ -173,11 +173,27 @@ func (ctx *usersRepository) ResetPasswordRepository(body *dtos.DTOUsersResetPass
 }
 
 func (ctx *usersRepository) ChangePasswordRepository(body *dtos.DTOUsersChangePassword) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from change password repository",
+	users := models.Users{}
+	res := helpers.APIResponse{}
+
+	if body.Cpassword != body.Password {
+		res.StatCode = http.StatusNotFound
+		res.StatMsg = "Confirm password not match with password"
+		return res
 	}
 
+	users.Password = packages.HashPassword(body.Password)
+
+	_, updatePasswordErr := ctx.db.NamedQuery("UPDATE users SET password = :password WHERE id = :id", &users)
+	if updatePasswordErr != nil {
+		res.StatCode = http.StatusForbidden
+		res.StatMsg = "Change old password to new password failed"
+		res.QueryError = updatePasswordErr
+		return res
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = "Change old password to new password successfully"
 	return res
 }
 

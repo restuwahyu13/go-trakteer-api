@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/smtp"
 	"strconv"
@@ -19,9 +20,9 @@ func SmtpEmail(to []string, template string) error {
 	smtpAddress := fmt.Sprintf("%s:%d", smtp_host, smtp_port)
 	smtpFromEmail := viper.GetString("SMTP_EMAIL")
 
-	fmt.Println(smtpAddress)
+	htmlTemplate, _ := json.Marshal(template)
+	smtpEmailError := smtp.SendMail(smtpAddress, smtpAuth, smtpFromEmail, to, htmlTemplate)
 
-	smtpEmailError := smtp.SendMail(smtpAddress, smtpAuth, smtpFromEmail, to, []byte(template))
 	if smtpEmailError != nil {
 		logrus.Errorf("Sending email using SMTP error: %v", smtpEmailError)
 	}
