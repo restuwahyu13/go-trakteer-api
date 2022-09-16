@@ -13,7 +13,7 @@ func SignToken(payload map[string]interface{}, expiredAt time.Duration) string {
 	options := jwt.MapClaims{}
 
 	options["jti"] = uuid.NewString()
-	options["exp"] = time.Now().Add(time.Duration(time.Minute) * expiredAt).Unix()
+	options["exp"] = time.Now().Add(time.Duration(expiredAt)).Unix()
 	options["aud"] = "go-trakteer"
 
 	for i, v := range payload {

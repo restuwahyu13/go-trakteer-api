@@ -79,7 +79,7 @@ func (ctx *usersRepository) LoginRepository(body *dtos.DTOUsersLogin) helpers.AP
 	accessTokenExpired := helpers.ExpiredAt(1, "days")
 	refrehTokenExpired := helpers.ExpiredAt(2, "months")
 	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
-	expiredAt := time.Now().Add(time.Duration(helpers.ExpiredAt(1, "days"))).In(jakartaTimeZone)
+	expiredAt := time.Now().Add(time.Duration(accessTokenExpired)).In(jakartaTimeZone)
 
 	accessToken := packages.SignToken(jwtPayload, time.Duration(accessTokenExpired))
 	refrehToken := packages.SignToken(jwtPayload, time.Duration(refrehTokenExpired))
