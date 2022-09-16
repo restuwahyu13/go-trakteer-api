@@ -10,22 +10,24 @@ import (
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
+	"github.com/restuwahyu13/go-trakteer-api/interfaces"
 	"github.com/restuwahyu13/go-trakteer-api/services"
 )
 
-type CustomersController struct {
-	service *services.CustomersService
+type CustomersController = interfaces.ICustomersController
+type customersController struct {
+	service services.CustomersService
 }
 
-func NewCustomersController(service *services.CustomersService) *CustomersController {
-	return &CustomersController{service: service}
+func NewCustomersController(service services.CustomersService) *customersController {
+	return &customersController{service: service}
 }
 
 /**
 * @description RegisterController
 **/
 
-func (ctx *CustomersController) RegisterController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *customersController) RegisterController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOCustomersRegister{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -48,7 +50,7 @@ func (ctx *CustomersController) RegisterController(rw http.ResponseWriter, r *ht
 * @description LoginController
 **/
 
-func (ctx *CustomersController) LoginController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *customersController) LoginController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOCustomersLogin{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -71,7 +73,7 @@ func (ctx *CustomersController) LoginController(rw http.ResponseWriter, r *http.
 * @description ActivationController
 **/
 
-func (ctx *CustomersController) ActivationController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *customersController) ActivationController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOCustomersActivation{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -94,7 +96,7 @@ func (ctx *CustomersController) ActivationController(rw http.ResponseWriter, r *
 * @description ResendActivationController
 **/
 
-func (ctx *CustomersController) ResendActivationController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *customersController) ResendActivationController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOCustomersResendActivation{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -117,7 +119,7 @@ func (ctx *CustomersController) ResendActivationController(rw http.ResponseWrite
 * @description ForgotPasswordController
 **/
 
-func (ctx *CustomersController) ForgotPasswordController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *customersController) ForgotPasswordController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOCustomersForgotPassword{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -140,7 +142,7 @@ func (ctx *CustomersController) ForgotPasswordController(rw http.ResponseWriter,
 * @description ResetPasswordController
 **/
 
-func (ctx *CustomersController) ResetPasswordController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *customersController) ResetPasswordController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOCustomersResetPassword{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -163,7 +165,7 @@ func (ctx *CustomersController) ResetPasswordController(rw http.ResponseWriter, 
 * @description ChangePasswordController
 **/
 
-func (ctx *CustomersController) ChangePasswordController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *customersController) ChangePasswordController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOCustomersChangePassword{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -186,7 +188,7 @@ func (ctx *CustomersController) ChangePasswordController(rw http.ResponseWriter,
 * @description GetProfileController
 **/
 
-func (ctx *CustomersController) GetProfileController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *customersController) GetProfileByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOCustomersGetProfileById{Id: Id}
 
@@ -203,7 +205,7 @@ func (ctx *CustomersController) GetProfileController(rw http.ResponseWriter, r *
 * @description UpdateProfileController
 **/
 
-func (ctx *CustomersController) UpdateProfileController(rw http.ResponseWriter, r *http.Request) {
+func (ctx *customersController) UpdateProfileByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOCustomersGetProfileById{Id: Id}
 

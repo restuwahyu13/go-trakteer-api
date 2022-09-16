@@ -26,7 +26,7 @@ func main() {
 	router := SetupRouter()
 
 	routes.NewUsersRoute("/api/v1/users", db, router).UsersRoute()
-	routes.CustomersRoute("/api/v1/customers", db, router)
+	routes.NewCustomersRoute("/api/v1/customers", db, router).CustomersRoute()
 	routes.NewRolesRoute("/api/v1/roles", db, router).RolesRoute()
 	routes.NewCategoriesRoute("/api/v1/categories", db, router).CategoriesRoute()
 

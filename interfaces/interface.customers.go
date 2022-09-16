@@ -10,7 +10,8 @@ import (
 type ICustomersRepository interface {
 	RegisterRepository(body *dtos.DTOCustomersRegister) helpers.APIResponse
 	LoginRepository(body *dtos.DTOCustomersLogin) helpers.APIResponse
-	AcitvationRepository(params *dtos.DTOCustomersActivation) helpers.APIResponse
+	ActivationRepository(params *dtos.DTOCustomersActivation) helpers.APIResponse
+	ResendActivationRepository(body *dtos.DTOCustomersResendActivation) helpers.APIResponse
 	ForgotPasswordRepository(body *dtos.DTOCustomersForgotPassword) helpers.APIResponse
 	ResetPasswordRepository(body *dtos.DTOCustomersResetPassword) helpers.APIResponse
 	ChangePasswordRepository(body *dtos.DTOCustomersChangePassword) helpers.APIResponse
@@ -21,7 +22,8 @@ type ICustomersRepository interface {
 type ICustomersService interface {
 	RegisterService(body *dtos.DTOCustomersRegister) helpers.APIResponse
 	LoginService(body *dtos.DTOCustomersLogin) helpers.APIResponse
-	AcitvationService(params *dtos.DTOCustomersForgotPassword) helpers.APIResponse
+	ActivationService(params *dtos.DTOCustomersActivation) helpers.APIResponse
+	ResendActivationService(body *dtos.DTOCustomersResendActivation) helpers.APIResponse
 	ForgotPasswordService(body *dtos.DTOCustomersForgotPassword) helpers.APIResponse
 	ResetPasswordService(body *dtos.DTOCustomersResetPassword) helpers.APIResponse
 	ChangePasswordService(body *dtos.DTOCustomersChangePassword) helpers.APIResponse
@@ -30,13 +32,13 @@ type ICustomersService interface {
 }
 
 type ICustomersController interface {
-	RegisterService(rw http.ResponseWriter, r *http.Request)
-	LoginService(rw http.ResponseWriter, r *http.Request)
-	AcitvationService(rw http.ResponseWriter, r *http.Request)
-	ForgotPasswordService(rw http.ResponseWriter, r *http.Request)
-	ResetPasswordService(rw http.ResponseWriter, r *http.Request)
-	ChangePasswordService(rw http.ResponseWriter, r *http.Request)
-	GetProfileByIdService(rw http.ResponseWriter, r *http.Request)
-	UpdateProfileByIdService(rw http.ResponseWriter, r *http.Request)
-	GetAllCustomersController(rw http.ResponseWriter, r *http.Request)
+	RegisterController(rw http.ResponseWriter, r *http.Request)
+	LoginController(rw http.ResponseWriter, r *http.Request)
+	ActivationController(rw http.ResponseWriter, r *http.Request)
+	ResendActivationController(rw http.ResponseWriter, r *http.Request)
+	ForgotPasswordController(rw http.ResponseWriter, r *http.Request)
+	ResetPasswordController(rw http.ResponseWriter, r *http.Request)
+	ChangePasswordController(rw http.ResponseWriter, r *http.Request)
+	GetProfileByIdController(rw http.ResponseWriter, r *http.Request)
+	UpdateProfileByIdController(rw http.ResponseWriter, r *http.Request)
 }

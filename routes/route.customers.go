@@ -10,18 +10,28 @@ import (
 	"github.com/restuwahyu13/go-trakteer-api/services"
 )
 
-func CustomersRoute(prefix string, db *sqlx.DB, router *chi.Mux) {
+type customersRoute struct {
+	controller controllers.CustomersController
+	prefix     string
+	router     *chi.Mux
+}
+
+func NewCustomersRoute(prefix string, db *sqlx.DB, router *chi.Mux) *customersRoute {
 	repository := repositorys.NewCustomersRepository(db)
 	service := services.NewCustomersService(repository)
 	controller := controllers.NewCustomersController(service)
 
-	router.Post(helpers.Endpoint(prefix, "/register"), controller.RegisterController)
-	router.Post(helpers.Endpoint(prefix, "/login"), controller.LoginController)
-	router.Get(helpers.Endpoint(prefix, "/activation/{token}"), controller.ActivationController)
-	router.Post(helpers.Endpoint(prefix, "/resend-activation"), controller.ResendActivationController)
-	router.Post(helpers.Endpoint(prefix, "/forgot-password"), controller.ForgotPasswordController)
-	router.Post(helpers.Endpoint(prefix, "/reset-password"), controller.ResetPasswordController)
-	router.Put(helpers.Endpoint(prefix, "/change-password"), controller.ChangePasswordController)
-	router.Get(helpers.Endpoint(prefix, "/profile/{id}"), controller.GetProfileController)
-	router.Put(helpers.Endpoint(prefix, "/profile/{id}"), controller.UpdateProfileController)
+	return &customersRoute{controller: controller, prefix: prefix, router: router}
+}
+
+func (ctx *customersRoute) CustomersRoute() {
+	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/register"), ctx.controller.RegisterController)
+	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/login"), ctx.controller.LoginController)
+	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/activation/{token}"), ctx.controller.ActivationController)
+	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/resend-activation"), ctx.controller.ResendActivationController)
+	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/forgot-password"), ctx.controller.ForgotPasswordController)
+	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/reset-password"), ctx.controller.ResetPasswordController)
+	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/change-password"), ctx.controller.ChangePasswordController)
+	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/profile/{id}"), ctx.controller.GetProfileByIdController)
+	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/profile/{id}"), ctx.controller.UpdateProfileByIdController)
 }

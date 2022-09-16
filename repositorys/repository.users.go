@@ -7,6 +7,7 @@ import (
 
 	"github.com/jackskj/carta"
 	"github.com/jmoiron/sqlx"
+	"github.com/spf13/viper"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
@@ -20,84 +21,22 @@ type usersRepository struct {
 	db *sqlx.DB
 }
 
+type usersRole struct {
+	Name string `json:"name"`
+	Role string `json:"role"`
+}
+
 type usersToken struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	Role         string `json:"role"`
+	AccessToken         string `json:"access_token"`
+	RefreshToken        string `json:"refresh_token"`
+	AccessTokenExpired  string `json:"access_token_expired"`
+	RefreshTokenExpired string `json:"refresh_token_expired"`
+	User                usersRole
 }
 
 func NewUsersRepository(db *sqlx.DB) *usersRepository {
 	return &usersRepository{db: db}
 }
-
-/**
-* @description RegisterRepository
-**/
-
-// func (ctx *usersRepository) RegisterRepository(body dtos.DTOUsersRegister) helpers.APIResponse {
-// 	users := models.Users{}
-// 	roles := models.Roles{}
-// 	catogories := models.Categories{}
-// 	res := helpers.APIResponse{}
-
-// 	checkUserEmailChan := make(chan error)
-// 	checkRoleIdChan := make(chan error)
-// 	checkCategorieIdChan := make(chan error)
-
-// 	users.Name = body.Name
-// 	users.Username = body.Username
-// 	users.Email = body.Email
-// 	users.Password = packages.HashPassword(body.Password)
-// 	users.Active = true
-// 	users.Verified = false
-// 	users.RoleId = body.RoleId
-// 	users.CategorieId = body.CategorieId
-
-// 	go (func() {
-// 		checkUserEmail := ctx.db.Get(&users, "SELECT username, email FROM users WHERE username = $1 OR email = $2", users.Username, users.Email)
-// 		checkUserEmailChan <- checkUserEmail
-
-// 		checkRoleId := ctx.db.Get(&roles, "SELECT id FROM roles WHERE id = $1", body.RoleId)
-// 		checkRoleIdChan <- checkRoleId
-
-// 		checkCategorieId := ctx.db.Get(&catogories, "SELECT id FROM catogories WHERE id = $1", users.CategorieId)
-// 		checkCategorieIdChan <- checkCategorieId
-// 	})()
-
-// 	if <-checkUserEmailChan == nil {
-// 		res.StatCode = http.StatusConflict
-// 		res.StatMsg = fmt.Sprintf("Username %v or Email %v already taken", users.Username, users.Email)
-// 		return res
-// 	}
-
-// 	if <-checkRoleIdChan != nil {
-// 		res.StatCode = http.StatusConflict
-// 		res.StatMsg = "Role name is not exist"
-// 		res.SqlError = <-checkRoleIdChan
-// 		return res
-// 	}
-
-// 	if <-checkCategorieIdChan != nil {
-// 		res.StatCode = http.StatusConflict
-// 		res.StatMsg = "Categorie name is not exist"
-// 		res.SqlError = <-checkCategorieIdChan
-// 		return res
-// 	}
-
-// 	_, err := ctx.db.NamedQuery(`
-// 		INSERT INTO users (name, username, email, password, active, verified, social_link, role_id, categorie_id)
-// 		VALUES(:name, :username, :email, :password, :active, :verified, :social_link, :role_id, :categorie_id)`, users)
-
-// 	if err != nil {
-// 		res.StatCode = http.StatusConflict
-// 		res.StatMsg = "Create new user account failed"
-// 		res.SqlError = err
-// 	}
-
-// 	res.StatCode = http.StatusCreated
-// 	res.StatMsg = "Create new user account success"
-// 	return res
-// }
 
 /**
 * @description LoginRepository
@@ -121,7 +60,7 @@ func (ctx *usersRepository) LoginRepository(body *dtos.DTOUsersLogin) helpers.AP
 	if err != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = fmt.Sprintf("Users email %v not registered", users.Email)
-		res.SqlError = err
+		res.QueryError = err
 		return res
 	}
 
@@ -137,9 +76,13 @@ func (ctx *usersRepository) LoginRepository(body *dtos.DTOUsersLogin) helpers.AP
 	jwtPayload["email"] = users.Email
 	jwtPayload["role"] = users.Role.Name
 
-	accessToken := packages.SignToken(jwtPayload, 60)    // 1 days
-	refrehToken := packages.SignToken(jwtPayload, 86400) // 2 months
-	expiredAt := time.Now().Add(time.Duration(time.Minute * 60)).Local()
+	accessTokenExpired := helpers.ExpiredAt(1, "days")
+	refrehTokenExpired := helpers.ExpiredAt(2, "months")
+	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
+	expiredAt := time.Now().Add(time.Duration(helpers.ExpiredAt(1, "days"))).In(jakartaTimeZone)
+
+	accessToken := packages.SignToken(jwtPayload, time.Duration(accessTokenExpired))
+	refrehToken := packages.SignToken(jwtPayload, time.Duration(refrehTokenExpired))
 
 	token.ResourceId = users.ID
 	token.ResourceType = "login"
@@ -154,14 +97,16 @@ func (ctx *usersRepository) LoginRepository(body *dtos.DTOUsersLogin) helpers.AP
 	if insertTokenErr != nil {
 		res.StatCode = http.StatusNotFound
 		res.StatMsg = "Insert token into database failed"
-		res.SqlError = insertTokenErr
+		res.QueryError = insertTokenErr
 		return res
 	}
 
 	accessTokenPayload := usersToken{
-		AccessToken:  accessToken,
-		RefreshToken: refrehToken,
-		Role:         users.Role.Name,
+		AccessToken:         accessToken,
+		RefreshToken:        refrehToken,
+		AccessTokenExpired:  helpers.TimeFormat(time.Now().Add(time.Duration(accessTokenExpired)).In(jakartaTimeZone)),
+		RefreshTokenExpired: helpers.TimeFormat(time.Now().Add(time.Duration(refrehTokenExpired)).In(jakartaTimeZone)),
+		User:                usersRole{Name: users.Name, Role: users.Role.Name},
 	}
 
 	res.StatCode = http.StatusOK
@@ -180,11 +125,41 @@ func (ctx *usersRepository) ActivationRepository(params *dtos.DTOUsersLogin) hel
 }
 
 func (ctx *usersRepository) ForgotPasswordRepository(body *dtos.DTOUsersForgotPassword) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from forgot password repository",
+	users := models.Users{}
+	res := helpers.APIResponse{}
+
+	users.Email = body.Email
+
+	checkUserEmail := ctx.db.Get(&users, "SELECT email FROM users WHERE email = $1", users.Email)
+	if checkUserEmail != nil {
+		res.StatCode = http.StatusNotFound
+		res.StatMsg = fmt.Sprintf("User email %s not exist", users.Email)
+		return res
 	}
 
+	htmlContent := helpers.HtmlContent{}
+	htmlContent.Url = viper.GetString("FE_URL")
+	htmlContent.To = users.Email
+	htmlContent.Token = helpers.RandomToken()
+
+	htmlTemplateRes, htmlTemplateErr := helpers.HtmlRender("template.resetPassword", htmlContent)
+
+	if htmlTemplateErr != nil {
+		res.StatCode = http.StatusNotFound
+		res.StatMsg = fmt.Sprintf("Render html template error: %v", htmlTemplateErr)
+		return res
+	}
+
+	sendEmailErr := helpers.SmtpEmail([]string{users.Email}, htmlTemplateRes)
+
+	if sendEmailErr != nil {
+		res.StatCode = http.StatusNotFound
+		res.StatMsg = fmt.Sprintf("Send smtp email error: %v", sendEmailErr)
+		return res
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = fmt.Sprintf("Reset password successfully, please check your email %s address", users.Email)
 	return res
 }
 
