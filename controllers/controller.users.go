@@ -121,16 +121,10 @@ func (ctx *usersController) ChangePasswordController(rw http.ResponseWriter, r *
 **/
 
 func (ctx *usersController) GetProfileByIdController(rw http.ResponseWriter, r *http.Request) {
-	body := dtos.DTOUsersGetProfileById{}
-	err := json.NewDecoder(r.Body).Decode(&body)
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTOUsersGetProfileById{Id: Id}
 
-	if err != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
-		helpers.Send(rw, helpers.ApiResponse(res))
-		return
-	}
-
-	res := ctx.service.GetProfileByIdService(&body)
+	res := ctx.service.GetProfileByIdService(&params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return

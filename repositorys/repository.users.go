@@ -247,11 +247,22 @@ func (ctx *usersRepository) ChangePasswordRepository(body *dtos.DTOUsersChangePa
 **/
 
 func (ctx *usersRepository) GetProfileByIdRepository(params *dtos.DTOUsersGetProfileById) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from get profile repository",
+	users := models.Users{}
+	res := helpers.APIResponse{}
+
+	users.Id = uint(params.Id)
+
+	checkUserErr := ctx.db.Get(&users, "SELECT id, name, username, email, active, verified, created_at, updated_at, deleted_at FROM users WHERE id = $1", users.Id)
+	if checkUserErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("UserID not exist for this id %d", users.Id)
+		res.QueryError = checkUserErr
+		return res
 	}
 
+	res.StatCode = http.StatusOK
+	res.StatMsg = "Get profile data successfully"
+	res.Data = users
 	return res
 }
 
