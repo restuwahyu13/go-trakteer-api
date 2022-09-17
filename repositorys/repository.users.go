@@ -58,7 +58,7 @@ func (ctx *usersRepository) LoginRepository(body *dtos.DTOUsersLogin) helpers.AP
 	carta.Map(checkUserEmail, &users)
 
 	if err != nil {
-		res.StatCode = http.StatusNotFound
+		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Users email %v not registered", users.Email)
 		res.QueryError = err
 		return res
@@ -76,15 +76,17 @@ func (ctx *usersRepository) LoginRepository(body *dtos.DTOUsersLogin) helpers.AP
 	jwtPayload["email"] = users.Email
 	jwtPayload["role"] = users.Role.Name
 
+	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
+	timeFormat := time.RFC1123Z
+
 	accessTokenExpired := helpers.ExpiredAt(1, "days")
 	refrehTokenExpired := helpers.ExpiredAt(2, "months")
-	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
 	expiredAt := time.Now().Add(time.Duration(accessTokenExpired)).In(jakartaTimeZone)
 
 	accessToken := packages.SignToken(jwtPayload, time.Duration(accessTokenExpired))
 	refrehToken := packages.SignToken(jwtPayload, time.Duration(refrehTokenExpired))
 
-	token.ResourceId = users.ID
+	token.ResourceId = users.Id
 	token.ResourceType = "login"
 	token.AccessToken = accessToken
 	token.RefreshToken = refrehToken
@@ -95,7 +97,7 @@ func (ctx *usersRepository) LoginRepository(body *dtos.DTOUsersLogin) helpers.AP
 	VALUES (:resource_id, :resource_type, :access_token, :refresh_token, :expired_at)`, &token)
 
 	if insertTokenErr != nil {
-		res.StatCode = http.StatusNotFound
+		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Insert token into database failed"
 		res.QueryError = insertTokenErr
 		return res
@@ -104,8 +106,8 @@ func (ctx *usersRepository) LoginRepository(body *dtos.DTOUsersLogin) helpers.AP
 	accessTokenPayload := usersToken{
 		AccessToken:         accessToken,
 		RefreshToken:        refrehToken,
-		AccessTokenExpired:  helpers.TimeFormat(time.Now().Add(time.Duration(accessTokenExpired)).In(jakartaTimeZone)),
-		RefreshTokenExpired: helpers.TimeFormat(time.Now().Add(time.Duration(refrehTokenExpired)).In(jakartaTimeZone)),
+		AccessTokenExpired:  time.Now().Add(time.Duration(accessTokenExpired)).In(jakartaTimeZone).Format(timeFormat),
+		RefreshTokenExpired: time.Now().Add(time.Duration(refrehTokenExpired)).In(jakartaTimeZone).Format(timeFormat),
 		User:                usersRole{Name: users.Name, Role: users.Role.Name},
 	}
 
@@ -115,14 +117,9 @@ func (ctx *usersRepository) LoginRepository(body *dtos.DTOUsersLogin) helpers.AP
 	return res
 }
 
-func (ctx *usersRepository) ActivationRepository(params *dtos.DTOUsersLogin) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from activation repository",
-	}
-
-	return res
-}
+/**
+* @description ForgotPasswordRepository
+**/
 
 func (ctx *usersRepository) ForgotPasswordRepository(body *dtos.DTOUsersForgotPassword) helpers.APIResponse {
 	users := models.Users{}
@@ -132,29 +129,38 @@ func (ctx *usersRepository) ForgotPasswordRepository(body *dtos.DTOUsersForgotPa
 
 	checkUserEmail := ctx.db.Get(&users, "SELECT email FROM users WHERE email = $1", users.Email)
 	if checkUserEmail != nil {
-		res.StatCode = http.StatusNotFound
+		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("User email %s not exist", users.Email)
 		return res
 	}
 
-	htmlContent := helpers.HtmlContent{}
-	htmlContent.Url = viper.GetString("FE_URL")
-	htmlContent.To = users.Email
-	htmlContent.Token = helpers.RandomToken()
+	htmlTemplateErrchan := make(chan error)
+	sendEmailErrChan := make(chan error)
 
-	htmlTemplateRes, htmlTemplateErr := helpers.HtmlRender("template.resetPassword", htmlContent)
+	go func() {
+		htmlContent := helpers.HtmlContent{}
+		htmlContent.Url = viper.GetString("FE_URL")
+		htmlContent.To = users.Email
+		htmlContent.Token = helpers.RandomToken()
 
-	if htmlTemplateErr != nil {
-		res.StatCode = http.StatusNotFound
+		htmlTemplateRes, htmlTemplateErr := helpers.HtmlRender("template.resetPassword", htmlContent)
+		htmlTemplateErrchan <- htmlTemplateErr
+
+		sendEmailErr := helpers.SmtpEmail([]string{users.Email}, htmlTemplateRes)
+		sendEmailErrChan <- sendEmailErr
+	}()
+
+	if htmlTemplateErr := <-htmlTemplateErrchan; htmlTemplateErr != nil {
+		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Render html template error: %v", htmlTemplateErr)
+		defer close(htmlTemplateErrchan)
 		return res
 	}
 
-	sendEmailErr := helpers.SmtpEmail([]string{users.Email}, htmlTemplateRes)
-
-	if sendEmailErr != nil {
-		res.StatCode = http.StatusNotFound
+	if sendEmailErr := <-sendEmailErrChan; sendEmailErr != nil {
+		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Send smtp email error: %v", sendEmailErr)
+		defer close(htmlTemplateErrchan)
 		return res
 	}
 
@@ -163,21 +169,60 @@ func (ctx *usersRepository) ForgotPasswordRepository(body *dtos.DTOUsersForgotPa
 	return res
 }
 
+/**
+* @description ResetPasswordRepository
+**/
+
 func (ctx *usersRepository) ResetPasswordRepository(body *dtos.DTOUsersResetPassword) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from reset password repository",
+	users := models.Users{}
+	token := models.Token{}
+	res := helpers.APIResponse{}
+
+	checkAccessToken := ctx.db.Get(&token, "SELECT resource_id, expired_at FROM token WHERE access_token = $1 AND resource_type = $2", body.Token, "activation")
+	if checkAccessToken != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Access token not match or not exist"
 	}
 
+	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
+	timeFormat := "2006-01-02 15:04:05"
+	timeNow := time.Now().In(jakartaTimeZone).Format(timeFormat)
+
+	if token.ExpiredAt.Format(timeFormat) < timeNow {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Access token expired, please resend new activation token"
+	}
+
+	if body.Cpassword != body.Password {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Confirm password not match with password"
+	}
+
+	users.Id = token.ResourceId
+	users.Password = packages.HashPassword(body.Password)
+
+	_, updatePasswordErr := ctx.db.NamedQuery("UPDATE users SET password = :password WHERE id = :id", &users)
+	if updatePasswordErr != nil {
+		res.StatCode = http.StatusForbidden
+		res.StatMsg = "Update activation account failed"
+		res.QueryError = updatePasswordErr
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = "Reset password to new password successfully"
 	return res
 }
+
+/**
+* @description ChangePasswordRepository
+**/
 
 func (ctx *usersRepository) ChangePasswordRepository(body *dtos.DTOUsersChangePassword) helpers.APIResponse {
 	users := models.Users{}
 	res := helpers.APIResponse{}
 
 	if body.Cpassword != body.Password {
-		res.StatCode = http.StatusNotFound
+		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Confirm password not match with password"
 		return res
 	}
@@ -197,6 +242,10 @@ func (ctx *usersRepository) ChangePasswordRepository(body *dtos.DTOUsersChangePa
 	return res
 }
 
+/**
+* @description GetProfileByIdRepository
+**/
+
 func (ctx *usersRepository) GetProfileByIdRepository(params *dtos.DTOUsersGetProfileById) helpers.APIResponse {
 	res := helpers.APIResponse{
 		StatCode: http.StatusOK,
@@ -205,6 +254,10 @@ func (ctx *usersRepository) GetProfileByIdRepository(params *dtos.DTOUsersGetPro
 
 	return res
 }
+
+/**
+* @description UpdateProfileByIdRepository
+**/
 
 func (ctx *usersRepository) UpdateProfileByIdRepository(body *dtos.DTOUsersUpdateProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse {
 	res := helpers.APIResponse{

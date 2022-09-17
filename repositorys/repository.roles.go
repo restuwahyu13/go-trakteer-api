@@ -42,7 +42,7 @@ func (ctx *rolesRepository) CreateRepository(body *dtos.DTORoles) helpers.APIRes
 	_, createdRoleErr := ctx.db.NamedQuery("INSERT INTO roles (name) VALUES (:name)", &roles)
 
 	if createdRoleErr != nil {
-		res.StatCode = http.StatusBadRequest
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Created new role failed"
 		res.QueryError = createdRoleErr
 		return res
@@ -60,6 +60,7 @@ func (ctx *rolesRepository) CreateRepository(body *dtos.DTORoles) helpers.APIRes
 func (ctx *rolesRepository) GetAllRepository(query *dtos.DTORolePagination) helpers.APIResponse {
 	roles := []models.Roles{}
 	res := helpers.APIResponse{}
+	// wg := sync.WaitGroup{}
 
 	getAllRolesChan := make(chan error)
 	countChan := make(chan int)
@@ -70,14 +71,15 @@ func (ctx *rolesRepository) GetAllRepository(query *dtos.DTORolePagination) help
 
 		count := 0
 		countRoles := ctx.db.QueryRowx("SELECT COUNT(id) FROM roles")
-		countRoles.Scan(&countRoles)
+		countRoles.Scan(&count)
 		countChan <- count
 	}()
 
 	if <-getAllRolesChan != nil {
-		res.StatCode = http.StatusNotFound
+		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Roles data not exist"
 		res.QueryError = <-getAllRolesChan
+		defer close(getAllRolesChan)
 		return res
 	}
 
@@ -85,6 +87,7 @@ func (ctx *rolesRepository) GetAllRepository(query *dtos.DTORolePagination) help
 	res.StatMsg = "Roles already to use"
 	res.Data = roles
 	res.Pagination = helpers.Stringify(helpers.Pagination(query, <-countChan))
+	defer close(countChan)
 	return res
 }
 
@@ -99,7 +102,7 @@ func (ctx *rolesRepository) GetByIdRepository(params *dtos.DTORolesById) helpers
 	getRoleId := ctx.db.Get(&roles, "SELECT * FROM roles WHERE id = $1", params.Id)
 
 	if getRoleId != nil {
-		res.StatCode = http.StatusNotFound
+		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
 		res.QueryError = getRoleId
 		return res
@@ -122,7 +125,7 @@ func (ctx *rolesRepository) DeleteByIdRepository(params *dtos.DTORolesById) help
 	checkRoleId := ctx.db.Get(&roles, "SELECT * FROM roles WHERE id = $1", params.Id)
 
 	if checkRoleId != nil {
-		res.StatCode = http.StatusNotFound
+		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
 		res.QueryError = checkRoleId
 		return res
@@ -131,7 +134,7 @@ func (ctx *rolesRepository) DeleteByIdRepository(params *dtos.DTORolesById) help
 	_, deletedRoleErr := ctx.db.NamedQuery("DELETE FROM roles WHERE id = :id", params.Id)
 
 	if deletedRoleErr != nil {
-		res.StatCode = http.StatusNotFound
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = fmt.Sprintf("Deleted role for this id %d failed", params.Id)
 		res.QueryError = deletedRoleErr
 		return res
@@ -154,7 +157,7 @@ func (ctx *rolesRepository) UpdatedByIdRepository(body *dtos.DTORoles, params *d
 	checkRoleId := ctx.db.Get(&roles, "SELECT * FROM roles WHERE id = $1", params.Id)
 
 	if checkRoleId != nil {
-		res.StatCode = http.StatusNotFound
+		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
 		res.QueryError = checkRoleId
 		return res
@@ -167,7 +170,7 @@ func (ctx *rolesRepository) UpdatedByIdRepository(body *dtos.DTORoles, params *d
 	_, updatedRoleErr := ctx.db.NamedQuery("UPDATE roles SET name = :name WHERE id = :id", &roles)
 
 	if updatedRoleErr != nil {
-		res.StatCode = http.StatusBadRequest
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Updated old role failed"
 		res.QueryError = updatedRoleErr
 		return res

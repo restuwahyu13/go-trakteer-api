@@ -23,6 +23,7 @@ type DTOUsersForgotPassword struct {
 }
 
 type DTOUsersResetPassword struct {
+	Token     string `validate:"required,base64" json:"token"`
 	Password  string `validate:"required,alphanumunicode,min=8" json:"password"`
 	Cpassword string `validate:"required,alphanumunicode,min=8" json:"cpassword"`
 }

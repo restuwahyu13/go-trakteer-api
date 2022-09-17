@@ -14,7 +14,7 @@ type UsersSocialLink struct {
 }
 
 type Users struct {
-	ID          uint        `json:"id" db:"id"`
+	Id          uint        `json:"id" db:"id"`
 	Username    string      `json:"username" db:"username"`
 	Name        string      `json:"name" db:"name"`
 	Email       string      `json:"email" db:"email"`

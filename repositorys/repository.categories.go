@@ -42,7 +42,7 @@ func (ctx *categoriesRepository) CreateRepository(body *dtos.DTOCategories) help
 	_, createdCategorieErr := ctx.db.NamedQuery("INSERT INTO categories (name) VALUES (:name)", &categories)
 
 	if createdCategorieErr != nil {
-		res.StatCode = http.StatusBadRequest
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Created new categorie failed"
 		res.QueryError = createdCategorieErr
 		return res
@@ -70,15 +70,15 @@ func (ctx *categoriesRepository) GetAllRepository(query *dtos.DTOCategoriesPagin
 
 		count := 0
 		countCategories := ctx.db.QueryRowx("SELECT COUNT(id) FROM categories")
-		countCategories.Scan(&countCategories)
-
+		countCategories.Scan(&count)
 		countChan <- count
 	})()
 
 	if <-getAllCategoriesChan != nil {
-		res.StatCode = http.StatusNotFound
+		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Categories data not exist"
 		res.QueryError = <-getAllCategoriesChan
+		defer close(getAllCategoriesChan)
 		return res
 	}
 
@@ -86,6 +86,7 @@ func (ctx *categoriesRepository) GetAllRepository(query *dtos.DTOCategoriesPagin
 	res.StatMsg = "Categories already to use"
 	res.Data = categories
 	res.Pagination = helpers.Stringify(helpers.Pagination(query, <-countChan))
+	defer close(countChan)
 	return res
 }
 
@@ -100,7 +101,7 @@ func (ctx *categoriesRepository) GetByIdRepository(params *dtos.DTOCategoriesId)
 	getRoleId := ctx.db.Get(&catagories, "SELECT * FROM catagories WHERE id = $1", params.Id)
 
 	if getRoleId != nil {
-		res.StatCode = http.StatusNotFound
+		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Categorie data for this id %d, not exist", params.Id)
 		res.QueryError = getRoleId
 		return res
@@ -123,7 +124,7 @@ func (ctx *categoriesRepository) DeleteByIdRepository(params *dtos.DTOCategories
 	checkCategorieId := ctx.db.Get(&categories, "SELECT * FROM categories WHERE id = $1", params.Id)
 
 	if checkCategorieId != nil {
-		res.StatCode = http.StatusNotFound
+		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
 		res.QueryError = checkCategorieId
 		return res
@@ -132,7 +133,7 @@ func (ctx *categoriesRepository) DeleteByIdRepository(params *dtos.DTOCategories
 	_, deletedCategorieErr := ctx.db.NamedQuery("DELETE FROM categories WHERE id = :id", params.Id)
 
 	if deletedCategorieErr != nil {
-		res.StatCode = http.StatusNotFound
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = fmt.Sprintf("Deleted categorie for this id %d failed", params.Id)
 		res.QueryError = deletedCategorieErr
 		return res
@@ -155,7 +156,7 @@ func (ctx *categoriesRepository) UpdatedByIdRepository(body *dtos.DTOCategories,
 	checkRoleId := ctx.db.Get(&catagories, "SELECT * FROM catagories WHERE id = $1", params.Id)
 
 	if checkRoleId != nil {
-		res.StatCode = http.StatusNotFound
+		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
 		res.QueryError = checkRoleId
 		return res
@@ -168,7 +169,7 @@ func (ctx *categoriesRepository) UpdatedByIdRepository(body *dtos.DTOCategories,
 	_, updatedCategorieErr := ctx.db.NamedQuery("UPDATE catagories SET name = :name WHERE id = :id", &catagories)
 
 	if updatedCategorieErr != nil {
-		res.StatCode = http.StatusBadRequest
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Updated old categorie failed"
 		res.QueryError = updatedCategorieErr
 		return res

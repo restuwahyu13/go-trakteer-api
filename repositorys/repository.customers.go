@@ -3,6 +3,7 @@ package repositorys
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 
@@ -106,12 +107,39 @@ func (ctx *customersRepository) LoginRepository(body *dtos.DTOCustomersLogin) he
 	return res
 }
 
-func (ctx *customersRepository) ActivationRepository(body *dtos.DTOCustomersActivation) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from activation repository",
+func (ctx *customersRepository) ActivationRepository(params *dtos.DTOCustomersActivation) helpers.APIResponse {
+	users := models.Users{}
+	token := models.Token{}
+	res := helpers.APIResponse{}
+
+	checkAccessToken := ctx.db.Get(&token, "SELECT resource_id, expired_at FROM token WHERE access_token = $1 AND resource_type = $2", params.Token, "activation")
+	if checkAccessToken != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Access token is not match"
 	}
 
+	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
+	timeFormat := "2006-01-02 15:04:05"
+	timeNow := time.Now().In(jakartaTimeZone).Format(timeFormat)
+
+	if token.ExpiredAt.Format(timeFormat) < timeNow {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Access token expired, please resend new activation token"
+	}
+
+	users.Id = token.ResourceId
+	users.Active = true
+	users.Verified = true
+
+	_, updateActiveError := ctx.db.NamedQuery("UPDATE users SET active = :active, verified = :verified WHERE id = :id", &users)
+	if updateActiveError != nil {
+		res.StatCode = http.StatusForbidden
+		res.StatMsg = "Update activation account failed"
+		res.QueryError = updateActiveError
+	}
+
+	res.StatCode = http.StatusBadRequest
+	res.StatMsg = "Activation account successfully"
 	return res
 }
 

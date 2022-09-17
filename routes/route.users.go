@@ -29,6 +29,6 @@ func (ctx *usersRoute) UsersRoute() {
 	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/forgot-password"), ctx.controller.ForgotPasswordController)
 	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/reset-password"), ctx.controller.ResetPasswordController)
 	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/change-password"), ctx.controller.ChangePasswordController)
-	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/profile/{id}"), ctx.controller.GetProfileByIdController)
-	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/profile/{id}"), ctx.controller.UpdateProfileByIdController)
+	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/profile/{id:[0-9]+}"), ctx.controller.GetProfileByIdController)
+	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/profile/{id:[0-9]+}"), ctx.controller.UpdateProfileByIdController)
 }

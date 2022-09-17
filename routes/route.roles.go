@@ -27,7 +27,7 @@ func NewRolesRoute(prefix string, db *sqlx.DB, router *chi.Mux) *rolesRoute {
 func (ctx *rolesRoute) RolesRoute() {
 	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/"), ctx.controller.CreateController)
 	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/"), ctx.controller.GetAllController)
-	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/{id}"), ctx.controller.GetByIdController)
-	ctx.router.Delete(helpers.Endpoint(ctx.prefix, "/{id}"), ctx.controller.DeleteByIdController)
-	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/{id}"), ctx.controller.UpdatedByIdController)
+	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.GetByIdController)
+	ctx.router.Delete(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.DeleteByIdController)
+	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.UpdatedByIdController)
 }
