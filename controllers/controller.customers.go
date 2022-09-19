@@ -38,6 +38,12 @@ func (ctx *customersController) RegisterController(rw http.ResponseWriter, r *ht
 		return
 	}
 
+	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	res := ctx.service.RegisterService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -61,6 +67,12 @@ func (ctx *customersController) LoginController(rw http.ResponseWriter, r *http.
 		return
 	}
 
+	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	res := ctx.service.LoginService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -75,16 +87,16 @@ func (ctx *customersController) LoginController(rw http.ResponseWriter, r *http.
 **/
 
 func (ctx *customersController) ActivationController(rw http.ResponseWriter, r *http.Request) {
-	body := dtos.DTOCustomersActivation{}
-	err := json.NewDecoder(r.Body).Decode(&body)
+	token := chi.URLParam(r, "token")
+	params := dtos.DTOCustomersActivation{Token: token}
 
-	if err != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
 
-	res := ctx.service.ActivationService(&body)
+	res := ctx.service.ActivationService(&params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -103,6 +115,12 @@ func (ctx *customersController) ResendActivationController(rw http.ResponseWrite
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
@@ -130,6 +148,12 @@ func (ctx *customersController) ForgotPasswordController(rw http.ResponseWriter,
 		return
 	}
 
+	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	res := ctx.service.ForgotPasswordService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -153,6 +177,12 @@ func (ctx *customersController) ResetPasswordController(rw http.ResponseWriter, 
 		return
 	}
 
+	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	res := ctx.service.ResetPasswordService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -172,6 +202,12 @@ func (ctx *customersController) ChangePasswordController(rw http.ResponseWriter,
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
