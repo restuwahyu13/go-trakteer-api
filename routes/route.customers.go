@@ -30,8 +30,8 @@ func (ctx *customersRoute) CustomersRoute() {
 	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/activation/{token}"), ctx.controller.ActivationController)
 	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/resend-activation"), ctx.controller.ResendActivationController)
 	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/forgot-password"), ctx.controller.ForgotPasswordController)
-	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/reset-password"), ctx.controller.ResetPasswordController)
-	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/change-password"), ctx.controller.ChangePasswordController)
-	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/profile/{id}"), ctx.controller.GetProfileByIdController)
-	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/profile/{id}"), ctx.controller.UpdateProfileByIdController)
+	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/reset-password:{token}"), ctx.controller.ResetPasswordController)
+	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/change-password:[0-9]+"), ctx.controller.ChangePasswordController)
+	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/profile/{id:[0-9]+}"), ctx.controller.GetProfileByIdController)
+	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/profile/{id:[0-9]+}"), ctx.controller.UpdateProfileByIdController)
 }

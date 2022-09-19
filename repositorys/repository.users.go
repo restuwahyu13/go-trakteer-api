@@ -128,7 +128,7 @@ func (ctx *usersRepository) ForgotPasswordRepository(body *dtos.DTOUsersForgotPa
 
 	users.Email = body.Email
 
-	checkUserEmail := ctx.db.Get(&users, "SELECT email FROM users WHERE email = $1", users.Email)
+	checkUserEmail := ctx.db.Get(&users, "SELECT id, email FROM users WHERE email = $1", users.Email)
 	if checkUserEmail != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("User email %s not exist", users.Email)
@@ -147,7 +147,7 @@ func (ctx *usersRepository) ForgotPasswordRepository(body *dtos.DTOUsersForgotPa
 		htmlTemplateRes, htmlTemplateErr := helpers.HtmlRender("template.resetPassword", htmlContent)
 		htmlTemplateErrchan <- htmlTemplateErr
 
-		sendEmailErr := helpers.SmtpEmail([]string{users.Email}, "Reset Password", htmlTemplateRes)
+		sendEmailErr := helpers.SmtpEmail([]string{users.Email}, "Reset Password!", htmlTemplateRes)
 		sendEmailErrChan <- sendEmailErr
 	}()
 
@@ -198,7 +198,8 @@ func (ctx *usersRepository) ResetPasswordRepository(body *dtos.DTOUsersResetPass
 	checkAccessToken := ctx.db.Get(&token, "SELECT resource_id, expired_at FROM token WHERE access_token = $1 AND resource_type = $2 ORDER BY id DESC", params.Token, "reset password")
 	if checkAccessToken != nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = "Token not match or not exist"
+		res.StatMsg = "Invalid token format or Token not match"
+		return res
 	}
 
 	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
@@ -207,12 +208,13 @@ func (ctx *usersRepository) ResetPasswordRepository(body *dtos.DTOUsersResetPass
 
 	if token.ExpiredAt.Format(timeFormat) < timeNow {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = "Token expired, please resend forgot password"
+		res.StatMsg = "Token expired, please try forgot password"
 	}
 
 	if body.Cpassword != body.Password {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Confirm password not match with password"
+		return res
 	}
 
 	users.Id = token.ResourceId
@@ -223,6 +225,7 @@ func (ctx *usersRepository) ResetPasswordRepository(body *dtos.DTOUsersResetPass
 		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Update reset password account failed"
 		res.Error = updatePasswordErr
+		return res
 	}
 
 	res.StatCode = http.StatusOK

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	gpc "github.com/restuwahyu13/go-playground-converter"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
@@ -38,6 +39,12 @@ func (ctx *usersController) LoginController(rw http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	res := ctx.service.LoginService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -57,6 +64,12 @@ func (ctx *usersController) ForgotPasswordController(rw http.ResponseWriter, r *
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
@@ -87,6 +100,16 @@ func (ctx *usersController) ResetPasswordController(rw http.ResponseWriter, r *h
 		return
 	}
 
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	} else if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	res := ctx.service.ResetPasswordService(&body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -113,6 +136,16 @@ func (ctx *usersController) ChangePasswordController(rw http.ResponseWriter, r *
 		return
 	}
 
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	} else if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	res := ctx.service.ChangePasswordService(&body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -129,6 +162,12 @@ func (ctx *usersController) ChangePasswordController(rw http.ResponseWriter, r *
 func (ctx *usersController) GetProfileByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOUsersGetProfileById{Id: Id}
+
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
 
 	res := ctx.service.GetProfileByIdService(&params)
 	if res.StatCode >= 400 {
@@ -156,6 +195,16 @@ func (ctx *usersController) UpdateProfileByIdController(rw http.ResponseWriter, 
 		return
 	}
 
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	} else if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	res := ctx.service.UpdateProfileByIdService(&body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -175,6 +224,12 @@ func (ctx *usersController) CreateUsersController(rw http.ResponseWriter, r *htt
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
@@ -205,6 +260,12 @@ func (ctx *usersController) GetAllUsersController(rw http.ResponseWriter, r *htt
 		CurrentPage: current_page,
 	}
 
+	if errValidator := gpc.Validator(query); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	res := ctx.service.GetAllUsersService(&query)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -222,6 +283,12 @@ func (ctx *usersController) GetUsersByIdController(rw http.ResponseWriter, r *ht
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOUsersById{Id: Id}
 
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	res := ctx.service.GetUsersByIdService(&params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -238,6 +305,12 @@ func (ctx *usersController) GetUsersByIdController(rw http.ResponseWriter, r *ht
 func (ctx *usersController) DeleteUsersByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOUsersById{Id: Id}
+
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
 
 	res := ctx.service.DeleteUsersByIdService(&params)
 	if res.StatCode >= 400 {
@@ -261,6 +334,16 @@ func (ctx *usersController) UpdateUsersByIdController(rw http.ResponseWriter, r 
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	} else if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	gpc "github.com/restuwahyu13/go-playground-converter"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
@@ -38,6 +39,12 @@ func (ctx *categoriesController) CreateController(rw http.ResponseWriter, r *htt
 		return
 	}
 
+	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	res := ctx.service.CreateService(&body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -64,6 +71,12 @@ func (ctx *categoriesController) GetAllController(rw http.ResponseWriter, r *htt
 		CurrentPage: current_page,
 	}
 
+	if errValidator := gpc.Validator(query); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	res := ctx.service.GetAllService(&query)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -81,6 +94,12 @@ func (ctx *categoriesController) GetByIdController(rw http.ResponseWriter, r *ht
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOCategoriesId{Id: Id}
 
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	res := ctx.service.GetByIdService(&params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -97,6 +116,12 @@ func (ctx *categoriesController) GetByIdController(rw http.ResponseWriter, r *ht
 func (ctx *categoriesController) DeleteByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOCategoriesId{Id: Id}
+
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
 
 	res := ctx.service.DeleteByIdService(&params)
 	if res.StatCode >= 400 {
@@ -120,6 +145,16 @@ func (ctx *categoriesController) UpdatedByIdController(rw http.ResponseWriter, r
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	} else if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}

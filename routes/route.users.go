@@ -27,8 +27,14 @@ func NewUsersRoute(prefix string, db *sqlx.DB, router *chi.Mux) *usersRoute {
 func (ctx *usersRoute) UsersRoute() {
 	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/login"), ctx.controller.LoginController)
 	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/forgot-password"), ctx.controller.ForgotPasswordController)
-	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/reset-password"), ctx.controller.ResetPasswordController)
-	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/change-password"), ctx.controller.ChangePasswordController)
+	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/reset-password/{token}"), ctx.controller.ResetPasswordController)
+	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/change-password/{id:[0-9]+}"), ctx.controller.ChangePasswordController)
 	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/profile/{id:[0-9]+}"), ctx.controller.GetProfileByIdController)
 	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/profile/{id:[0-9]+}"), ctx.controller.UpdateProfileByIdController)
+
+	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/"), ctx.controller.CreateUsersController)
+	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/"), ctx.controller.GetAllUsersController)
+	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.GetAllUsersController)
+	ctx.router.Delete(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.DeleteUsersByIdController)
+	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.UpdateUsersByIdController)
 }

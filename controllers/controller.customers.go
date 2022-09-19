@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	gpc "github.com/restuwahyu13/go-playground-converter"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
@@ -192,6 +193,12 @@ func (ctx *customersController) GetProfileByIdController(rw http.ResponseWriter,
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOCustomersGetProfileById{Id: Id}
 
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
 	res := ctx.service.GetProfileByIdService(&params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -214,6 +221,16 @@ func (ctx *customersController) UpdateProfileByIdController(rw http.ResponseWrit
 
 	if err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	} else if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
