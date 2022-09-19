@@ -195,7 +195,7 @@ func (ctx *usersRepository) ResetPasswordRepository(body *dtos.DTOUsersResetPass
 	token := models.Token{}
 	res := helpers.APIResponse{}
 
-	checkAccessToken := ctx.db.Get(&token, "SELECT resource_id, expired_at FROM token WHERE access_token = $1 AND resource_type = $2", params.Token, "reset password")
+	checkAccessToken := ctx.db.Get(&token, "SELECT resource_id, expired_at FROM token WHERE access_token = $1 AND resource_type = $2 ORDER BY id DESC", params.Token, "reset password")
 	if checkAccessToken != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Token not match or not exist"
