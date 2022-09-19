@@ -146,7 +146,7 @@ func (ctx *usersRepository) ForgotPasswordRepository(body *dtos.DTOUsersForgotPa
 		htmlTemplateRes, htmlTemplateErr := helpers.HtmlRender("template.resetPassword", htmlContent)
 		htmlTemplateErrchan <- htmlTemplateErr
 
-		sendEmailErr := helpers.SmtpEmail([]string{users.Email}, htmlTemplateRes)
+		sendEmailErr := helpers.SmtpEmail([]string{users.Email}, "Reset Password", htmlTemplateRes)
 		sendEmailErrChan <- sendEmailErr
 	}()
 

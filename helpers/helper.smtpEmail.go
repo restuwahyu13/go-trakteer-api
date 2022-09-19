@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/smtp"
 	"strconv"
@@ -10,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func SmtpEmail(to []string, template string) error {
+func SmtpEmail(to []string, subject, template string) error {
 	smtp_host := viper.GetString("SMTP_HOST")
 	smtp_port, _ := strconv.Atoi(viper.GetString("SMTP_PORT"))
 	smtp_username := viper.GetString("SMTP_USERNAME")
@@ -20,12 +19,17 @@ func SmtpEmail(to []string, template string) error {
 	smtpAddress := fmt.Sprintf("%s:%d", smtp_host, smtp_port)
 	smtpFromEmail := viper.GetString("SMTP_EMAIL")
 
-	htmlTemplate, _ := json.Marshal(template)
-	smtpEmailError := smtp.SendMail(smtpAddress, smtpAuth, smtpFromEmail, to, htmlTemplate)
-
+	smtpEmailError := smtp.SendMail(smtpAddress, smtpAuth, smtpFromEmail, to, smtpEmailMetadata(subject, template))
 	if smtpEmailError != nil {
 		logrus.Errorf("Sending email using SMTP error: %v", smtpEmailError)
 	}
 
 	return smtpEmailError
+}
+
+func smtpEmailMetadata(subject string, template string) []byte {
+	mimeType := "Content-Type: text/html; \n"
+	subjecEmail := "Subject: " + subject + "\n"
+	bodyEmail := []byte(subjecEmail + mimeType + "\n" + template)
+	return bodyEmail
 }
