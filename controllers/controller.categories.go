@@ -59,9 +59,9 @@ func (ctx *categoriesController) CreateController(rw http.ResponseWriter, r *htt
 **/
 
 func (ctx *categoriesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
-	limit, _ := strconv.Atoi(helpers.QueryParser(r, "limit"))
-	offset, _ := strconv.Atoi(helpers.QueryParser(r, "offset"))
-	current_page, _ := strconv.Atoi(helpers.QueryParser(r, "current_page"))
+	limit := helpers.QueryParser(r, "limit")
+	offset := helpers.QueryParser(r, "offset")
+	current_page := helpers.QueryParser(r, "current_page")
 	sort := helpers.QueryParser(r, "sort")
 
 	query := dtos.DTOCategoriesPagination{

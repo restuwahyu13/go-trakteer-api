@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -163,6 +164,9 @@ func (ctx *usersController) GetProfileByIdController(rw http.ResponseWriter, r *
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOUsersGetProfileById{Id: Id}
 
+	errValidator := gpc.Validator(params)
+	log.Print(errValidator.Errors)
+
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
@@ -248,9 +252,9 @@ func (ctx *usersController) CreateUsersController(rw http.ResponseWriter, r *htt
 **/
 
 func (ctx *usersController) GetAllUsersController(rw http.ResponseWriter, r *http.Request) {
-	limit, _ := strconv.Atoi(helpers.QueryParser(r, "limit"))
-	offset, _ := strconv.Atoi(helpers.QueryParser(r, "offset"))
-	current_page, _ := strconv.Atoi(helpers.QueryParser(r, "current_page"))
+	limit := helpers.QueryParser(r, "limit")
+	offset := helpers.QueryParser(r, "offset")
+	current_page := helpers.QueryParser(r, "current_page")
 	sort := helpers.QueryParser(r, "sort")
 
 	query := dtos.DTOUsersPagination{

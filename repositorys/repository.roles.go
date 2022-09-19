@@ -60,7 +60,6 @@ func (ctx *rolesRepository) CreateRepository(body *dtos.DTORoles) helpers.APIRes
 func (ctx *rolesRepository) GetAllRepository(query *dtos.DTORolePagination) helpers.APIResponse {
 	roles := []models.Roles{}
 	res := helpers.APIResponse{}
-	// wg := sync.WaitGroup{}
 
 	getAllRolesChan := make(chan error)
 	countChan := make(chan int)

@@ -5,13 +5,12 @@ type DTORoles struct {
 }
 
 type DTORolePagination struct {
-	Limit       int    `json:"limit" default:"10"`
-	Offset      int    `json:"offset" default:"0"`
-	Sort        string `json:"sort" default:"asc"`
-	Count       int    `json:"count"`
-	Perpage     int    `json:"per_page" default:"10"`
-	CurrentPage int    `json:"current_page" default:"1"`
-	TotalPage   int    `json:"total_page"`
+	Limit       string `validate:"required,numeric" json:"limit"`
+	Offset      string `validate:"required,numeric" json:"offset"`
+	Sort        string `validate:"required,alpha" json:"sort"`
+	Count       int    `validate:"numeric" json:"count"`
+	CurrentPage string `validate:"required,numeric" json:"current_page"`
+	TotalPage   int    `validate:"numeric" json:"total_page"`
 }
 
 type DTORolesById struct {
