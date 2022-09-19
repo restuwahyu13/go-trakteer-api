@@ -10,8 +10,8 @@ import (
 type IUsersRepository interface {
 	LoginRepository(body *dtos.DTOUsersLogin) helpers.APIResponse
 	ForgotPasswordRepository(body *dtos.DTOUsersForgotPassword) helpers.APIResponse
-	ResetPasswordRepository(body *dtos.DTOUsersResetPassword) helpers.APIResponse
-	ChangePasswordRepository(body *dtos.DTOUsersChangePassword) helpers.APIResponse
+	ResetPasswordRepository(body *dtos.DTOUsersResetPassword, params *dtos.DTOUsersResetPasswordToken) helpers.APIResponse
+	ChangePasswordRepository(body *dtos.DTOUsersChangePassword, params *dtos.DTOUsersById) helpers.APIResponse
 	GetProfileByIdRepository(params *dtos.DTOUsersGetProfileById) helpers.APIResponse
 	UpdateProfileByIdRepository(body *dtos.DTOUsersUpdateProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse
 	CreateUsersRepository(body *dtos.DTOUsersCreate) helpers.APIResponse
@@ -24,8 +24,8 @@ type IUsersRepository interface {
 type IUsersService interface {
 	LoginService(body *dtos.DTOUsersLogin) helpers.APIResponse
 	ForgotPasswordService(body *dtos.DTOUsersForgotPassword) helpers.APIResponse
-	ResetPasswordService(body *dtos.DTOUsersResetPassword) helpers.APIResponse
-	ChangePasswordService(body *dtos.DTOUsersChangePassword) helpers.APIResponse
+	ResetPasswordService(body *dtos.DTOUsersResetPassword, params *dtos.DTOUsersResetPasswordToken) helpers.APIResponse
+	ChangePasswordService(body *dtos.DTOUsersChangePassword, params *dtos.DTOUsersById) helpers.APIResponse
 	GetProfileByIdService(params *dtos.DTOUsersGetProfileById) helpers.APIResponse
 	UpdateProfileByIdService(body *dtos.DTOUsersUpdateProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse
 	CreateUsersService(body *dtos.DTOUsersCreate) helpers.APIResponse

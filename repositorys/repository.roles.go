@@ -44,7 +44,7 @@ func (ctx *rolesRepository) CreateRepository(body *dtos.DTORoles) helpers.APIRes
 	if createdRoleErr != nil {
 		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Created new role failed"
-		res.QueryError = createdRoleErr
+		res.Error = createdRoleErr
 		return res
 	}
 
@@ -78,7 +78,7 @@ func (ctx *rolesRepository) GetAllRepository(query *dtos.DTORolePagination) help
 	if <-getAllRolesChan != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Roles data not exist"
-		res.QueryError = <-getAllRolesChan
+		res.Error = <-getAllRolesChan
 		defer close(getAllRolesChan)
 		return res
 	}
@@ -104,7 +104,7 @@ func (ctx *rolesRepository) GetByIdRepository(params *dtos.DTORolesById) helpers
 	if getRoleId != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
-		res.QueryError = getRoleId
+		res.Error = getRoleId
 		return res
 	}
 
@@ -127,7 +127,7 @@ func (ctx *rolesRepository) DeleteByIdRepository(params *dtos.DTORolesById) help
 	if checkRoleId != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
-		res.QueryError = checkRoleId
+		res.Error = checkRoleId
 		return res
 	}
 
@@ -136,7 +136,7 @@ func (ctx *rolesRepository) DeleteByIdRepository(params *dtos.DTORolesById) help
 	if deletedRoleErr != nil {
 		res.StatCode = http.StatusForbidden
 		res.StatMsg = fmt.Sprintf("Deleted role for this id %d failed", params.Id)
-		res.QueryError = deletedRoleErr
+		res.Error = deletedRoleErr
 		return res
 	}
 
@@ -159,7 +159,7 @@ func (ctx *rolesRepository) UpdatedByIdRepository(body *dtos.DTORoles, params *d
 	if checkRoleId != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
-		res.QueryError = checkRoleId
+		res.Error = checkRoleId
 		return res
 	}
 
@@ -172,7 +172,7 @@ func (ctx *rolesRepository) UpdatedByIdRepository(body *dtos.DTORoles, params *d
 	if updatedRoleErr != nil {
 		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Updated old role failed"
-		res.QueryError = updatedRoleErr
+		res.Error = updatedRoleErr
 		return res
 	}
 

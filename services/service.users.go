@@ -24,12 +24,12 @@ func (ctx *usersService) ForgotPasswordService(body *dtos.DTOUsersForgotPassword
 	return ctx.repository.ForgotPasswordRepository(body)
 }
 
-func (ctx *usersService) ResetPasswordService(body *dtos.DTOUsersResetPassword) helpers.APIResponse {
-	return ctx.repository.ResetPasswordRepository(body)
+func (ctx *usersService) ResetPasswordService(body *dtos.DTOUsersResetPassword, params *dtos.DTOUsersResetPasswordToken) helpers.APIResponse {
+	return ctx.repository.ResetPasswordRepository(body, params)
 }
 
-func (ctx *usersService) ChangePasswordService(body *dtos.DTOUsersChangePassword) helpers.APIResponse {
-	return ctx.repository.ChangePasswordRepository(body)
+func (ctx *usersService) ChangePasswordService(body *dtos.DTOUsersChangePassword, params *dtos.DTOUsersById) helpers.APIResponse {
+	return ctx.repository.ChangePasswordRepository(body, params)
 }
 
 func (ctx *usersService) GetProfileByIdService(params *dtos.DTOUsersGetProfileById) helpers.APIResponse {

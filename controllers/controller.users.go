@@ -75,6 +75,9 @@ func (ctx *usersController) ForgotPasswordController(rw http.ResponseWriter, r *
 **/
 
 func (ctx *usersController) ResetPasswordController(rw http.ResponseWriter, r *http.Request) {
+	token := chi.URLParam(r, "token")
+	params := dtos.DTOUsersResetPasswordToken{Token: token}
+
 	body := dtos.DTOUsersResetPassword{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -84,7 +87,7 @@ func (ctx *usersController) ResetPasswordController(rw http.ResponseWriter, r *h
 		return
 	}
 
-	res := ctx.service.ResetPasswordService(&body)
+	res := ctx.service.ResetPasswordService(&body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -98,6 +101,9 @@ func (ctx *usersController) ResetPasswordController(rw http.ResponseWriter, r *h
 **/
 
 func (ctx *usersController) ChangePasswordController(rw http.ResponseWriter, r *http.Request) {
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTOUsersById{Id: Id}
+
 	body := dtos.DTOUsersChangePassword{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -107,7 +113,7 @@ func (ctx *usersController) ChangePasswordController(rw http.ResponseWriter, r *
 		return
 	}
 
-	res := ctx.service.ChangePasswordService(&body)
+	res := ctx.service.ChangePasswordService(&body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return

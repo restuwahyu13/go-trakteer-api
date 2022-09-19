@@ -60,7 +60,7 @@ func (ctx *usersRepository) LoginRepository(body *dtos.DTOUsersLogin) helpers.AP
 	if err != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Users email %v not registered", users.Email)
-		res.QueryError = err
+		res.Error = err
 		return res
 	}
 
@@ -99,7 +99,7 @@ func (ctx *usersRepository) LoginRepository(body *dtos.DTOUsersLogin) helpers.AP
 	if insertTokenErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Insert token into database failed"
-		res.QueryError = insertTokenErr
+		res.Error = insertTokenErr
 		return res
 	}
 
@@ -123,6 +123,7 @@ func (ctx *usersRepository) LoginRepository(body *dtos.DTOUsersLogin) helpers.AP
 
 func (ctx *usersRepository) ForgotPasswordRepository(body *dtos.DTOUsersForgotPassword) helpers.APIResponse {
 	users := models.Users{}
+	token := models.Token{}
 	res := helpers.APIResponse{}
 
 	users.Email = body.Email
@@ -164,6 +165,22 @@ func (ctx *usersRepository) ForgotPasswordRepository(body *dtos.DTOUsersForgotPa
 		return res
 	}
 
+	token.ResourceId = users.Id
+	token.ResourceType = "reset password"
+	token.AccessToken = helpers.RandomToken()
+	token.ExpiredAt = time.Now().Add(time.Duration(helpers.ExpiredAt(5, "minutes")))
+
+	_, insertTokenErr := ctx.db.NamedQuery(`
+	INSERT INTO token (resource_id, resource_type, access_token, refresh_token, expired_at)
+	VALUES (:resource_id, :resource_type, :access_token, :refresh_token, :expired_at)`, &token)
+
+	if insertTokenErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Insert token into database failed"
+		res.Error = insertTokenErr
+		return res
+	}
+
 	res.StatCode = http.StatusOK
 	res.StatMsg = fmt.Sprintf("Reset password successfully, please check your email %s address", users.Email)
 	return res
@@ -173,15 +190,15 @@ func (ctx *usersRepository) ForgotPasswordRepository(body *dtos.DTOUsersForgotPa
 * @description ResetPasswordRepository
 **/
 
-func (ctx *usersRepository) ResetPasswordRepository(body *dtos.DTOUsersResetPassword) helpers.APIResponse {
+func (ctx *usersRepository) ResetPasswordRepository(body *dtos.DTOUsersResetPassword, params *dtos.DTOUsersResetPasswordToken) helpers.APIResponse {
 	users := models.Users{}
 	token := models.Token{}
 	res := helpers.APIResponse{}
 
-	checkAccessToken := ctx.db.Get(&token, "SELECT resource_id, expired_at FROM token WHERE access_token = $1 AND resource_type = $2", body.Token, "activation")
+	checkAccessToken := ctx.db.Get(&token, "SELECT resource_id, expired_at FROM token WHERE access_token = $1 AND resource_type = $2", params.Token, "reset password")
 	if checkAccessToken != nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = "Access token not match or not exist"
+		res.StatMsg = "Token not match or not exist"
 	}
 
 	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
@@ -190,7 +207,7 @@ func (ctx *usersRepository) ResetPasswordRepository(body *dtos.DTOUsersResetPass
 
 	if token.ExpiredAt.Format(timeFormat) < timeNow {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = "Access token expired, please resend new activation token"
+		res.StatMsg = "Token expired, please resend forgot password"
 	}
 
 	if body.Cpassword != body.Password {
@@ -204,12 +221,12 @@ func (ctx *usersRepository) ResetPasswordRepository(body *dtos.DTOUsersResetPass
 	_, updatePasswordErr := ctx.db.NamedQuery("UPDATE users SET password = :password WHERE id = :id", &users)
 	if updatePasswordErr != nil {
 		res.StatCode = http.StatusForbidden
-		res.StatMsg = "Update activation account failed"
-		res.QueryError = updatePasswordErr
+		res.StatMsg = "Update reset password account failed"
+		res.Error = updatePasswordErr
 	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = "Reset password to new password successfully"
+	res.StatMsg = "Reset old password to new password successfully"
 	return res
 }
 
@@ -217,7 +234,7 @@ func (ctx *usersRepository) ResetPasswordRepository(body *dtos.DTOUsersResetPass
 * @description ChangePasswordRepository
 **/
 
-func (ctx *usersRepository) ChangePasswordRepository(body *dtos.DTOUsersChangePassword) helpers.APIResponse {
+func (ctx *usersRepository) ChangePasswordRepository(body *dtos.DTOUsersChangePassword, params *dtos.DTOUsersById) helpers.APIResponse {
 	users := models.Users{}
 	res := helpers.APIResponse{}
 
@@ -227,13 +244,14 @@ func (ctx *usersRepository) ChangePasswordRepository(body *dtos.DTOUsersChangePa
 		return res
 	}
 
+	users.Id = uint(params.Id)
 	users.Password = packages.HashPassword(body.Password)
 
 	_, updatePasswordErr := ctx.db.NamedQuery("UPDATE users SET password = :password WHERE id = :id", &users)
 	if updatePasswordErr != nil {
 		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Change old password to new password failed"
-		res.QueryError = updatePasswordErr
+		res.Error = updatePasswordErr
 		return res
 	}
 
@@ -256,7 +274,7 @@ func (ctx *usersRepository) GetProfileByIdRepository(params *dtos.DTOUsersGetPro
 	if checkUserErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("UserID not exist for this id %d", users.Id)
-		res.QueryError = checkUserErr
+		res.Error = checkUserErr
 		return res
 	}
 
@@ -271,11 +289,33 @@ func (ctx *usersRepository) GetProfileByIdRepository(params *dtos.DTOUsersGetPro
 **/
 
 func (ctx *usersRepository) UpdateProfileByIdRepository(body *dtos.DTOUsersUpdateProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from update profile repository",
+	users := models.Users{}
+	res := helpers.APIResponse{}
+
+	checkUserErr := ctx.db.Get(&users, "SELECT id FROM users WHERE id = $1", params.Id)
+	if checkUserErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("UserID not exist for this id %d", users.Id)
+		res.Error = checkUserErr
+		return res
 	}
 
+	users.Id = uint(params.Id)
+	users.Name = body.Name
+	users.Username = body.Username
+	users.Email = body.Email
+	users.Active = body.Active
+
+	_, updateProfileErr := ctx.db.NamedQuery("UPDATE users SET name = :name, username = :username, email = :email, active = :active WHERE id = :id", &users)
+	if updateProfileErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Update profile failed"
+		res.Error = updateProfileErr
+		return res
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = "Updated profile successfully"
 	return res
 }
 

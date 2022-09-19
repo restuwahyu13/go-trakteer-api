@@ -66,14 +66,14 @@ func (ctx *customersRepository) RegisterRepository(body *dtos.DTOCustomersRegist
 	if <-checkRoleIdChan != nil {
 		res.StatCode = http.StatusConflict
 		res.StatMsg = "Role name is not exist"
-		res.QueryError = <-checkRoleIdChan
+		res.Error = <-checkRoleIdChan
 		return res
 	}
 
 	if <-checkCategorieIdChan != nil {
 		res.StatCode = http.StatusConflict
 		res.StatMsg = "Categorie name is not exist"
-		res.QueryError = <-checkCategorieIdChan
+		res.Error = <-checkCategorieIdChan
 		return res
 	}
 
@@ -90,7 +90,7 @@ func (ctx *customersRepository) RegisterRepository(body *dtos.DTOCustomersRegist
 	if err != nil {
 		res.StatCode = http.StatusConflict
 		res.StatMsg = "Create new customer account failed"
-		res.QueryError = err
+		res.Error = err
 	}
 
 	res.StatCode = http.StatusCreated
@@ -135,7 +135,7 @@ func (ctx *customersRepository) ActivationRepository(params *dtos.DTOCustomersAc
 	if updateActiveError != nil {
 		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Update activation account failed"
-		res.QueryError = updateActiveError
+		res.Error = updateActiveError
 	}
 
 	res.StatCode = http.StatusBadRequest

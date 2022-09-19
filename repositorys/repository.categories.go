@@ -44,7 +44,7 @@ func (ctx *categoriesRepository) CreateRepository(body *dtos.DTOCategories) help
 	if createdCategorieErr != nil {
 		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Created new categorie failed"
-		res.QueryError = createdCategorieErr
+		res.Error = createdCategorieErr
 		return res
 	}
 
@@ -77,7 +77,7 @@ func (ctx *categoriesRepository) GetAllRepository(query *dtos.DTOCategoriesPagin
 	if <-getAllCategoriesChan != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Categories data not exist"
-		res.QueryError = <-getAllCategoriesChan
+		res.Error = <-getAllCategoriesChan
 		defer close(getAllCategoriesChan)
 		return res
 	}
@@ -103,7 +103,7 @@ func (ctx *categoriesRepository) GetByIdRepository(params *dtos.DTOCategoriesId)
 	if getRoleId != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Categorie data for this id %d, not exist", params.Id)
-		res.QueryError = getRoleId
+		res.Error = getRoleId
 		return res
 	}
 
@@ -126,7 +126,7 @@ func (ctx *categoriesRepository) DeleteByIdRepository(params *dtos.DTOCategories
 	if checkCategorieId != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
-		res.QueryError = checkCategorieId
+		res.Error = checkCategorieId
 		return res
 	}
 
@@ -135,7 +135,7 @@ func (ctx *categoriesRepository) DeleteByIdRepository(params *dtos.DTOCategories
 	if deletedCategorieErr != nil {
 		res.StatCode = http.StatusForbidden
 		res.StatMsg = fmt.Sprintf("Deleted categorie for this id %d failed", params.Id)
-		res.QueryError = deletedCategorieErr
+		res.Error = deletedCategorieErr
 		return res
 	}
 
@@ -158,7 +158,7 @@ func (ctx *categoriesRepository) UpdatedByIdRepository(body *dtos.DTOCategories,
 	if checkRoleId != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
-		res.QueryError = checkRoleId
+		res.Error = checkRoleId
 		return res
 	}
 
@@ -171,7 +171,7 @@ func (ctx *categoriesRepository) UpdatedByIdRepository(body *dtos.DTOCategories,
 	if updatedCategorieErr != nil {
 		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Updated old categorie failed"
-		res.QueryError = updatedCategorieErr
+		res.Error = updatedCategorieErr
 		return res
 	}
 
