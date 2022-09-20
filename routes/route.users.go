@@ -26,22 +26,22 @@ func NewUsersRoute(prefix string, db *sqlx.DB, router *chi.Mux) *usersRoute {
 	return &usersRoute{controller: controller, prefix: prefix, router: router, db: db}
 }
 
-func (ctx *usersRoute) UsersRoute() {
-	ctx.router.Group(func(r chi.Router) {
-		r.Post(helpers.Endpoint(ctx.prefix, "/login"), ctx.controller.LoginController)
-		r.Post(helpers.Endpoint(ctx.prefix, "/forgot-password"), ctx.controller.ForgotPasswordController)
-		r.Put(helpers.Endpoint(ctx.prefix, "/reset-password/{token}"), ctx.controller.ResetPasswordController)
-		r.Put(helpers.Endpoint(ctx.prefix, "/change-password/{id:[0-9]+}"), ctx.controller.ChangePasswordController)
-		r.Get(helpers.Endpoint(ctx.prefix, "/profile/{id:[0-9]+}"), ctx.controller.GetProfileByIdController)
-		r.Put(helpers.Endpoint(ctx.prefix, "/profile/{id:[0-9]+}"), ctx.controller.UpdateProfileByIdController)
+func (r *usersRoute) UsersRoute() {
+	ctx.router.Group(func(router chi.Router) {
+		router.Post(helpers.Endpoint(ctx.prefix, "/login"), ctx.controller.LoginController)
+		router.Post(helpers.Endpoint(ctx.prefix, "/forgot-password"), ctx.controller.ForgotPasswordController)
+		router.Put(helpers.Endpoint(ctx.prefix, "/reset-password/{token}"), ctx.controller.ResetPasswordController)
+		router.Put(helpers.Endpoint(ctx.prefix, "/change-password/{id:[0-9]+}"), ctx.controller.ChangePasswordController)
+		router.Get(helpers.Endpoint(ctx.prefix, "/profile/{id:[0-9]+}"), ctx.controller.GetProfileByIdController)
+		router.Put(helpers.Endpoint(ctx.prefix, "/profile/{id:[0-9]+}"), ctx.controller.UpdateProfileByIdController)
 	})
 
-	ctx.router.Group(func(r chi.Router) {
-		r.Use(middlewares.NewMiddlewareAuth(ctx.db).Middleware)
-		r.Post(helpers.Endpoint(ctx.prefix, "/"), ctx.controller.CreateUsersController)
-		r.Get(helpers.Endpoint(ctx.prefix, "/"), ctx.controller.GetAllUsersController)
-		r.Get(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.GetUsersByIdController)
-		r.Delete(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.DeleteUsersByIdController)
-		r.Put(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.UpdateUsersByIdController)
+	r.router.Group(func(router chi.Router) {
+		router.Use(middlewares.NewMiddlewareAuth(ctx.db).Middleware)
+		router.Post(helpers.Endpoint(ctx.prefix, "/"), ctx.controller.CreateUsersController)
+		router.Get(helpers.Endpoint(ctx.prefix, "/"), ctx.controller.GetAllUsersController)
+		router.Get(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.GetUsersByIdController)
+		router.Delete(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.DeleteUsersByIdController)
+		router.Put(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.UpdateUsersByIdController)
 	})
 }
