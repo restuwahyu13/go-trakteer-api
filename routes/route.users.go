@@ -27,7 +27,7 @@ func NewUsersRoute(prefix string, db *sqlx.DB, router *chi.Mux) *usersRoute {
 }
 
 func (r *usersRoute) UsersRoute() {
-	ctx.router.Group(func(router chi.Router) {
+	r.router.Group(func(router chi.Router) {
 		router.Post(helpers.Endpoint(r.prefix, "/login"), r.controller.LoginController)
 		router.Post(helpers.Endpoint(r.prefix, "/forgot-password"), r.controller.ForgotPasswordController)
 		router.Put(helpers.Endpoint(r.prefix, "/reset-password/{token}"), r.controller.ResetPasswordController)
