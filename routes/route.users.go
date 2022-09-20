@@ -31,7 +31,7 @@ func (r *usersRoute) UsersRoute() {
 		router.Post(helpers.Endpoint(r.prefix, "/login"), r.controller.LoginController)
 		router.Post(helpers.Endpoint(r.prefix, "/forgot-password"), r.controller.ForgotPasswordController)
 		router.Put(helpers.Endpoint(r.prefix, "/reset-password/{token}"), r.controller.ResetPasswordController)
-		router.Put(helpers.Endpoint(r.prefix, "/change-password/{id:[0-9]+}"), ctx.controller.ChangePasswordController)
+		router.Put(helpers.Endpoint(r.prefix, "/change-password/{id:[0-9]+}"), r.controller.ChangePasswordController)
 		router.Get(helpers.Endpoint(r.prefix, "/profile/{id:[0-9]+}"), r.controller.GetProfileByIdController)
 		router.Put(helpers.Endpoint(r.prefix, "/profile/{id:[0-9]+}"), r.controller.UpdateProfileByIdController)
 	})
@@ -42,6 +42,6 @@ func (r *usersRoute) UsersRoute() {
 		router.Get(helpers.Endpoint(r.prefix, "/"), r.controller.GetAllUsersController)
 		router.Get(helpers.Endpoint(r.prefix, "/{id:[0-9]+}"), r.controller.GetUsersByIdController)
 		router.Delete(helpers.Endpoint(r.prefix, "/{id:[0-9]+}"), r.controller.DeleteUsersByIdController)
-		router.Put(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.UpdateUsersByIdController)
+		router.Put(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), r.controller.UpdateUsersByIdController)
 	})
 }
