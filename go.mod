@@ -4,6 +4,8 @@ go 1.19
 
 require (
 	github.com/go-chi/chi/v5 v5.0.7
+	github.com/go-playground/mold v2.2.0+incompatible
+	github.com/go-playground/mold/v4 v4.1.0
 	github.com/jackskj/carta v0.2.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/restuwahyu13/go-playground-converter v0.0.8
@@ -19,7 +21,10 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lib/pq v1.10.7 // indirect
+	github.com/segmentio/go-camelcase v0.0.0-20160726192923-7085f1e3c734 // indirect
+	github.com/segmentio/go-snakecase v1.2.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
+	gopkg.in/go-playground/mold.v2 v2.2.0 // indirect
 )
 
 require (

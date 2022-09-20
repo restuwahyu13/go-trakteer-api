@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
@@ -8,31 +9,31 @@ import (
 )
 
 type IUsersRepository interface {
-	LoginRepository(body *dtos.DTOUsersLogin) helpers.APIResponse
-	ForgotPasswordRepository(body *dtos.DTOUsersForgotPassword) helpers.APIResponse
-	ResetPasswordRepository(body *dtos.DTOUsersResetPassword, params *dtos.DTOUsersResetPasswordToken) helpers.APIResponse
-	ChangePasswordRepository(body *dtos.DTOUsersChangePassword, params *dtos.DTOUsersById) helpers.APIResponse
-	GetProfileByIdRepository(params *dtos.DTOUsersGetProfileById) helpers.APIResponse
-	UpdateProfileByIdRepository(body *dtos.DTOUsersUpdateProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse
-	CreateUsersRepository(body *dtos.DTOUsersCreate) helpers.APIResponse
-	GetAllUsersRepository(query *dtos.DTOUsersPagination) helpers.APIResponse
-	GetUsersByIdRepository(params *dtos.DTOUsersById) helpers.APIResponse
-	DeleteUsersByIdRepository(params *dtos.DTOUsersById) helpers.APIResponse
-	UpdateUsersByIdRepository(body *dtos.DTOUsersUpdate, params *dtos.DTOUsersById) helpers.APIResponse
+	LoginRepository(ctx context.Context, body *dtos.DTOUsersLogin) helpers.APIResponse
+	ForgotPasswordRepository(ctx context.Context, body *dtos.DTOUsersForgotPassword) helpers.APIResponse
+	ResetPasswordRepository(ctx context.Context, body *dtos.DTOUsersResetPassword, params *dtos.DTOUsersResetPasswordToken) helpers.APIResponse
+	ChangePasswordRepository(ctx context.Context, body *dtos.DTOUsersChangePassword, params *dtos.DTOUsersById) helpers.APIResponse
+	GetProfileByIdRepository(ctx context.Context, params *dtos.DTOUsersGetProfileById) helpers.APIResponse
+	UpdateProfileByIdRepository(ctx context.Context, body *dtos.DTOUsersUpdateProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse
+	CreateUsersRepository(ctx context.Context, body *dtos.DTOUsersCreate) helpers.APIResponse
+	GetAllUsersRepository(ctx context.Context, query *dtos.DTOUsersPagination) helpers.APIResponse
+	GetUsersByIdRepository(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse
+	DeleteUsersByIdRepository(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse
+	UpdateUsersByIdRepository(ctx context.Context, body *dtos.DTOUsersUpdate, params *dtos.DTOUsersById) helpers.APIResponse
 }
 
 type IUsersService interface {
-	LoginService(body *dtos.DTOUsersLogin) helpers.APIResponse
-	ForgotPasswordService(body *dtos.DTOUsersForgotPassword) helpers.APIResponse
-	ResetPasswordService(body *dtos.DTOUsersResetPassword, params *dtos.DTOUsersResetPasswordToken) helpers.APIResponse
-	ChangePasswordService(body *dtos.DTOUsersChangePassword, params *dtos.DTOUsersById) helpers.APIResponse
-	GetProfileByIdService(params *dtos.DTOUsersGetProfileById) helpers.APIResponse
-	UpdateProfileByIdService(body *dtos.DTOUsersUpdateProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse
-	CreateUsersService(body *dtos.DTOUsersCreate) helpers.APIResponse
-	GetAllUsersService(query *dtos.DTOUsersPagination) helpers.APIResponse
-	GetUsersByIdService(params *dtos.DTOUsersById) helpers.APIResponse
-	DeleteUsersByIdService(params *dtos.DTOUsersById) helpers.APIResponse
-	UpdateUsersByIdService(body *dtos.DTOUsersUpdate, params *dtos.DTOUsersById) helpers.APIResponse
+	LoginService(ctx context.Context, body *dtos.DTOUsersLogin) helpers.APIResponse
+	ForgotPasswordService(ctx context.Context, body *dtos.DTOUsersForgotPassword) helpers.APIResponse
+	ResetPasswordService(ctx context.Context, body *dtos.DTOUsersResetPassword, params *dtos.DTOUsersResetPasswordToken) helpers.APIResponse
+	ChangePasswordService(ctx context.Context, body *dtos.DTOUsersChangePassword, params *dtos.DTOUsersById) helpers.APIResponse
+	GetProfileByIdService(ctx context.Context, params *dtos.DTOUsersGetProfileById) helpers.APIResponse
+	UpdateProfileByIdService(ctx context.Context, body *dtos.DTOUsersUpdateProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse
+	CreateUsersService(ctx context.Context, body *dtos.DTOUsersCreate) helpers.APIResponse
+	GetAllUsersService(ctx context.Context, query *dtos.DTOUsersPagination) helpers.APIResponse
+	GetUsersByIdService(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse
+	DeleteUsersByIdService(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse
+	UpdateUsersByIdService(ctx context.Context, body *dtos.DTOUsersUpdate, params *dtos.DTOUsersById) helpers.APIResponse
 }
 
 type IUsersController interface {

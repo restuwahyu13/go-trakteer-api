@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-playground/mold/v4/modifiers"
 	gpc "github.com/restuwahyu13/go-playground-converter"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
@@ -22,6 +24,10 @@ type usersController struct {
 	service services.UsersService
 }
 
+var (
+	conform = modifiers.New()
+)
+
 func NewUsersController(service services.UsersService) *usersController {
 	return &usersController{service: service}
 }
@@ -30,7 +36,7 @@ func NewUsersController(service services.UsersService) *usersController {
 * @description LoginController
 **/
 
-func (ctx *usersController) LoginController(rw http.ResponseWriter, r *http.Request) {
+func (c *usersController) LoginController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOUsersLogin{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -41,12 +47,12 @@ func (ctx *usersController) LoginController(rw http.ResponseWriter, r *http.Requ
 	}
 
 	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
 
-	res := ctx.service.LoginService(&body)
+	res := c.service.LoginService(r.Context(), &body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -59,7 +65,7 @@ func (ctx *usersController) LoginController(rw http.ResponseWriter, r *http.Requ
 * @description ForgotPasswordController
 **/
 
-func (ctx *usersController) ForgotPasswordController(rw http.ResponseWriter, r *http.Request) {
+func (c *usersController) ForgotPasswordController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOUsersForgotPassword{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -70,12 +76,12 @@ func (ctx *usersController) ForgotPasswordController(rw http.ResponseWriter, r *
 	}
 
 	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
 
-	res := ctx.service.ForgotPasswordService(&body)
+	res := c.service.ForgotPasswordService(r.Context(), &body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -88,7 +94,7 @@ func (ctx *usersController) ForgotPasswordController(rw http.ResponseWriter, r *
 * @description ResetPasswordController
 **/
 
-func (ctx *usersController) ResetPasswordController(rw http.ResponseWriter, r *http.Request) {
+func (c *usersController) ResetPasswordController(rw http.ResponseWriter, r *http.Request) {
 	token := chi.URLParam(r, "token")
 	params := dtos.DTOUsersResetPasswordToken{Token: token}
 
@@ -102,16 +108,16 @@ func (ctx *usersController) ResetPasswordController(rw http.ResponseWriter, r *h
 	}
 
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	} else if errValidator := gpc.Validator(body); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
 
-	res := ctx.service.ResetPasswordService(&body, &params)
+	res := c.service.ResetPasswordService(r.Context(), &body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -124,7 +130,7 @@ func (ctx *usersController) ResetPasswordController(rw http.ResponseWriter, r *h
 * @description ChangePasswordController
 **/
 
-func (ctx *usersController) ChangePasswordController(rw http.ResponseWriter, r *http.Request) {
+func (c *usersController) ChangePasswordController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOUsersById{Id: Id}
 
@@ -138,16 +144,16 @@ func (ctx *usersController) ChangePasswordController(rw http.ResponseWriter, r *
 	}
 
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	} else if errValidator := gpc.Validator(body); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
 
-	res := ctx.service.ChangePasswordService(&body, &params)
+	res := c.service.ChangePasswordService(r.Context(), &body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -160,7 +166,7 @@ func (ctx *usersController) ChangePasswordController(rw http.ResponseWriter, r *
 * @description GetProfileByIdController
 **/
 
-func (ctx *usersController) GetProfileByIdController(rw http.ResponseWriter, r *http.Request) {
+func (c *usersController) GetProfileByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOUsersGetProfileById{Id: Id}
 
@@ -168,12 +174,12 @@ func (ctx *usersController) GetProfileByIdController(rw http.ResponseWriter, r *
 	log.Print(errValidator.Errors)
 
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
 
-	res := ctx.service.GetProfileByIdService(&params)
+	res := c.service.GetProfileByIdService(r.Context(), &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -186,7 +192,7 @@ func (ctx *usersController) GetProfileByIdController(rw http.ResponseWriter, r *
 * @description UpdateProfileByIdController
 **/
 
-func (ctx *usersController) UpdateProfileByIdController(rw http.ResponseWriter, r *http.Request) {
+func (c *usersController) UpdateProfileByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOUsersGetProfileById{Id: Id}
 
@@ -199,17 +205,27 @@ func (ctx *usersController) UpdateProfileByIdController(rw http.ResponseWriter, 
 		return
 	}
 
-	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+	// normalize value
+	name := body.Name
+
+	if err := conform.Struct(context.Background(), &body); err != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Go validator Error: %s", err)}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	} else if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	} else if errValidator := gpc.Validator(body); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
 
-	res := ctx.service.UpdateProfileByIdService(&body, &params)
+	// assign normalize value
+	body.Name = helpers.ReplaceAllString(`[^A-Za-z|\s]`, name, "")
+
+	res := c.service.UpdateProfileByIdService(r.Context(), &body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -222,7 +238,7 @@ func (ctx *usersController) UpdateProfileByIdController(rw http.ResponseWriter, 
 * @description CreateUsersController
 **/
 
-func (ctx *usersController) CreateUsersController(rw http.ResponseWriter, r *http.Request) {
+func (c *usersController) CreateUsersController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOUsersCreate{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -233,12 +249,12 @@ func (ctx *usersController) CreateUsersController(rw http.ResponseWriter, r *htt
 	}
 
 	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
 
-	res := ctx.service.CreateUsersService(&body)
+	res := c.service.CreateUsersService(r.Context(), &body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -251,7 +267,7 @@ func (ctx *usersController) CreateUsersController(rw http.ResponseWriter, r *htt
 * @description GetAllUsersController
 **/
 
-func (ctx *usersController) GetAllUsersController(rw http.ResponseWriter, r *http.Request) {
+func (c *usersController) GetAllUsersController(rw http.ResponseWriter, r *http.Request) {
 	limit := helpers.QueryParser(r, "limit")
 	offset := helpers.QueryParser(r, "offset")
 	current_page := helpers.QueryParser(r, "current_page")
@@ -265,12 +281,12 @@ func (ctx *usersController) GetAllUsersController(rw http.ResponseWriter, r *htt
 	}
 
 	if errValidator := gpc.Validator(query); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
 
-	res := ctx.service.GetAllUsersService(&query)
+	res := c.service.GetAllUsersService(r.Context(), &query)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -283,17 +299,17 @@ func (ctx *usersController) GetAllUsersController(rw http.ResponseWriter, r *htt
 * @description GetUsersByIdController
 **/
 
-func (ctx *usersController) GetUsersByIdController(rw http.ResponseWriter, r *http.Request) {
+func (c *usersController) GetUsersByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOUsersById{Id: Id}
 
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
 
-	res := ctx.service.GetUsersByIdService(&params)
+	res := c.service.GetUsersByIdService(r.Context(), &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -306,17 +322,17 @@ func (ctx *usersController) GetUsersByIdController(rw http.ResponseWriter, r *ht
 * @description DeleteUsersByIdController
 **/
 
-func (ctx *usersController) DeleteUsersByIdController(rw http.ResponseWriter, r *http.Request) {
+func (c *usersController) DeleteUsersByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOUsersById{Id: Id}
 
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
 
-	res := ctx.service.DeleteUsersByIdService(&params)
+	res := c.service.DeleteUsersByIdService(r.Context(), &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -329,7 +345,7 @@ func (ctx *usersController) DeleteUsersByIdController(rw http.ResponseWriter, r 
 * @description UpdateUsersByIdController
 **/
 
-func (ctx *usersController) UpdateUsersByIdController(rw http.ResponseWriter, r *http.Request) {
+func (c *usersController) UpdateUsersByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOUsersById{Id: Id}
 
@@ -343,16 +359,16 @@ func (ctx *usersController) UpdateUsersByIdController(rw http.ResponseWriter, r 
 	}
 
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	} else if errValidator := gpc.Validator(body); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
 
-	res := ctx.service.UpdateUsersByIdService(&body, &params)
+	res := c.service.UpdateUsersByIdService(r.Context(), &body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return

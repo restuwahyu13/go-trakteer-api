@@ -39,7 +39,7 @@ func (ctx *customersController) RegisterController(rw http.ResponseWriter, r *ht
 	}
 
 	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
@@ -68,7 +68,7 @@ func (ctx *customersController) LoginController(rw http.ResponseWriter, r *http.
 	}
 
 	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
@@ -91,7 +91,7 @@ func (ctx *customersController) ActivationController(rw http.ResponseWriter, r *
 	params := dtos.DTOCustomersActivation{Token: token}
 
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
@@ -120,7 +120,7 @@ func (ctx *customersController) ResendActivationController(rw http.ResponseWrite
 	}
 
 	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
@@ -149,7 +149,7 @@ func (ctx *customersController) ForgotPasswordController(rw http.ResponseWriter,
 	}
 
 	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
@@ -178,7 +178,7 @@ func (ctx *customersController) ResetPasswordController(rw http.ResponseWriter, 
 	}
 
 	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
@@ -207,7 +207,7 @@ func (ctx *customersController) ChangePasswordController(rw http.ResponseWriter,
 	}
 
 	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
@@ -230,7 +230,7 @@ func (ctx *customersController) GetProfileByIdController(rw http.ResponseWriter,
 	params := dtos.DTOCustomersGetProfileById{Id: Id}
 
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
@@ -262,11 +262,11 @@ func (ctx *customersController) UpdateProfileByIdController(rw http.ResponseWrit
 	}
 
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	} else if errValidator := gpc.Validator(body); errValidator.Errors != nil {
-		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Error Validators", Data: errValidator.Errors}
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}

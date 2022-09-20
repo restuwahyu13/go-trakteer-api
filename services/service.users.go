@@ -1,6 +1,8 @@
 package services
 
 import (
+	"context"
+
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
 	"github.com/restuwahyu13/go-trakteer-api/interfaces"
@@ -16,46 +18,46 @@ func NewUsersService(repository repositorys.UsersRepository) *usersService {
 	return &usersService{repository: repository}
 }
 
-func (ctx *usersService) LoginService(body *dtos.DTOUsersLogin) helpers.APIResponse {
-	return ctx.repository.LoginRepository(body)
+func (s *usersService) LoginService(ctx context.Context, body *dtos.DTOUsersLogin) helpers.APIResponse {
+	return s.repository.LoginRepository(ctx, body)
 }
 
-func (ctx *usersService) ForgotPasswordService(body *dtos.DTOUsersForgotPassword) helpers.APIResponse {
-	return ctx.repository.ForgotPasswordRepository(body)
+func (s *usersService) ForgotPasswordService(ctx context.Context, body *dtos.DTOUsersForgotPassword) helpers.APIResponse {
+	return s.repository.ForgotPasswordRepository(ctx, body)
 }
 
-func (ctx *usersService) ResetPasswordService(body *dtos.DTOUsersResetPassword, params *dtos.DTOUsersResetPasswordToken) helpers.APIResponse {
-	return ctx.repository.ResetPasswordRepository(body, params)
+func (s *usersService) ResetPasswordService(ctx context.Context, body *dtos.DTOUsersResetPassword, params *dtos.DTOUsersResetPasswordToken) helpers.APIResponse {
+	return s.repository.ResetPasswordRepository(ctx, body, params)
 }
 
-func (ctx *usersService) ChangePasswordService(body *dtos.DTOUsersChangePassword, params *dtos.DTOUsersById) helpers.APIResponse {
-	return ctx.repository.ChangePasswordRepository(body, params)
+func (s *usersService) ChangePasswordService(ctx context.Context, body *dtos.DTOUsersChangePassword, params *dtos.DTOUsersById) helpers.APIResponse {
+	return s.repository.ChangePasswordRepository(ctx, body, params)
 }
 
-func (ctx *usersService) GetProfileByIdService(params *dtos.DTOUsersGetProfileById) helpers.APIResponse {
-	return ctx.repository.GetProfileByIdRepository(params)
+func (s *usersService) GetProfileByIdService(ctx context.Context, params *dtos.DTOUsersGetProfileById) helpers.APIResponse {
+	return s.repository.GetProfileByIdRepository(ctx, params)
 }
 
-func (ctx *usersService) UpdateProfileByIdService(body *dtos.DTOUsersUpdateProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse {
-	return ctx.repository.UpdateProfileByIdRepository(body, params)
+func (s *usersService) UpdateProfileByIdService(ctx context.Context, body *dtos.DTOUsersUpdateProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse {
+	return s.repository.UpdateProfileByIdRepository(ctx, body, params)
 }
 
-func (ctx *usersService) CreateUsersService(body *dtos.DTOUsersCreate) helpers.APIResponse {
-	return ctx.repository.CreateUsersRepository(body)
+func (s *usersService) CreateUsersService(ctx context.Context, body *dtos.DTOUsersCreate) helpers.APIResponse {
+	return s.repository.CreateUsersRepository(ctx, body)
 }
 
-func (ctx *usersService) GetAllUsersService(query *dtos.DTOUsersPagination) helpers.APIResponse {
-	return ctx.repository.GetAllUsersRepository(query)
+func (s *usersService) GetAllUsersService(ctx context.Context, query *dtos.DTOUsersPagination) helpers.APIResponse {
+	return s.repository.GetAllUsersRepository(ctx, query)
 }
 
-func (ctx *usersService) GetUsersByIdService(params *dtos.DTOUsersById) helpers.APIResponse {
-	return ctx.repository.GetUsersByIdRepository(params)
+func (s *usersService) GetUsersByIdService(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse {
+	return s.repository.GetUsersByIdRepository(ctx, params)
 }
 
-func (ctx *usersService) DeleteUsersByIdService(params *dtos.DTOUsersById) helpers.APIResponse {
-	return ctx.repository.DeleteUsersByIdRepository(params)
+func (s *usersService) DeleteUsersByIdService(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse {
+	return s.repository.DeleteUsersByIdRepository(ctx, params)
 }
 
-func (ctx *usersService) UpdateUsersByIdService(body *dtos.DTOUsersUpdate, params *dtos.DTOUsersById) helpers.APIResponse {
-	return ctx.repository.UpdateUsersByIdRepository(body, params)
+func (s *usersService) UpdateUsersByIdService(ctx context.Context, body *dtos.DTOUsersUpdate, params *dtos.DTOUsersById) helpers.APIResponse {
+	return s.repository.UpdateUsersByIdRepository(ctx, body, params)
 }

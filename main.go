@@ -27,9 +27,11 @@ func main() {
 		runtime.GOMAXPROCS(runtime.NumCPU() / 2)
 	}
 
-	err := packages.Viper()
-	if err != nil {
-		log.Fatalf(".env file not load: %v", err)
+	if _, ok := os.LookupEnv("GO_ENV"); !ok {
+		err := packages.Viper()
+		if err != nil {
+			log.Fatalf(".env file not load: %v", err)
+		}
 	}
 
 	db := SetupDatabase()

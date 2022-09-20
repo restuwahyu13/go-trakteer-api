@@ -41,16 +41,16 @@ type DTOUsersGetProfileById struct {
 }
 
 type DTOUsersUpdateProfileById struct {
-	Email    string `validate:"required,email" json:"email"`
-	Username string `validate:"required,alphanum" json:"username"`
-	Name     string `validate:"required" json:"name"`
+	Email    string `mod:"trim" validate:"required,email" json:"email"`
+	Username string `mod:"trim" validate:"required,alphanum" json:"username"`
+	Name     string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
 	Active   bool   `validate:"boolean" json:"active"`
 }
 
 type DTOUsersCreate struct {
-	Username    string `validate:"required,alphanum" json:"username"`
-	Name        string `validate:"required,alpha" json:"name"`
-	Email       string `validate:"required,email" json:"email"`
+	Username    string `mod:"trim" validate:"required,alphanum" json:"username"`
+	Name        string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
+	Email       string `mod:"trim" validate:"required,email" json:"email"`
 	Password    string `validate:"required,alphanumunicode" json:"password"`
 	Active      bool   `validate:"required,boolean" json:"active"`
 	Verified    bool   `validate:"required,boolean" json:"verified"`
@@ -63,9 +63,9 @@ type DTOUsersById struct {
 }
 
 type DTOUsersUpdate struct {
-	Username    string `validate:"required,alphanum" json:"username"`
-	Name        string `validate:"required,alphaunicode" json:"name"`
-	Email       string `validate:"required,email" json:"email"`
+	Username    string `mod:"trim" validate:"required,alphanum" json:"username"`
+	Name        string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
+	Email       string `mod:"trim" validate:"required,email" json:"email"`
 	Password    string `validate:"required,alphanumunicode" json:"password"`
 	Active      bool   `validate:"required,boolean" json:"active"`
 	Verified    bool   `validate:"required,boolean" json:"verified"`
