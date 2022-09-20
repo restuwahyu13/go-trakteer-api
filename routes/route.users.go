@@ -28,20 +28,20 @@ func NewUsersRoute(prefix string, db *sqlx.DB, router *chi.Mux) *usersRoute {
 
 func (r *usersRoute) UsersRoute() {
 	ctx.router.Group(func(router chi.Router) {
-		router.Post(helpers.Endpoint(ctx.prefix, "/login"), ctx.controller.LoginController)
-		router.Post(helpers.Endpoint(ctx.prefix, "/forgot-password"), ctx.controller.ForgotPasswordController)
-		router.Put(helpers.Endpoint(ctx.prefix, "/reset-password/{token}"), ctx.controller.ResetPasswordController)
-		router.Put(helpers.Endpoint(ctx.prefix, "/change-password/{id:[0-9]+}"), ctx.controller.ChangePasswordController)
-		router.Get(helpers.Endpoint(ctx.prefix, "/profile/{id:[0-9]+}"), ctx.controller.GetProfileByIdController)
-		router.Put(helpers.Endpoint(ctx.prefix, "/profile/{id:[0-9]+}"), ctx.controller.UpdateProfileByIdController)
+		router.Post(helpers.Endpoint(r.prefix, "/login"), r.controller.LoginController)
+		router.Post(helpers.Endpoint(r.prefix, "/forgot-password"), r.controller.ForgotPasswordController)
+		router.Put(helpers.Endpoint(r.prefix, "/reset-password/{token}"), r.controller.ResetPasswordController)
+		router.Put(helpers.Endpoint(r.prefix, "/change-password/{id:[0-9]+}"), ctx.controller.ChangePasswordController)
+		router.Get(helpers.Endpoint(r.prefix, "/profile/{id:[0-9]+}"), r.controller.GetProfileByIdController)
+		router.Put(helpers.Endpoint(r.prefix, "/profile/{id:[0-9]+}"), r.controller.UpdateProfileByIdController)
 	})
 
 	r.router.Group(func(router chi.Router) {
 		router.Use(middlewares.NewMiddlewareAuth(ctx.db).Middleware)
-		router.Post(helpers.Endpoint(ctx.prefix, "/"), ctx.controller.CreateUsersController)
-		router.Get(helpers.Endpoint(ctx.prefix, "/"), ctx.controller.GetAllUsersController)
-		router.Get(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.GetUsersByIdController)
-		router.Delete(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.DeleteUsersByIdController)
+		router.Post(helpers.Endpoint(r.prefix, "/"), r.controller.CreateUsersController)
+		router.Get(helpers.Endpoint(r.prefix, "/"), r.controller.GetAllUsersController)
+		router.Get(helpers.Endpoint(r.prefix, "/{id:[0-9]+}"), r.controller.GetUsersByIdController)
+		router.Delete(helpers.Endpoint(r.prefix, "/{id:[0-9]+}"), r.controller.DeleteUsersByIdController)
 		router.Put(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.UpdateUsersByIdController)
 	})
 }
