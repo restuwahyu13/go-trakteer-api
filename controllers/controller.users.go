@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -205,10 +204,10 @@ func (c *usersController) UpdateProfileByIdController(rw http.ResponseWriter, r 
 		return
 	}
 
-	// store value
+	// store original value
 	name := body.Name
 
-	if err := conform.Struct(context.Background(), &body); err != nil {
+	if err := conform.Struct(r.Context(), &body); err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Go validator Error: %s", err)}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -248,10 +247,10 @@ func (c *usersController) CreateUsersController(rw http.ResponseWriter, r *http.
 		return
 	}
 
-	// store value
+	// store original value
 	name := body.Name
 
-	if err := conform.Struct(context.Background(), &body); err != nil {
+	if err := conform.Struct(r.Context(), &body); err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Go validator Error: %s", err)}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -283,9 +282,10 @@ func (c *usersController) GetAllUsersController(rw http.ResponseWriter, r *http.
 	current_page, _ := strconv.Atoi(helpers.QueryParser(r, "current_page"))
 	sort := strings.ToUpper(helpers.QueryParser(r, "sort"))
 
+	queryOffset := uint(offset)
 	query := dtos.DTOUsersPagination{
 		Limit:       uint(limit),
-		Offset:      uint(offset),
+		Offset:      &queryOffset,
 		Sort:        sort,
 		CurrentPage: uint(current_page),
 	}
@@ -368,10 +368,10 @@ func (c *usersController) UpdateUsersByIdController(rw http.ResponseWriter, r *h
 		return
 	}
 
-	// store value
+	// store original value
 	name := body.Name
 
-	if err := conform.Struct(context.Background(), &body); err != nil {
+	if err := conform.Struct(r.Context(), &body); err != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Go validator Error: %s", err)}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return

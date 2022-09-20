@@ -36,3 +36,10 @@ func VerifyToken(tokenString string) (string, error) {
 	})
 	return token.Raw, err
 }
+
+func ParseToken(tokenString string) (jwt.Claims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(viper.GetString("JWT_SECRET")), nil
+	})
+	return token.Claims, err
+}

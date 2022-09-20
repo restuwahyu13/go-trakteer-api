@@ -2,7 +2,7 @@ package dtos
 
 type DTOUsersPagination struct {
 	Limit       uint   `validate:"required,numeric" json:"limit"`
-	Offset      uint   `validate:"required,numeric" json:"offset"`
+	Offset      *uint  `validate:"required,numeric" json:"offset"`
 	Sort        string `validate:"required,alpha" json:"sort"`
 	Count       int    `validate:"numeric" json:"count"`
 	CurrentPage uint   `validate:"required,numeric" json:"current_page"`

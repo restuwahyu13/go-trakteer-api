@@ -3,7 +3,6 @@ package helpers
 import (
 	"encoding/json"
 	"math"
-	"strconv"
 )
 
 type paginationOptions struct {
@@ -22,15 +21,11 @@ func Pagination(pagination interface{}, count int) paginationOptions {
 	jsn, _ := json.Marshal(pagination)
 	json.Unmarshal(jsn, &payload)
 
-	limit, _ := strconv.Atoi(payload["limit"].(string))
-	offset, _ := strconv.Atoi(payload["offset"].(string))
-	current_page, _ := strconv.Atoi(payload["current_page"].(string))
-
-	pagin.Limit = uint(limit)
-	pagin.Offset = uint(offset)
+	pagin.Limit = uint(payload["limit"].(float64))
+	pagin.Offset = uint(payload["offset"].(float64))
 	pagin.Sort = payload["sort"].(string)
 	pagin.Count = uint(count)
-	pagin.CurrentPage = uint(current_page)
+	pagin.CurrentPage = uint(payload["current_page"].(float64))
 
 	if pagin.CurrentPage > 1 {
 		pagin.Offset = (pagin.Limit * pagin.CurrentPage) - pagin.Limit

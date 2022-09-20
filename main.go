@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compress/gzip"
 	"context"
 	"fmt"
 	"log"
@@ -12,8 +13,9 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -36,6 +38,7 @@ func main() {
 
 	db := SetupDatabase()
 	router := SetupRouter()
+	SetupMiddleware(router)
 
 	routes.NewUsersRoute("/api/v1/users", db, router).UsersRoute()
 	routes.NewCustomersRoute("/api/v1/customers", db, router).CustomersRoute()
@@ -69,6 +72,20 @@ func SetupRouter() *chi.Mux {
 	}
 
 	return router
+}
+
+func SetupMiddleware(router *chi.Mux) {
+	if viper.GetString("GO_ENV") != "production" {
+		router.Use(middleware.Logger)
+	}
+
+	router.Use(middleware.Compress(gzip.BestCompression))
+	router.Use(middleware.AllowContentType("application/json"))
+	router.Use(middleware.AllowContentEncoding("application/json"))
+	router.Use(middleware.ThrottleWithOpts(middleware.ThrottleOpts{Limit: 5, BacklogLimit: 50, BacklogTimeout: time.Duration(5 * time.Minute)}))
+	router.Use(middleware.NoCache)
+	router.Use(middleware.CleanPath)
+	router.Use(middleware.RequestID)
 }
 
 func SetupGraceFullShutDown(router *chi.Mux) {

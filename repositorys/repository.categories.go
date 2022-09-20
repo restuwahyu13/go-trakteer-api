@@ -111,7 +111,7 @@ func (r *categoriesRepository) GetByIdRepository(ctx context.Context, params *dt
 	defer cancel()
 
 	catagories.Id = params.Id
-	getRoleIdErr := r.db.GetContext(ctx, &catagories, "SELECT * FROM catagories WHERE id = $1", catagories.Id)
+	getRoleIdErr := r.db.GetContext(ctx, &catagories, "SELECT * FROM categories WHERE id = $1", catagories.Id)
 
 	if getRoleIdErr != nil {
 		res.StatCode = http.StatusBadRequest
@@ -176,7 +176,7 @@ func (r *categoriesRepository) UpdatedByIdRepository(ctx context.Context, body *
 	defer cancel()
 
 	catagories.Id = params.Id
-	checkCategorieIdErr := r.db.GetContext(ctx, &catagories, "SELECT id FROM catagories WHERE id = $1", catagories.Id)
+	checkCategorieIdErr := r.db.GetContext(ctx, &catagories, "SELECT id FROM categories WHERE id = $1", catagories.Id)
 
 	if checkCategorieIdErr != nil {
 		res.StatCode = http.StatusBadRequest
@@ -188,7 +188,7 @@ func (r *categoriesRepository) UpdatedByIdRepository(ctx context.Context, body *
 	catagories.Name = body.Name
 	catagories.UpdatedAt = time.Now().Local()
 
-	_, updatedCategorieErr := r.db.NamedQueryContext(ctx, "UPDATE catagories SET name = :name WHERE id = :id", &catagories)
+	_, updatedCategorieErr := r.db.NamedQueryContext(ctx, "UPDATE categories SET name = :name WHERE id = :id", &catagories)
 
 	if updatedCategorieErr != nil {
 		res.StatCode = http.StatusForbidden

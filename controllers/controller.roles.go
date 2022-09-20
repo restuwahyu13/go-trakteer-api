@@ -39,11 +39,21 @@ func (c *rolesController) CreateController(rw http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+	// store original value
+	name := body.Name
+
+	if err := conform.Struct(r.Context(), &body); err != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Go validator Error: %s", err)}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	} else if errValidator := gpc.Validator(body); errValidator.Errors != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
+
+	// assign normalize value
+	body.Name = helpers.ReplaceAllString(`[^A-Za-z|\s]`, name, "")
 
 	res := c.service.CreateService(r.Context(), &body)
 	if res.StatCode >= 400 {
@@ -59,16 +69,17 @@ func (c *rolesController) CreateController(rw http.ResponseWriter, r *http.Reque
 **/
 
 func (c *rolesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
-	limit := helpers.QueryParser(r, "limit")
-	offset := helpers.QueryParser(r, "offset")
-	current_page := helpers.QueryParser(r, "current_page")
-	sort := helpers.QueryParser(r, "sort")
+	limit, _ := strconv.Atoi(helpers.QueryParser(r, "limit"))
+	offset, _ := strconv.Atoi(helpers.QueryParser(r, "offset"))
+	current_page, _ := strconv.Atoi(helpers.QueryParser(r, "current_page"))
+	sort := strings.ToUpper(helpers.QueryParser(r, "sort"))
 
+	queryOffset := uint(offset)
 	query := dtos.DTORolePagination{
-		Limit:       limit,
-		Offset:      offset,
-		Sort:        strings.ToUpper(sort),
-		CurrentPage: current_page,
+		Limit:       uint(limit),
+		Offset:      &queryOffset,
+		Sort:        sort,
+		CurrentPage: uint(current_page),
 	}
 
 	if errValidator := gpc.Validator(query); errValidator.Errors != nil {
@@ -149,7 +160,14 @@ func (c *rolesController) UpdatedByIdController(rw http.ResponseWriter, r *http.
 		return
 	}
 
-	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+	// store original value
+	name := body.Name
+
+	if err := conform.Struct(r.Context(), &body); err != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Go validator Error: %s", err)}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	} else if errValidator := gpc.Validator(params); errValidator.Errors != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -158,6 +176,9 @@ func (c *rolesController) UpdatedByIdController(rw http.ResponseWriter, r *http.
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
 	}
+
+	// assign normalize value
+	body.Name = helpers.ReplaceAllString(`[^A-Za-z|\s]`, name, "")
 
 	res := c.service.UpdatedByIdService(r.Context(), &body, &params)
 	if res.StatCode >= 400 {
