@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackskj/carta"
 	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
@@ -69,7 +70,7 @@ func (r *usersRepository) LoginRepository(ctx context.Context, body *dtos.DTOUse
 	if err != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Users email %v not registered", users.Email)
-		res.Error = err
+		defer logrus.Errorf("Error Logs: %v", err)
 		return res
 	}
 
@@ -108,7 +109,7 @@ func (r *usersRepository) LoginRepository(ctx context.Context, body *dtos.DTOUse
 	if insertTokenErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Insert token into database failed"
-		res.Error = insertTokenErr
+		defer logrus.Errorf("Error Logs: %v", insertTokenErr)
 		return res
 	}
 
@@ -121,7 +122,7 @@ func (r *usersRepository) LoginRepository(ctx context.Context, body *dtos.DTOUse
 	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = "Login successfully"
+	res.StatMsg = "Login success"
 	res.Data = accessTokenPayload
 	return res
 }
@@ -139,11 +140,12 @@ func (r *usersRepository) ForgotPasswordRepository(ctx context.Context, body *dt
 	defer cancel()
 
 	users.Email = body.Email
+	checkUserEmailErr := r.db.GetContext(ctx, &users, "SELECT id, email FROM users WHERE email = $1", users.Email)
 
-	checkUserEmail := r.db.GetContext(ctx, &users, "SELECT id, email FROM users WHERE email = $1", users.Email)
-	if checkUserEmail != nil {
+	if checkUserEmailErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("User email %s not exist", users.Email)
+		defer logrus.Errorf("Error Logs: %v", checkUserEmailErr)
 		return res
 	}
 
@@ -166,6 +168,7 @@ func (r *usersRepository) ForgotPasswordRepository(ctx context.Context, body *dt
 	if htmlTemplateErr := <-htmlTemplateErrchan; htmlTemplateErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Render html template error: %v", htmlTemplateErr)
+		defer logrus.Errorf("Error Logs: %v", htmlTemplateErr)
 		defer close(htmlTemplateErrchan)
 		return res
 	}
@@ -173,6 +176,7 @@ func (r *usersRepository) ForgotPasswordRepository(ctx context.Context, body *dt
 	if sendEmailErr := <-sendEmailErrChan; sendEmailErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Send smtp email error: %v", sendEmailErr)
+		defer logrus.Errorf("Error Logs: %v", sendEmailErr)
 		defer close(htmlTemplateErrchan)
 		return res
 	}
@@ -189,12 +193,12 @@ func (r *usersRepository) ForgotPasswordRepository(ctx context.Context, body *dt
 	if insertTokenErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Insert token into database failed"
-		res.Error = insertTokenErr
+		defer logrus.Errorf("Error Logs: %v", insertTokenErr)
 		return res
 	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = fmt.Sprintf("Reset password successfully, please check your email %s address", users.Email)
+	res.StatMsg = fmt.Sprintf("Reset password success, please check your email %s address", users.Email)
 	return res
 }
 
@@ -210,10 +214,11 @@ func (r *usersRepository) ResetPasswordRepository(ctx context.Context, body *dto
 	ctx, cancel := context.WithTimeout(ctx, min)
 	defer cancel()
 
-	checkAccessToken := r.db.GetContext(ctx, &token, "SELECT resource_id, expired_at FROM token WHERE access_token = $1 AND resource_type = $2 ORDER BY id DESC", params.Token, "reset password")
-	if checkAccessToken != nil {
+	checkAccessTokenErr := r.db.GetContext(ctx, &token, "SELECT resource_id, expired_at FROM token WHERE access_token = $1 AND resource_type = $2 ORDER BY id DESC", params.Token, "reset password")
+	if checkAccessTokenErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Invalid token format or Token not match"
+		defer logrus.Errorf("Error Logs: %v", checkAccessTokenErr)
 		return res
 	}
 
@@ -239,7 +244,7 @@ func (r *usersRepository) ResetPasswordRepository(ctx context.Context, body *dto
 	if updatePasswordErr != nil {
 		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Update reset password account failed"
-		res.Error = updatePasswordErr
+		defer logrus.Errorf("Error Logs: %v", updatePasswordErr)
 		return res
 	}
 
@@ -250,7 +255,7 @@ func (r *usersRepository) ResetPasswordRepository(ctx context.Context, body *dto
 	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = "Reset old password to new password successfully"
+	res.StatMsg = "Reset old password to new password success"
 	return res
 }
 
@@ -271,19 +276,19 @@ func (r *usersRepository) ChangePasswordRepository(ctx context.Context, body *dt
 		return res
 	}
 
-	users.Id = uint(params.Id)
+	users.Id = params.Id
 	users.Password = packages.HashPassword(body.Password)
 
 	_, updatePasswordErr := r.db.NamedQueryContext(ctx, "UPDATE users SET password = :password WHERE id = :id", &users)
 	if updatePasswordErr != nil {
 		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Change old password to new password failed"
-		res.Error = updatePasswordErr
+		defer logrus.Errorf("Error Logs: %v", updatePasswordErr)
 		return res
 	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = "Change old password to new password successfully"
+	res.StatMsg = "Change old password to new password success"
 	return res
 }
 
@@ -298,18 +303,18 @@ func (r *usersRepository) GetProfileByIdRepository(ctx context.Context, params *
 	ctx, cancel := context.WithTimeout(ctx, min)
 	defer cancel()
 
-	users.Id = uint(params.Id)
-
+	users.Id = params.Id
 	checkUserErr := r.db.GetContext(ctx, &users, "SELECT id, name, username, email, active, verified, created_at, updated_at, deleted_at FROM users WHERE id = $1", users.Id)
+
 	if checkUserErr != nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = fmt.Sprintf("UserID not exist for this id %d", users.Id)
-		res.Error = checkUserErr
+		res.StatMsg = fmt.Sprintf("UserId for this id %d not exist ", users.Id)
+		defer logrus.Errorf("Error Logs: %v", checkUserErr)
 		return res
 	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = "Get profile data successfully"
+	res.StatMsg = "Get profile data success"
 	res.Data = users
 	return res
 }
@@ -328,71 +333,248 @@ func (r *usersRepository) UpdateProfileByIdRepository(ctx context.Context, body 
 	checkUserErr := r.db.GetContext(ctx, &users, "SELECT id FROM users WHERE id = $1", params.Id)
 	if checkUserErr != nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = fmt.Sprintf("UserID not exist for this id %d", users.Id)
-		res.Error = checkUserErr
+		res.StatMsg = fmt.Sprintf("UserId for this id %d not exist ", users.Id)
+		defer logrus.Errorf("Error Logs: %v", checkUserErr)
 		return res
 	}
 
-	users.Id = uint(params.Id)
+	users.Id = params.Id
 	users.Name = body.Name
 	users.Username = body.Username
 	users.Email = body.Email
-	users.Active = body.Active
+	users.Active = *body.Active
 
 	_, updateProfileErr := r.db.NamedQueryContext(ctx, "UPDATE users SET name = :name, username = :username, email = :email, active = :active WHERE id = :id", &users)
 	if updateProfileErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Update profile failed"
-		res.Error = updateProfileErr
+		defer logrus.Errorf("Error Logs: %v", updateProfileErr)
 		return res
 	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = "Updated profile successfully"
+	res.StatMsg = "Updated profile success"
 	return res
 }
+
+/**
+* @description CreateUsersRepository
+**/
 
 func (r *usersRepository) CreateUsersRepository(ctx context.Context, body *dtos.DTOUsersCreate) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from get all users repository",
+	users := models.Users{}
+	categories := models.Categories{}
+	roles := models.Roles{}
+	res := helpers.APIResponse{}
+
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
+
+	users.Name = body.Name
+	users.Username = body.Username
+	users.Email = body.Email
+	users.Password = packages.HashPassword(body.Password)
+	users.Active = true
+	users.Verified = true
+	users.RoleId = body.RoleId
+	users.CategorieId = body.CategorieId
+
+	checkUserErrChan := make(chan error)
+	checkRoleErrChan := make(chan error)
+	checkCategorieErrChan := make(chan error)
+
+	go func() {
+		checkUserErr := r.db.GetContext(ctx, &users, "SELECT username, email FROM users WHERE username = $1 OR email = $2", users.Username, users.Email)
+		checkUserErrChan <- checkUserErr
+
+		checkRoleErr := r.db.GetContext(ctx, &roles, "SELECT id FROM roles WHERE id = $1", users.RoleId)
+		checkRoleErrChan <- checkRoleErr
+
+		checkCategorieErr := r.db.GetContext(ctx, &categories, "SELECT id FROM categories WHERE id = $1", users.CategorieId)
+		checkCategorieErrChan <- checkCategorieErr
+	}()
+
+	if err := <-checkUserErrChan; err == nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("Username %s or email %s already taken", users.Username, users.Email)
+		defer logrus.Errorf("Error Logs: %v", err)
+		defer close(checkUserErrChan)
+		return res
 	}
 
+	if err := <-checkRoleErrChan; err != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("RoleId for this id %d not exist", users.RoleId)
+		defer logrus.Errorf("Error Logs: %v", err)
+		defer close(checkRoleErrChan)
+		return res
+	}
+
+	if err := <-checkCategorieErrChan; err != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("CategorieId for this id %d not exist", users.CategorieId)
+		defer logrus.Errorf("Error Logs: %v", err)
+		defer close(checkCategorieErrChan)
+		return res
+	}
+
+	_, insertErr := r.db.NamedQueryContext(ctx, `
+	INSERT INTO users (name, username, email, password, active, verified, social_link, role_id, categorie_id)
+	VALUES(:name, :username, :email, :password, :active, :verified, :social_link, :role_id, :categorie_id)`, &users)
+
+	if insertErr != nil {
+		res.StatCode = http.StatusConflict
+		res.StatMsg = "Create new user account failed"
+		defer logrus.Errorf("Error Logs: %v", insertErr)
+		return res
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = "Create new user success"
 	return res
 }
+
+/**
+* @description GetAllUsersRepository
+**/
 
 func (r *usersRepository) GetAllUsersRepository(ctx context.Context, query *dtos.DTOUsersPagination) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from get all users repository",
+	users := []models.Users{}
+	res := helpers.APIResponse{}
+
+	ctx, cancel := context.WithTimeout(ctx, max)
+	defer cancel()
+
+	getAllUsersChan := make(chan error)
+	countChan := make(chan int)
+
+	go func() {
+		getAllRoles := r.db.SelectContext(ctx, &users, fmt.Sprintf("SELECT id, name, username, email, active, verified, created_at, updated_at, deleted_at FROM users ORDER BY id %s LIMIT $1 OFFSET $2", query.Sort), query.Limit, query.Offset)
+		getAllUsersChan <- getAllRoles
+
+		count := 0
+		countRoles := r.db.QueryRowContext(ctx, "SELECT COUNT(id) FROM users")
+		countRoles.Scan(&count)
+		countChan <- count
+	}()
+
+	if <-getAllUsersChan != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Users data not exist"
+		defer logrus.Errorf("Error Logs: %v", <-getAllUsersChan)
+		defer close(getAllUsersChan)
+		return res
 	}
 
+	res.StatCode = http.StatusOK
+	res.StatMsg = "Users data already to use"
+	res.Data = users
+	res.Pagination = helpers.Stringify(helpers.Pagination(query, <-countChan))
+	defer close(countChan)
 	return res
 }
+
+/**
+* @description GetUsersByIdRepository
+**/
 
 func (r *usersRepository) GetUsersByIdRepository(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from get all users repository",
+	users := models.Users{}
+	res := helpers.APIResponse{}
+
+	users.Id = params.Id
+	getRoleId := r.db.GetContext(ctx, &users, "SELECT id, name, username, email, active, verified, created_at, updated_at, deleted_at FROM users WHERE id = $1", users.Id)
+
+	if getRoleId != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("User data for this id %d not exist", users.Id)
+		defer logrus.Errorf("Error Logs: %v", getRoleId)
+		return res
 	}
 
+	res.StatCode = http.StatusOK
+	res.StatMsg = "User data already to use"
+	res.Data = users
 	return res
 }
+
+/**
+* @description DeleteUsersByIdRepository
+**/
 
 func (r *usersRepository) DeleteUsersByIdRepository(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from get all users repository",
+	users := models.Users{}
+	res := helpers.APIResponse{}
+
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
+
+	users.Id = params.Id
+	checkRoleId := r.db.GetContext(ctx, &users, "SELECT id FROM users WHERE id = $1", users.Id)
+
+	if checkRoleId != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("User data for this id %d not exist", users.Id)
+		defer logrus.Errorf("Error Logs: %v", checkRoleId)
+		return res
 	}
 
+	deletedTime := time.Now().Local()
+	users.DeletedAt = &deletedTime
+
+	_, deletedRoleErr := r.db.NamedQueryContext(ctx, "UPDATE users SET deleted_at = :deleted_at WHERE id = :id", &users)
+
+	if deletedRoleErr != nil {
+		res.StatCode = http.StatusForbidden
+		res.StatMsg = fmt.Sprintf("Deleted user for this id %d failed", users.Id)
+		defer logrus.Errorf("Error Logs: %v", deletedRoleErr)
+		return res
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = fmt.Sprintf("Deleted user data for this id %d success", users.Id)
 	return res
 }
 
+/**
+* @description UpdateUsersByIdRepository
+**/
+
 func (r *usersRepository) UpdateUsersByIdRepository(ctx context.Context, body *dtos.DTOUsersUpdate, params *dtos.DTOUsersById) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from get all users repository",
+	users := models.Users{}
+	res := helpers.APIResponse{}
+
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
+
+	users.Id = params.Id
+	checkUserId := r.db.GetContext(ctx, &users, "SELECT id FROM users WHERE id = $1", users.Id)
+
+	if checkUserId != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("User data for this id %d not exist", users.Id)
+		defer logrus.Errorf("Error Logs: %v", checkUserId)
+		return res
 	}
 
+	users.Name = body.Name
+	users.Username = body.Username
+	users.Email = body.Email
+	users.Active = *body.Active
+	users.RoleId = body.RoleId
+	users.CategorieId = body.CategorieId
+	users.UpdatedAt = time.Now()
+
+	_, updatedRoleErr := r.db.NamedQueryContext(ctx, "UPDATE users SET name = :name, username = :username, email = :email, active = :active WHERE id = :id", &users)
+
+	if updatedRoleErr != nil {
+		res.StatCode = http.StatusForbidden
+		res.StatMsg = fmt.Sprintf("Updated user data for this id %v failed", users.Id)
+		defer logrus.Errorf("Error Logs: %v", updatedRoleErr)
+		return res
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = fmt.Sprintf("Updated user data for this id %v success", users.Id)
 	return res
 }

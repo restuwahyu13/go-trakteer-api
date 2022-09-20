@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
@@ -8,19 +9,19 @@ import (
 )
 
 type IRolesRepository interface {
-	CreateRepository(body *dtos.DTORoles) helpers.APIResponse
-	GetAllRepository(query *dtos.DTORolePagination) helpers.APIResponse
-	GetByIdRepository(params *dtos.DTORolesById) helpers.APIResponse
-	DeleteByIdRepository(params *dtos.DTORolesById) helpers.APIResponse
-	UpdatedByIdRepository(body *dtos.DTORoles, params *dtos.DTORolesById) helpers.APIResponse
+	CreateRepository(ctx context.Context, body *dtos.DTORoles) helpers.APIResponse
+	GetAllRepository(ctx context.Context, query *dtos.DTORolePagination) helpers.APIResponse
+	GetByIdRepository(ctx context.Context, params *dtos.DTORolesById) helpers.APIResponse
+	DeleteByIdRepository(ctx context.Context, params *dtos.DTORolesById) helpers.APIResponse
+	UpdatedByIdRepository(ctx context.Context, body *dtos.DTORoles, params *dtos.DTORolesById) helpers.APIResponse
 }
 
 type IRolesService interface {
-	CreateService(body *dtos.DTORoles) helpers.APIResponse
-	GetAllService(query *dtos.DTORolePagination) helpers.APIResponse
-	GetByIdService(params *dtos.DTORolesById) helpers.APIResponse
-	DeleteByIdService(params *dtos.DTORolesById) helpers.APIResponse
-	UpdatedByIdService(body *dtos.DTORoles, params *dtos.DTORolesById) helpers.APIResponse
+	CreateService(ctx context.Context, body *dtos.DTORoles) helpers.APIResponse
+	GetAllService(ctx context.Context, query *dtos.DTORolePagination) helpers.APIResponse
+	GetByIdService(ctx context.Context, params *dtos.DTORolesById) helpers.APIResponse
+	DeleteByIdService(ctx context.Context, params *dtos.DTORolesById) helpers.APIResponse
+	UpdatedByIdService(ctx context.Context, body *dtos.DTORoles, params *dtos.DTORolesById) helpers.APIResponse
 }
 
 type IRolesController interface {

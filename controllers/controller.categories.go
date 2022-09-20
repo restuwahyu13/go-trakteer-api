@@ -29,7 +29,7 @@ func NewCategoriesController(service services.CategoriesService) *categoriesCont
 * @description CreateController
 **/
 
-func (ctx *categoriesController) CreateController(rw http.ResponseWriter, r *http.Request) {
+func (c *categoriesController) CreateController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOCategories{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -45,7 +45,7 @@ func (ctx *categoriesController) CreateController(rw http.ResponseWriter, r *htt
 		return
 	}
 
-	res := ctx.service.CreateService(&body)
+	res := c.service.CreateService(r.Context(), &body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -58,7 +58,7 @@ func (ctx *categoriesController) CreateController(rw http.ResponseWriter, r *htt
 * @description GetAllController
 **/
 
-func (ctx *categoriesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
+func (c *categoriesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
 	limit := helpers.QueryParser(r, "limit")
 	offset := helpers.QueryParser(r, "offset")
 	current_page := helpers.QueryParser(r, "current_page")
@@ -77,7 +77,7 @@ func (ctx *categoriesController) GetAllController(rw http.ResponseWriter, r *htt
 		return
 	}
 
-	res := ctx.service.GetAllService(&query)
+	res := c.service.GetAllService(r.Context(), &query)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -90,9 +90,9 @@ func (ctx *categoriesController) GetAllController(rw http.ResponseWriter, r *htt
 * @description GetByIdController
 **/
 
-func (ctx *categoriesController) GetByIdController(rw http.ResponseWriter, r *http.Request) {
+func (c *categoriesController) GetByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
-	params := dtos.DTOCategoriesId{Id: Id}
+	params := dtos.DTOCategoriesId{Id: uint(Id)}
 
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
@@ -100,7 +100,7 @@ func (ctx *categoriesController) GetByIdController(rw http.ResponseWriter, r *ht
 		return
 	}
 
-	res := ctx.service.GetByIdService(&params)
+	res := c.service.GetByIdService(r.Context(), &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -113,9 +113,9 @@ func (ctx *categoriesController) GetByIdController(rw http.ResponseWriter, r *ht
 * @description DeleteByIdController
 **/
 
-func (ctx *categoriesController) DeleteByIdController(rw http.ResponseWriter, r *http.Request) {
+func (c *categoriesController) DeleteByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
-	params := dtos.DTOCategoriesId{Id: Id}
+	params := dtos.DTOCategoriesId{Id: uint(Id)}
 
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
@@ -123,7 +123,7 @@ func (ctx *categoriesController) DeleteByIdController(rw http.ResponseWriter, r 
 		return
 	}
 
-	res := ctx.service.DeleteByIdService(&params)
+	res := c.service.DeleteByIdService(r.Context(), &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -136,9 +136,9 @@ func (ctx *categoriesController) DeleteByIdController(rw http.ResponseWriter, r 
 * @description UpdatedByIdController
 **/
 
-func (ctx *categoriesController) UpdatedByIdController(rw http.ResponseWriter, r *http.Request) {
+func (c *categoriesController) UpdatedByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
-	params := dtos.DTOCategoriesId{Id: Id}
+	params := dtos.DTOCategoriesId{Id: uint(Id)}
 
 	body := dtos.DTOCategories{}
 	err := json.NewDecoder(r.Body).Decode(&body)
@@ -159,7 +159,7 @@ func (ctx *categoriesController) UpdatedByIdController(rw http.ResponseWriter, r
 		return
 	}
 
-	res := ctx.service.UpdatedByIdService(&body, &params)
+	res := c.service.UpdatedByIdService(r.Context(), &body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return

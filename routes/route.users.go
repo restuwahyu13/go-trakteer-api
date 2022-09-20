@@ -34,7 +34,7 @@ func (ctx *usersRoute) UsersRoute() {
 
 	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/"), ctx.controller.CreateUsersController)
 	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/"), ctx.controller.GetAllUsersController)
-	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.GetAllUsersController)
+	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.GetUsersByIdController)
 	ctx.router.Delete(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.DeleteUsersByIdController)
 	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), ctx.controller.UpdateUsersByIdController)
 }

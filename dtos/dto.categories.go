@@ -14,5 +14,5 @@ type DTOCategoriesPagination struct {
 }
 
 type DTOCategoriesId struct {
-	Id int `json:"id"`
+	Id uint `json:"id"`
 }

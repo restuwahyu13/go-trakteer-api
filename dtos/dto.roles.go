@@ -14,5 +14,5 @@ type DTORolePagination struct {
 }
 
 type DTORolesById struct {
-	Id int `json:"id"`
+	Id uint `json:"id"`
 }

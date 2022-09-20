@@ -5,7 +5,7 @@ DSN := postgres://restuwahyu13:restuwahyu13@localhost:5432/postgres?sslmode=disa
 MIGDIR := databases/migrations/
 
 dev:
-	${NODEMON} -V -x go run main.go --signal ${SIGNAL}
+	${NODEMON} -V -x go run --race *.go --signal ${SIGNAL}
 
 build:
 	go build -v -race main.go

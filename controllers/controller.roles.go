@@ -29,7 +29,7 @@ func NewRolesController(service services.RolesService) *rolesController {
 * @description CreateController
 **/
 
-func (ctx *rolesController) CreateController(rw http.ResponseWriter, r *http.Request) {
+func (c *rolesController) CreateController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTORoles{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -45,7 +45,7 @@ func (ctx *rolesController) CreateController(rw http.ResponseWriter, r *http.Req
 		return
 	}
 
-	res := ctx.service.CreateService(&body)
+	res := c.service.CreateService(r.Context(), &body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -58,7 +58,7 @@ func (ctx *rolesController) CreateController(rw http.ResponseWriter, r *http.Req
 * @description GetAllController
 **/
 
-func (ctx *rolesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
+func (c *rolesController) GetAllController(rw http.ResponseWriter, r *http.Request) {
 	limit := helpers.QueryParser(r, "limit")
 	offset := helpers.QueryParser(r, "offset")
 	current_page := helpers.QueryParser(r, "current_page")
@@ -77,7 +77,7 @@ func (ctx *rolesController) GetAllController(rw http.ResponseWriter, r *http.Req
 		return
 	}
 
-	res := ctx.service.GetAllService(&query)
+	res := c.service.GetAllService(r.Context(), &query)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -90,9 +90,9 @@ func (ctx *rolesController) GetAllController(rw http.ResponseWriter, r *http.Req
 * @description GetByIdController
 **/
 
-func (ctx *rolesController) GetByIdController(rw http.ResponseWriter, r *http.Request) {
+func (c *rolesController) GetByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
-	params := dtos.DTORolesById{Id: Id}
+	params := dtos.DTORolesById{Id: uint(Id)}
 
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator}
@@ -100,7 +100,7 @@ func (ctx *rolesController) GetByIdController(rw http.ResponseWriter, r *http.Re
 		return
 	}
 
-	res := ctx.service.GetByIdService(&params)
+	res := c.service.GetByIdService(r.Context(), &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -113,9 +113,9 @@ func (ctx *rolesController) GetByIdController(rw http.ResponseWriter, r *http.Re
 * @description DeleteByIdController
 **/
 
-func (ctx *rolesController) DeleteByIdController(rw http.ResponseWriter, r *http.Request) {
+func (c *rolesController) DeleteByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
-	params := dtos.DTORolesById{Id: Id}
+	params := dtos.DTORolesById{Id: uint(Id)}
 
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator}
@@ -123,7 +123,7 @@ func (ctx *rolesController) DeleteByIdController(rw http.ResponseWriter, r *http
 		return
 	}
 
-	res := ctx.service.DeleteByIdService(&params)
+	res := c.service.DeleteByIdService(r.Context(), &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -136,9 +136,9 @@ func (ctx *rolesController) DeleteByIdController(rw http.ResponseWriter, r *http
 * @description UpdatedByIdController
 **/
 
-func (ctx *rolesController) UpdatedByIdController(rw http.ResponseWriter, r *http.Request) {
+func (c *rolesController) UpdatedByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
-	params := dtos.DTORolesById{Id: Id}
+	params := dtos.DTORolesById{Id: uint(Id)}
 
 	body := dtos.DTORoles{}
 	err := json.NewDecoder(r.Body).Decode(&body)
@@ -159,7 +159,7 @@ func (ctx *rolesController) UpdatedByIdController(rw http.ResponseWriter, r *htt
 		return
 	}
 
-	res := ctx.service.UpdatedByIdService(&body, &params)
+	res := c.service.UpdatedByIdService(r.Context(), &body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return

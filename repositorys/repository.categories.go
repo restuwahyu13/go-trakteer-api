@@ -1,11 +1,13 @@
 package repositorys
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
@@ -26,25 +28,29 @@ func NewCategoriesRepository(db *sqlx.DB) *categoriesRepository {
 * @description CreateRepository
 **/
 
-func (ctx *categoriesRepository) CreateRepository(body *dtos.DTOCategories) helpers.APIResponse {
+func (r *categoriesRepository) CreateRepository(ctx context.Context, body *dtos.DTOCategories) helpers.APIResponse {
 	categories := models.Roles{}
 	res := helpers.APIResponse{}
 
-	categories.Name = body.Name
-	checkRoleName := ctx.db.Get(&categories, "SELECT name FROM categories WHERE name = $1", body.Name)
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
 
-	if checkRoleName == nil {
+	categories.Name = body.Name
+	checkRoleNameErr := r.db.GetContext(ctx, &categories, "SELECT name FROM categories WHERE name = $1", body.Name)
+
+	if checkRoleNameErr == nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Categorie name already exist"
+		defer logrus.Errorf("Error Logs: %v", checkRoleNameErr)
 		return res
 	}
 
-	_, createdCategorieErr := ctx.db.NamedQuery("INSERT INTO categories (name) VALUES (:name)", &categories)
+	_, createdCategorieErr := r.db.NamedQueryContext(ctx, "INSERT INTO categories (name) VALUES (:name)", &categories)
 
 	if createdCategorieErr != nil {
 		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Created new categorie failed"
-		res.Error = createdCategorieErr
+		defer logrus.Errorf("Error Logs: %v", createdCategorieErr)
 		return res
 	}
 
@@ -57,27 +63,30 @@ func (ctx *categoriesRepository) CreateRepository(body *dtos.DTOCategories) help
 * @description GetAllRepository
 **/
 
-func (ctx *categoriesRepository) GetAllRepository(query *dtos.DTOCategoriesPagination) helpers.APIResponse {
+func (r *categoriesRepository) GetAllRepository(ctx context.Context, query *dtos.DTOCategoriesPagination) helpers.APIResponse {
 	categories := []models.Categories{}
 	res := helpers.APIResponse{}
+
+	ctx, cancel := context.WithTimeout(ctx, max)
+	defer cancel()
 
 	getAllCategoriesChan := make(chan error)
 	countChan := make(chan int)
 
 	go (func() {
-		getAllCategories := ctx.db.Select(&categories, fmt.Sprintf("SELECT * FROM categories ORDER BY id %s LIMIT $1 OFFSET $2", query.Sort), query.Limit, query.Offset)
+		getAllCategories := r.db.SelectContext(ctx, &categories, fmt.Sprintf("SELECT * FROM categories ORDER BY id %s LIMIT $1 OFFSET $2", query.Sort), query.Limit, query.Offset)
 		getAllCategoriesChan <- getAllCategories
 
 		count := 0
-		countCategories := ctx.db.QueryRowx("SELECT COUNT(id) FROM categories")
+		countCategories := r.db.QueryRowContext(ctx, "SELECT COUNT(id) FROM categories")
 		countCategories.Scan(&count)
 		countChan <- count
 	})()
 
-	if <-getAllCategoriesChan != nil {
+	if err := <-getAllCategoriesChan; err != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Categories data not exist"
-		res.Error = <-getAllCategoriesChan
+		defer logrus.Errorf("Error Logs: %v", err)
 		defer close(getAllCategoriesChan)
 		return res
 	}
@@ -94,16 +103,20 @@ func (ctx *categoriesRepository) GetAllRepository(query *dtos.DTOCategoriesPagin
 * @description GetByIdRepository
 **/
 
-func (ctx *categoriesRepository) GetByIdRepository(params *dtos.DTOCategoriesId) helpers.APIResponse {
+func (r *categoriesRepository) GetByIdRepository(ctx context.Context, params *dtos.DTOCategoriesId) helpers.APIResponse {
 	catagories := models.Categories{}
 	res := helpers.APIResponse{}
 
-	getRoleId := ctx.db.Get(&catagories, "SELECT * FROM catagories WHERE id = $1", params.Id)
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
 
-	if getRoleId != nil {
+	catagories.Id = params.Id
+	getRoleIdErr := r.db.GetContext(ctx, &catagories, "SELECT * FROM catagories WHERE id = $1", catagories.Id)
+
+	if getRoleIdErr != nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = fmt.Sprintf("Categorie data for this id %d, not exist", params.Id)
-		res.Error = getRoleId
+		res.StatMsg = fmt.Sprintf("CategorieId for this id %d not exist", catagories.Id)
+		defer logrus.Errorf("Error Logs: %v", getRoleIdErr)
 		return res
 	}
 
@@ -117,31 +130,37 @@ func (ctx *categoriesRepository) GetByIdRepository(params *dtos.DTOCategoriesId)
 * @description DeleteByIdRepository
 **/
 
-func (ctx *categoriesRepository) DeleteByIdRepository(params *dtos.DTOCategoriesId) helpers.APIResponse {
+func (r *categoriesRepository) DeleteByIdRepository(ctx context.Context, params *dtos.DTOCategoriesId) helpers.APIResponse {
 	categories := models.Categories{}
 	res := helpers.APIResponse{}
 
-	checkCategorieId := ctx.db.Get(&categories, "SELECT * FROM categories WHERE id = $1", params.Id)
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
 
-	if checkCategorieId != nil {
+	categories.Id = params.Id
+	checkCategorieIdErr := r.db.GetContext(ctx, &categories, "SELECT * FROM categories WHERE id = $1", categories.Id)
+
+	if checkCategorieIdErr != nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
-		res.Error = checkCategorieId
+		res.StatMsg = fmt.Sprintf("Categorie data for this id %d, not exist", categories.Id)
+		defer logrus.Errorf("Error Logs: %v", checkCategorieIdErr)
 		return res
 	}
 
-	_, deletedCategorieErr := ctx.db.NamedQuery("DELETE FROM categories WHERE id = :id", params.Id)
+	deletedTime := time.Now().Local()
+	categories.DeletedAt = &deletedTime
+
+	_, deletedCategorieErr := r.db.NamedQueryContext(ctx, "UPDATE categories SET deleted_at = :deleted_at WHERE id = :id", &categories)
 
 	if deletedCategorieErr != nil {
 		res.StatCode = http.StatusForbidden
-		res.StatMsg = fmt.Sprintf("Deleted categorie for this id %d failed", params.Id)
-		res.Error = deletedCategorieErr
+		res.StatMsg = fmt.Sprintf("Deleted categorie for this id %d failed", categories.Id)
+		defer logrus.Errorf("Error Logs: %v", deletedCategorieErr)
 		return res
 	}
 
 	res.StatCode = http.StatusOK
 	res.StatMsg = fmt.Sprintf("Deleted categorie for this id %d success", categories.Id)
-	res.Data = categories
 	return res
 }
 
@@ -149,33 +168,36 @@ func (ctx *categoriesRepository) DeleteByIdRepository(params *dtos.DTOCategories
 * @description UpdatedByIdRepository
 **/
 
-func (ctx *categoriesRepository) UpdatedByIdRepository(body *dtos.DTOCategories, params *dtos.DTOCategoriesId) helpers.APIResponse {
-	catagories := models.Roles{}
+func (r *categoriesRepository) UpdatedByIdRepository(ctx context.Context, body *dtos.DTOCategories, params *dtos.DTOCategoriesId) helpers.APIResponse {
+	catagories := models.Categories{}
 	res := helpers.APIResponse{}
 
-	checkRoleId := ctx.db.Get(&catagories, "SELECT * FROM catagories WHERE id = $1", params.Id)
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
 
-	if checkRoleId != nil {
+	catagories.Id = params.Id
+	checkCategorieIdErr := r.db.GetContext(ctx, &catagories, "SELECT id FROM catagories WHERE id = $1", catagories.Id)
+
+	if checkCategorieIdErr != nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
-		res.Error = checkRoleId
+		res.StatMsg = fmt.Sprintf("Categorie data for this id %d not exist", catagories.Id)
+		defer logrus.Errorf("Error Logs: %v", checkCategorieIdErr)
 		return res
 	}
 
-	catagories.ID = uint(params.Id)
 	catagories.Name = body.Name
-	catagories.UpdatedAt = time.Now()
+	catagories.UpdatedAt = time.Now().Local()
 
-	_, updatedCategorieErr := ctx.db.NamedQuery("UPDATE catagories SET name = :name WHERE id = :id", &catagories)
+	_, updatedCategorieErr := r.db.NamedQueryContext(ctx, "UPDATE catagories SET name = :name WHERE id = :id", &catagories)
 
 	if updatedCategorieErr != nil {
 		res.StatCode = http.StatusForbidden
-		res.StatMsg = "Updated old categorie failed"
-		res.Error = updatedCategorieErr
+		res.StatMsg = fmt.Sprintf("Updated categorie data for this id %v failed", catagories.Id)
+		defer logrus.Errorf("Error Logs: %v", updatedCategorieErr)
 		return res
 	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = "Updated old categorie success"
+	res.StatMsg = fmt.Sprintf("Updated categorie data for this id %v success", catagories.Id)
 	return res
 }

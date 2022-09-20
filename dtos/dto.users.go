@@ -1,11 +1,11 @@
 package dtos
 
 type DTOUsersPagination struct {
-	Limit       string `validate:"required,numeric" json:"limit"`
-	Offset      string `validate:"required,numeric" json:"offset"`
+	Limit       uint   `validate:"required,numeric" json:"limit"`
+	Offset      uint   `validate:"required,numeric" json:"offset"`
 	Sort        string `validate:"required,alpha" json:"sort"`
 	Count       int    `validate:"numeric" json:"count"`
-	CurrentPage string `validate:"required,numeric" json:"current_page"`
+	CurrentPage uint   `validate:"required,numeric" json:"current_page"`
 	TotalPage   int    `validate:"numeric" json:"total_page"`
 }
 
@@ -37,14 +37,14 @@ type DTOUsersChangePassword struct {
 }
 
 type DTOUsersGetProfileById struct {
-	Id int `validate:"required,numeric,min=1" json:"id"`
+	Id uint `validate:"required,numeric,min=1" json:"id"`
 }
 
 type DTOUsersUpdateProfileById struct {
 	Email    string `mod:"trim" validate:"required,email" json:"email"`
 	Username string `mod:"trim" validate:"required,alphanum" json:"username"`
 	Name     string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
-	Active   bool   `validate:"boolean" json:"active"`
+	Active   *bool  `validate:"boolean" json:"active"`
 }
 
 type DTOUsersCreate struct {
@@ -52,23 +52,19 @@ type DTOUsersCreate struct {
 	Name        string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
 	Email       string `mod:"trim" validate:"required,email" json:"email"`
 	Password    string `validate:"required,alphanumunicode" json:"password"`
-	Active      bool   `validate:"required,boolean" json:"active"`
-	Verified    bool   `validate:"required,boolean" json:"verified"`
-	RoleId      *uint  `validate:"required,number" json:"role_id"`
-	CategorieId *uint  `validate:"required,number" json:"categorie_id"`
+	RoleId      uint   `validate:"required,numeric" json:"role_id"`
+	CategorieId uint   `validate:"required,numeric" json:"categorie_id"`
 }
 
 type DTOUsersById struct {
-	Id int `validate:"required,numeric,min=1" json:"id"`
+	Id uint `validate:"required,numeric,min=1" json:"id"`
 }
 
 type DTOUsersUpdate struct {
 	Username    string `mod:"trim" validate:"required,alphanum" json:"username"`
 	Name        string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
 	Email       string `mod:"trim" validate:"required,email" json:"email"`
-	Password    string `validate:"required,alphanumunicode" json:"password"`
-	Active      bool   `validate:"required,boolean" json:"active"`
-	Verified    bool   `validate:"required,boolean" json:"verified"`
-	RoleId      *uint  `validate:"required,number" json:"role_id"`
-	CategorieId *uint  `validate:"required,number" json:"categorie_id"`
+	Active      *bool  `validate:"required,boolean" json:"active"`
+	RoleId      uint   `validate:"required,numeric" json:"role_id"`
+	CategorieId uint   `validate:"required,numeric" json:"categorie_id"`
 }

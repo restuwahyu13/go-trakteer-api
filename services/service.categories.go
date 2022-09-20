@@ -1,6 +1,8 @@
 package services
 
 import (
+	"context"
+
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
 	"github.com/restuwahyu13/go-trakteer-api/interfaces"
@@ -16,22 +18,22 @@ func NewCategoriesService(repository repositorys.CategoriesRepository) *categori
 	return &categoriesService{repository: repository}
 }
 
-func (ctx *categoriesService) CreateService(body *dtos.DTOCategories) helpers.APIResponse {
-	return ctx.repository.CreateRepository(body)
+func (s *categoriesService) CreateService(ctx context.Context, body *dtos.DTOCategories) helpers.APIResponse {
+	return s.repository.CreateRepository(ctx, body)
 }
 
-func (ctx *categoriesService) GetAllService(query *dtos.DTOCategoriesPagination) helpers.APIResponse {
-	return ctx.repository.GetAllRepository(query)
+func (s *categoriesService) GetAllService(ctx context.Context, query *dtos.DTOCategoriesPagination) helpers.APIResponse {
+	return s.repository.GetAllRepository(ctx, query)
 }
 
-func (ctx *categoriesService) GetByIdService(params *dtos.DTOCategoriesId) helpers.APIResponse {
-	return ctx.repository.GetByIdRepository(params)
+func (s *categoriesService) GetByIdService(ctx context.Context, params *dtos.DTOCategoriesId) helpers.APIResponse {
+	return s.repository.GetByIdRepository(ctx, params)
 }
 
-func (ctx *categoriesService) DeleteByIdService(params *dtos.DTOCategoriesId) helpers.APIResponse {
-	return ctx.repository.DeleteByIdRepository(params)
+func (s *categoriesService) DeleteByIdService(ctx context.Context, params *dtos.DTOCategoriesId) helpers.APIResponse {
+	return s.repository.DeleteByIdRepository(ctx, params)
 }
 
-func (ctx *categoriesService) UpdatedByIdService(body *dtos.DTOCategories, params *dtos.DTOCategoriesId) helpers.APIResponse {
-	return ctx.repository.UpdatedByIdRepository(body, params)
+func (s *categoriesService) UpdatedByIdService(ctx context.Context, body *dtos.DTOCategories, params *dtos.DTOCategoriesId) helpers.APIResponse {
+	return s.repository.UpdatedByIdRepository(ctx, body, params)
 }

@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
@@ -8,19 +9,19 @@ import (
 )
 
 type ICategoriesRepository interface {
-	CreateRepository(body *dtos.DTOCategories) helpers.APIResponse
-	GetAllRepository(query *dtos.DTOCategoriesPagination) helpers.APIResponse
-	GetByIdRepository(params *dtos.DTOCategoriesId) helpers.APIResponse
-	DeleteByIdRepository(params *dtos.DTOCategoriesId) helpers.APIResponse
-	UpdatedByIdRepository(body *dtos.DTOCategories, params *dtos.DTOCategoriesId) helpers.APIResponse
+	CreateRepository(ctx context.Context, body *dtos.DTOCategories) helpers.APIResponse
+	GetAllRepository(ctx context.Context, query *dtos.DTOCategoriesPagination) helpers.APIResponse
+	GetByIdRepository(ctx context.Context, params *dtos.DTOCategoriesId) helpers.APIResponse
+	DeleteByIdRepository(ctx context.Context, params *dtos.DTOCategoriesId) helpers.APIResponse
+	UpdatedByIdRepository(ctx context.Context, body *dtos.DTOCategories, params *dtos.DTOCategoriesId) helpers.APIResponse
 }
 
 type ICategoriesService interface {
-	CreateService(body *dtos.DTOCategories) helpers.APIResponse
-	GetAllService(query *dtos.DTOCategoriesPagination) helpers.APIResponse
-	GetByIdService(params *dtos.DTOCategoriesId) helpers.APIResponse
-	DeleteByIdService(params *dtos.DTOCategoriesId) helpers.APIResponse
-	UpdatedByIdService(body *dtos.DTOCategories, params *dtos.DTOCategoriesId) helpers.APIResponse
+	CreateService(ctx context.Context, body *dtos.DTOCategories) helpers.APIResponse
+	GetAllService(ctx context.Context, query *dtos.DTOCategoriesPagination) helpers.APIResponse
+	GetByIdService(ctx context.Context, params *dtos.DTOCategoriesId) helpers.APIResponse
+	DeleteByIdService(ctx context.Context, params *dtos.DTOCategoriesId) helpers.APIResponse
+	UpdatedByIdService(ctx context.Context, body *dtos.DTOCategories, params *dtos.DTOCategoriesId) helpers.APIResponse
 }
 
 type ICategoriesController interface {

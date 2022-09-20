@@ -1,7 +1,6 @@
 package repositorys
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -11,7 +10,6 @@ import (
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
 	"github.com/restuwahyu13/go-trakteer-api/interfaces"
 	"github.com/restuwahyu13/go-trakteer-api/models"
-	"github.com/restuwahyu13/go-trakteer-api/packages"
 )
 
 type CustomersRepository = interfaces.ICustomersRepository
@@ -28,70 +26,70 @@ func NewCustomersRepository(db *sqlx.DB) *customersRepository {
 **/
 
 func (ctx *customersRepository) RegisterRepository(body *dtos.DTOCustomersRegister) helpers.APIResponse {
-	users := models.Users{}
-	roles := models.Roles{}
-	catogories := models.Categories{}
+	// users := models.Users{}
+	// roles := models.Roles{}
+	// catogories := models.Categories{}
 	res := helpers.APIResponse{}
 
-	checkUserEmailChan := make(chan error)
-	checkRoleIdChan := make(chan error)
-	checkCategorieIdChan := make(chan error)
+	// checkUserEmailChan := make(chan error)
+	// checkRoleIdChan := make(chan error)
+	// checkCategorieIdChan := make(chan error)
 
-	users.Name = body.Name
-	users.Username = body.Username
-	users.Email = body.Email
-	users.Password = packages.HashPassword(body.Password)
-	users.Active = true
-	users.Verified = false
-	users.RoleId = body.RoleId
-	users.CategorieId = body.CategorieId
+	// users.Name = body.Name
+	// users.Username = body.Username
+	// users.Email = body.Email
+	// users.Password = packages.HashPassword(body.Password)
+	// users.Active = true
+	// users.Verified = false
+	// users.RoleId = body.RoleId
+	// users.CategorieId = body.CategorieId
 
-	go (func() {
-		checkUserEmail := ctx.db.Get(&users, "SELECT username, email FROM users WHERE username = $1 OR email = $2", users.Username, users.Email)
-		checkUserEmailChan <- checkUserEmail
+	// go (func() {
+	// 	checkUserEmail := ctx.db.Get(&users, "SELECT username, email FROM users WHERE username = $1 OR email = $2", users.Username, users.Email)
+	// 	checkUserEmailChan <- checkUserEmail
 
-		checkRoleId := ctx.db.Get(&roles, "SELECT id FROM roles WHERE id = $1", body.RoleId)
-		checkRoleIdChan <- checkRoleId
+	// 	checkRoleId := ctx.db.Get(&roles, "SELECT id FROM roles WHERE id = $1", body.RoleId)
+	// 	checkRoleIdChan <- checkRoleId
 
-		checkCategorieId := ctx.db.Get(&catogories, "SELECT id FROM catogories WHERE id = $1", users.CategorieId)
-		checkCategorieIdChan <- checkCategorieId
-	})()
+	// 	checkCategorieId := ctx.db.Get(&catogories, "SELECT id FROM catogories WHERE id = $1", users.CategorieId)
+	// 	checkCategorieIdChan <- checkCategorieId
+	// })()
 
-	if <-checkUserEmailChan == nil {
-		res.StatCode = http.StatusConflict
-		res.StatMsg = fmt.Sprintf("Username %v or Email %v already taken", users.Username, users.Email)
-		return res
-	}
+	// if <-checkUserEmailChan == nil {
+	// 	res.StatCode = http.StatusConflict
+	// 	res.StatMsg = fmt.Sprintf("Username %v or Email %v already taken", users.Username, users.Email)
+	// 	return res
+	// }
 
-	if <-checkRoleIdChan != nil {
-		res.StatCode = http.StatusConflict
-		res.StatMsg = "Role name is not exist"
-		res.Error = <-checkRoleIdChan
-		return res
-	}
+	// if <-checkRoleIdChan != nil {
+	// 	res.StatCode = http.StatusConflict
+	// 	res.StatMsg = "Role name is not exist"
+	// 	res.Error = <-checkRoleIdChan
+	// 	return res
+	// }
 
-	if <-checkCategorieIdChan != nil {
-		res.StatCode = http.StatusConflict
-		res.StatMsg = "Categorie name is not exist"
-		res.Error = <-checkCategorieIdChan
-		return res
-	}
+	// if <-checkCategorieIdChan != nil {
+	// 	res.StatCode = http.StatusConflict
+	// 	res.StatMsg = "Categorie name is not exist"
+	// 	res.Error = <-checkCategorieIdChan
+	// 	return res
+	// }
 
-	if users.Role.Name != "customer" {
-		res.StatCode = http.StatusBadRequest
-		res.StatMsg = "Your role must be customer"
-		return res
-	}
+	// if users.Role.Name != "customer" {
+	// 	res.StatCode = http.StatusBadRequest
+	// 	res.StatMsg = "Your role must be customer"
+	// 	return res
+	// }
 
-	_, err := ctx.db.NamedQuery(`
-		INSERT INTO users (name, username, email, password, active, verified, social_link, role_id, categorie_id)
-		VALUES(:name, :username, :email, :password, :active, :verified, :social_link, :role_id, :categorie_id)`, users)
+	// _, err := ctx.db.NamedQuery(`
+	// 	INSERT INTO users (name, username, email, password, active, verified, social_link, role_id, categorie_id)
+	// 	VALUES(:name, :username, :email, :password, :active, :verified, :social_link, :role_id, :categorie_id)`, users)
 
-	if err != nil {
-		res.StatCode = http.StatusConflict
-		res.StatMsg = "Create new customer account failed"
-		res.Error = err
-	}
+	// if err != nil {
+	// 	res.StatCode = http.StatusConflict
+	// 	res.StatMsg = "Create new customer account failed"
+	// 	res.Error = err
+	// }
 
 	res.StatCode = http.StatusCreated
 	res.StatMsg = "Create new customer account success"
@@ -135,7 +133,6 @@ func (ctx *customersRepository) ActivationRepository(params *dtos.DTOCustomersAc
 	if updateActiveError != nil {
 		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Update activation account failed"
-		res.Error = updateActiveError
 	}
 
 	res.StatCode = http.StatusBadRequest
