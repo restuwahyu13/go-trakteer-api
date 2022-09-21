@@ -18,6 +18,7 @@ type redisClient struct {
 func Redis(db int) *redisClient {
 	redisOptions := &redis.Options{}
 	redisOptions.Addr = fmt.Sprintf("%s:%s", viper.GetString("REDIS_HOST"), viper.GetString("REDIS_PORT"))
+	redisOptions.Password = viper.GetString("REDIS_PASSWORD")
 	redisOptions.DB = db
 	redisOptions.MaxRetries = 15
 	redisOptions.PoolFIFO = true
