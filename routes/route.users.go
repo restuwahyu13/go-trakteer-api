@@ -37,11 +37,11 @@ func (r *usersRoute) UsersRoute() {
 	})
 
 	r.router.Group(func(router chi.Router) {
-		router.Use(middlewares.NewMiddlewareAuth(ctx.db).Middleware)
+		router.Use(middlewares.NewMiddlewareAuth(r.db).Middleware)
 		router.Post(helpers.Endpoint(r.prefix, "/"), r.controller.CreateUsersController)
 		router.Get(helpers.Endpoint(r.prefix, "/"), r.controller.GetAllUsersController)
 		router.Get(helpers.Endpoint(r.prefix, "/{id:[0-9]+}"), r.controller.GetUsersByIdController)
 		router.Delete(helpers.Endpoint(r.prefix, "/{id:[0-9]+}"), r.controller.DeleteUsersByIdController)
-		router.Put(helpers.Endpoint(ctx.prefix, "/{id:[0-9]+}"), r.controller.UpdateUsersByIdController)
+		router.Put(helpers.Endpoint(r.prefix, "/{id:[0-9]+}"), r.controller.UpdateUsersByIdController)
 	})
 }
