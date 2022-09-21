@@ -65,7 +65,9 @@ func (r *usersRepository) LoginRepository(ctx context.Context, body *dtos.DTOUse
 		roles.id as role_id, roles.name as role_name, roles.created_at as role_created_at, roles.updated_at as role_updated_at
 		FROM users INNER JOIN roles ON users.role_id = roles.id WHERE users.email = $1
 	`, body.Email)
-	carta.Map(checkUserEmail, &users)
+
+	relationErr := carta.Map(checkUserEmail, &users)
+	defer logrus.Errorf("Error Logs: %v", relationErr)
 
 	if err != nil {
 		res.StatCode = http.StatusBadRequest
@@ -481,6 +483,9 @@ func (r *usersRepository) GetAllUsersRepository(ctx context.Context, query *dtos
 func (r *usersRepository) GetUsersByIdRepository(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse {
 	users := models.Users{}
 	res := helpers.APIResponse{}
+
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
 
 	users.Id = params.Id
 	getRoleId := r.db.GetContext(ctx, &users, "SELECT id, name, username, email, active, verified, created_at, updated_at, deleted_at FROM users WHERE id = $1", users.Id)

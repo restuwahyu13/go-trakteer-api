@@ -3,10 +3,12 @@ package middlewares
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/jackskj/carta"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 
@@ -63,7 +65,23 @@ func (m *authHandler) Middleware(next http.Handler) http.Handler {
 		encoded, _ := json.Marshal(&decodeToken)
 		json.Unmarshal(encoded, &metadataToken)
 
-		checkUserEmailErr := m.db.GetContext(ctx, &users, "SELECT id FROM users WHERE email = $1", metadataToken["email"])
+		checkUserEmail, checkUserEmailErr := m.db.QueryContext(ctx, `
+			SELECT
+			users.id, users.name, users.email, users.password,
+			roles.id as role_id, roles.name as role_name,
+			categories.id as categorie_id, categories.name as categorie_name
+			FROM users
+			LEFT JOIN roles ON users.role_id = roles.id
+			LEFT JOIN categories ON users.categorie_id = categories.id
+			WHERE users.email = $1
+		`, metadataToken["email"])
+
+		relationErr := carta.Map(checkUserEmail, &users)
+		if relationErr != nil {
+			defer logrus.Errorf("Error Logs: %v", relationErr)
+			return
+		}
+
 		if checkUserEmailErr != nil {
 			res.StatCode = http.StatusUnauthorized
 			res.StatMsg = "Metadata accessToken not match with metadataToken from db"
@@ -91,6 +109,18 @@ func (m *authHandler) Middleware(next http.Handler) http.Handler {
 			res.StatCode = http.StatusBadRequest
 			res.StatMsg = "AccessToken expired"
 			helpers.Send(rw, helpers.ApiResponse(res))
+		}
+
+		cacheUserData := make(map[string]interface{})
+		cacheUserData["id"] = users.Id
+		cacheUserData["email"] = users.Email
+		cacheUserData["role"] = users.Role.Name
+		cacheUserData["categorie"] = users.Categorie.Name
+
+		_, redisErr := packages.Redis(1).Hset(r.Context(), fmt.Sprintf("users:%d", users.Id), cacheUserData, time.Duration(helpers.ExpiredAt(1, "days")))
+		if redisErr != nil {
+			defer logrus.Errorf("Error Logs: %v", redisErr)
+			return
 		}
 
 		next.ServeHTTP(rw, r)
