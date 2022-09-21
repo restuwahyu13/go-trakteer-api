@@ -109,6 +109,7 @@ func (m *authHandler) Middleware(next http.Handler) http.Handler {
 			res.StatCode = http.StatusBadRequest
 			res.StatMsg = "AccessToken expired"
 			helpers.Send(rw, helpers.ApiResponse(res))
+			return
 		}
 
 		cacheUserData := make(map[string]interface{})
