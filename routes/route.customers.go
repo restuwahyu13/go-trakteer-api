@@ -5,7 +5,6 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/restuwahyu13/go-trakteer-api/controllers"
-	"github.com/restuwahyu13/go-trakteer-api/helpers"
 	"github.com/restuwahyu13/go-trakteer-api/repositorys"
 	"github.com/restuwahyu13/go-trakteer-api/services"
 )
@@ -24,14 +23,16 @@ func NewCustomersRoute(prefix string, db *sqlx.DB, router *chi.Mux) *customersRo
 	return &customersRoute{controller: controller, prefix: prefix, router: router}
 }
 
-func (ctx *customersRoute) CustomersRoute() {
-	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/register"), ctx.controller.RegisterController)
-	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/login"), ctx.controller.LoginController)
-	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/activation/{token}"), ctx.controller.ActivationController)
-	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/resend-activation"), ctx.controller.ResendActivationController)
-	ctx.router.Post(helpers.Endpoint(ctx.prefix, "/forgot-password"), ctx.controller.ForgotPasswordController)
-	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/reset-password:{token}"), ctx.controller.ResetPasswordController)
-	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/change-password:[0-9]+"), ctx.controller.ChangePasswordController)
-	ctx.router.Get(helpers.Endpoint(ctx.prefix, "/profile/{id:[0-9]+}"), ctx.controller.GetProfileByIdController)
-	ctx.router.Put(helpers.Endpoint(ctx.prefix, "/profile/{id:[0-9]+}"), ctx.controller.UpdateProfileByIdController)
+func (r *customersRoute) CustomersRoute() {
+	r.router.Route(r.prefix, func(router chi.Router) {
+		r.router.Post("/register", r.controller.RegisterController)
+		r.router.Post("/login", r.controller.LoginController)
+		r.router.Get("/activation/{token}", r.controller.ActivationController)
+		r.router.Post("/resend-activation", r.controller.ResendActivationController)
+		r.router.Post("/forgot-password", r.controller.ForgotPasswordController)
+		r.router.Put("/reset-password:{token}", r.controller.ResetPasswordController)
+		r.router.Put("/change-password:[0-9]+", r.controller.ChangePasswordController)
+		r.router.Get("/profile/{id:[0-9]+}", r.controller.GetProfileByIdController)
+		r.router.Put("/profile/{id:[0-9]+}", r.controller.UpdateProfileByIdController)
+	})
 }
