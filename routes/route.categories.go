@@ -5,7 +5,6 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/restuwahyu13/go-trakteer-api/controllers"
-	"github.com/restuwahyu13/go-trakteer-api/helpers"
 	"github.com/restuwahyu13/go-trakteer-api/middlewares"
 	"github.com/restuwahyu13/go-trakteer-api/repositorys"
 	"github.com/restuwahyu13/go-trakteer-api/services"
@@ -26,12 +25,13 @@ func NewCategoriesRoute(prefix string, db *sqlx.DB, router *chi.Mux) *categories
 }
 
 func (r *categoriesRoute) CategoriesRoute() {
-	r.router.Group(func(router chi.Router) {
+	r.router.Route(r.prefix, func(router chi.Router) {
 		router.Use(middlewares.NewMiddlewareAuth(r.db).Middleware)
-		router.Post(helpers.Endpoint(r.prefix, "/"), r.controller.CreateController)
-		router.Get(helpers.Endpoint(r.prefix, "/"), r.controller.GetAllController)
-		router.Get(helpers.Endpoint(r.prefix, "/{id:[0-9]+}"), r.controller.GetByIdController)
-		router.Delete(helpers.Endpoint(r.prefix, "/{id:[0-9]+}"), r.controller.DeleteByIdController)
-		router.Put(helpers.Endpoint(r.prefix, "/{id:[0-9]+}"), r.controller.UpdatedByIdController)
+
+		router.Post("/", r.controller.CreateController)
+		router.Get("/", r.controller.GetAllController)
+		router.Get("/{id:[0-9]+}", r.controller.GetByIdController)
+		router.Delete("/{id:[0-9]+}", r.controller.DeleteByIdController)
+		router.Put("/{id:[0-9]+}", r.controller.UpdatedByIdController)
 	})
 }

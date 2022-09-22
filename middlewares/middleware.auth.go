@@ -118,7 +118,7 @@ func (m *authHandler) Middleware(next http.Handler) http.Handler {
 		cacheUserData["role"] = users.Role.Name
 		cacheUserData["categorie"] = users.Categorie.Name
 
-		_, redisErr := packages.Redis(1).Hset(ctx, fmt.Sprintf("users:%d", users.Id), cacheUserData, time.Duration(helpers.ExpiredAt(1, "days")))
+		_, redisErr := packages.Redis(1).Hset(ctx, fmt.Sprintf("users:%s", users.Email), cacheUserData, time.Duration(helpers.ExpiredAt(1, "days")))
 		if redisErr != nil {
 			defer logrus.Errorf("Error Logs: %v", redisErr)
 			return

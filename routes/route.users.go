@@ -5,7 +5,6 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/restuwahyu13/go-trakteer-api/controllers"
-	"github.com/restuwahyu13/go-trakteer-api/helpers"
 	"github.com/restuwahyu13/go-trakteer-api/middlewares"
 	"github.com/restuwahyu13/go-trakteer-api/repositorys"
 	"github.com/restuwahyu13/go-trakteer-api/services"
@@ -27,21 +26,25 @@ func NewUsersRoute(prefix string, db *sqlx.DB, router *chi.Mux) *usersRoute {
 }
 
 func (r *usersRoute) UsersRoute() {
-	r.router.Group(func(router chi.Router) {
-		router.Post(helpers.Endpoint(r.prefix, "/login"), r.controller.LoginController)
-		router.Post(helpers.Endpoint(r.prefix, "/forgot-password"), r.controller.ForgotPasswordController)
-		router.Put(helpers.Endpoint(r.prefix, "/reset-password/{token}"), r.controller.ResetPasswordController)
-		router.Put(helpers.Endpoint(r.prefix, "/change-password/{id:[0-9]+}"), r.controller.ChangePasswordController)
-		router.Get(helpers.Endpoint(r.prefix, "/profile/{id:[0-9]+}"), r.controller.GetProfileByIdController)
-		router.Put(helpers.Endpoint(r.prefix, "/profile/{id:[0-9]+}"), r.controller.UpdateProfileByIdController)
-	})
+	r.router.Route(r.prefix, func(route chi.Router) {
+		route.Group(func(router chi.Router) {
+			router.Post("/login", r.controller.LoginController)
+			router.Post("/forgot-password", r.controller.ForgotPasswordController)
+			router.Put("/reset-password/{token}", r.controller.ResetPasswordController)
+			router.Put("/change-password/{id:[0-9]+}", r.controller.ChangePasswordController)
+			router.Get("/profile/{id:[0-9]+}", r.controller.GetProfileByIdController)
+			router.Put("/profile/{id:[0-9]+}", r.controller.UpdateProfileByIdController)
+		})
 
-	r.router.Group(func(router chi.Router) {
-		router.Use(middlewares.NewMiddlewareAuth(r.db).Middleware)
-		router.Post(helpers.Endpoint(r.prefix, "/"), r.controller.CreateUsersController)
-		router.Get(helpers.Endpoint(r.prefix, "/"), r.controller.GetAllUsersController)
-		router.Get(helpers.Endpoint(r.prefix, "/{id:[0-9]+}"), r.controller.GetUsersByIdController)
-		router.Delete(helpers.Endpoint(r.prefix, "/{id:[0-9]+}"), r.controller.DeleteUsersByIdController)
-		router.Put(helpers.Endpoint(r.prefix, "/{id:[0-9]+}"), r.controller.UpdateUsersByIdController)
+		route.Group(func(router chi.Router) {
+			router.Use(middlewares.NewMiddlewareAuth(r.db).Middleware)
+			router.Use(middlewares.NewMiddlewarePermission("super admin", "staff").Middleware)
+
+			router.Post("/", r.controller.CreateUsersController)
+			router.Get("/", r.controller.GetAllUsersController)
+			router.Get("/{id:[0-9]+}", r.controller.GetUsersByIdController)
+			router.Delete("/{id:[0-9]+}", r.controller.DeleteUsersByIdController)
+			router.Put("/{id:[0-9]+}", r.controller.UpdateUsersByIdController)
+		})
 	})
 }
