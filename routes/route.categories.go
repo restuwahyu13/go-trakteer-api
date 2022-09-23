@@ -27,6 +27,7 @@ func NewCategoriesRoute(prefix string, db *sqlx.DB, router *chi.Mux) *categories
 func (r *categoriesRoute) CategoriesRoute() {
 	r.router.Route(r.prefix, func(router chi.Router) {
 		router.Use(middlewares.NewMiddlewareAuth(r.db).Middleware)
+		router.Use(middlewares.NewMiddlewarePermission("super admin", "staff").Middleware)
 
 		router.Post("/", r.controller.CreateController)
 		router.Get("/", r.controller.GetAllController)

@@ -48,12 +48,10 @@ type DTOUsersUpdateProfileById struct {
 }
 
 type DTOUsersCreate struct {
-	Username    string `mod:"trim" validate:"required,alphanum" json:"username"`
-	Name        string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
-	Email       string `mod:"trim" validate:"required,email" json:"email"`
-	Password    string `validate:"required,alphanumunicode" json:"password"`
-	RoleId      uint   `validate:"required,numeric" json:"role_id"`
-	CategorieId uint   `validate:"required,numeric" json:"categorie_id"`
+	Name     string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
+	Email    string `mod:"trim" validate:"required,email" json:"email"`
+	Password string `validate:"required,alphanumunicode" json:"password"`
+	RoleId   uint   `validate:"required,numeric" json:"role_id"`
 }
 
 type DTOUsersById struct {
@@ -61,10 +59,8 @@ type DTOUsersById struct {
 }
 
 type DTOUsersUpdate struct {
-	Username    string `mod:"trim" validate:"required,alphanum" json:"username"`
-	Name        string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
-	Email       string `mod:"trim" validate:"required,email" json:"email"`
-	Active      *bool  `validate:"required,boolean" json:"active"`
-	RoleId      uint   `validate:"required,numeric" json:"role_id"`
-	CategorieId uint   `validate:"required,numeric" json:"categorie_id"`
+	Name   string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
+	Email  string `mod:"trim" validate:"required,email" json:"email"`
+	Active *bool  `validate:"required,boolean" json:"active"`
+	RoleId uint   `validate:"required,numeric" json:"role_id"`
 }

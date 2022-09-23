@@ -75,7 +75,7 @@ func (r *usersRepository) LoginRepository(ctx context.Context, body *dtos.DTOUse
 	}
 
 	jwtPayload := make(map[string]interface{})
-	jwtPayload["email"] = users.Email
+	jwtPayload["id"] = users.Id
 	jwtPayload["role"] = users.Role.Name
 
 	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
@@ -83,10 +83,10 @@ func (r *usersRepository) LoginRepository(ctx context.Context, body *dtos.DTOUse
 
 	accessTokenExpired := helpers.ExpiredAt(1, "days")
 	refrehTokenExpired := helpers.ExpiredAt(2, "months")
-	expiredAt := time.Now().Add(time.Duration(accessTokenExpired)).In(jakartaTimeZone)
+	expiredAt := time.Now().Add(accessTokenExpired).In(jakartaTimeZone)
 
-	accessToken := packages.SignToken(jwtPayload, time.Duration(accessTokenExpired))
-	refrehToken := packages.SignToken(jwtPayload, time.Duration(refrehTokenExpired))
+	accessToken := packages.SignToken(jwtPayload, accessTokenExpired)
+	refrehToken := packages.SignToken(jwtPayload, refrehTokenExpired)
 
 	token.ResourceId = users.Id
 	token.ResourceType = "login"
@@ -289,11 +289,11 @@ func (r *usersRepository) GetProfileByIdRepository(ctx context.Context, params *
 	defer cancel()
 
 	users.Id = params.Id
-	checkUserErr := r.db.GetContext(ctx, &users, "SELECT id, name, username, email, active, verified, created_at, updated_at, deleted_at FROM users WHERE id = $1", users.Id)
+	checkUserErr := r.db.GetContext(ctx, &users, "SELECT id, name, email, active, verified, created_at, updated_at, deleted_at FROM users WHERE id = $1", users.Id)
 
 	if checkUserErr != nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = fmt.Sprintf("UserId for this id %d not exist ", users.Id)
+		res.StatMsg = fmt.Sprintf("User data for this id %d not exist ", users.Id)
 		defer logrus.Errorf("Error Logs: %v", checkUserErr)
 		return res
 	}
@@ -318,18 +318,17 @@ func (r *usersRepository) UpdateProfileByIdRepository(ctx context.Context, body 
 	checkUserErr := r.db.GetContext(ctx, &users, "SELECT id FROM users WHERE id = $1", params.Id)
 	if checkUserErr != nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = fmt.Sprintf("UserId for this id %d not exist ", users.Id)
+		res.StatMsg = fmt.Sprintf("User data for this id %d not exist ", users.Id)
 		defer logrus.Errorf("Error Logs: %v", checkUserErr)
 		return res
 	}
 
 	users.Id = params.Id
 	users.Name = body.Name
-	users.Username = body.Username
 	users.Email = body.Email
 	users.Active = *body.Active
 
-	_, updateProfileErr := r.db.NamedQueryContext(ctx, "UPDATE users SET name = :name, username = :username, email = :email, active = :active WHERE id = :id", &users)
+	_, updateProfileErr := r.db.NamedQueryContext(ctx, "UPDATE users SET name = :name, email = :email, active = :active WHERE id = :id", &users)
 	if updateProfileErr != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Update profile failed"
@@ -348,7 +347,6 @@ func (r *usersRepository) UpdateProfileByIdRepository(ctx context.Context, body 
 
 func (r *usersRepository) CreateUsersRepository(ctx context.Context, body *dtos.DTOUsersCreate) helpers.APIResponse {
 	users := models.Users{}
-	categories := models.Categories{}
 	roles := models.Roles{}
 	res := helpers.APIResponse{}
 
@@ -356,32 +354,26 @@ func (r *usersRepository) CreateUsersRepository(ctx context.Context, body *dtos.
 	defer cancel()
 
 	users.Name = body.Name
-	users.Username = body.Username
 	users.Email = body.Email
 	users.Password = packages.HashPassword(body.Password)
 	users.Active = true
 	users.Verified = true
 	users.RoleId = body.RoleId
-	users.CategorieId = body.CategorieId
 
 	checkUserErrChan := make(chan error)
 	checkRoleErrChan := make(chan error)
-	checkCategorieErrChan := make(chan error)
 
 	go func() {
-		checkUserErr := r.db.GetContext(ctx, &users, "SELECT username, email FROM users WHERE username = $1 OR email = $2", users.Username, users.Email)
+		checkUserErr := r.db.GetContext(ctx, &users, "SELECT email FROM users WHERE email = $2", users.Email)
 		checkUserErrChan <- checkUserErr
 
 		checkRoleErr := r.db.GetContext(ctx, &roles, "SELECT id FROM roles WHERE id = $1", users.RoleId)
 		checkRoleErrChan <- checkRoleErr
-
-		checkCategorieErr := r.db.GetContext(ctx, &categories, "SELECT id FROM categories WHERE id = $1", users.CategorieId)
-		checkCategorieErrChan <- checkCategorieErr
 	}()
 
 	if err := <-checkUserErrChan; err == nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = fmt.Sprintf("Username %s or email %s already taken", users.Username, users.Email)
+		res.StatMsg = fmt.Sprintf("Email %s already taken", users.Email)
 		defer logrus.Errorf("Error Logs: %v", err)
 		defer close(checkUserErrChan)
 		return res
@@ -389,23 +381,16 @@ func (r *usersRepository) CreateUsersRepository(ctx context.Context, body *dtos.
 
 	if err := <-checkRoleErrChan; err != nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = fmt.Sprintf("RoleId for this id %d not exist", users.RoleId)
+		res.StatMsg = fmt.Sprintf("Role data for this id %d not exist", users.RoleId)
 		defer logrus.Errorf("Error Logs: %v", err)
 		defer close(checkRoleErrChan)
 		return res
 	}
 
-	if err := <-checkCategorieErrChan; err != nil {
-		res.StatCode = http.StatusBadRequest
-		res.StatMsg = fmt.Sprintf("CategorieId for this id %d not exist", users.CategorieId)
-		defer logrus.Errorf("Error Logs: %v", err)
-		defer close(checkCategorieErrChan)
-		return res
-	}
-
 	_, insertErr := r.db.NamedQueryContext(ctx, `
-	INSERT INTO users (name, username, email, password, active, verified, social_link, role_id, categorie_id)
-	VALUES(:name, :username, :email, :password, :active, :verified, :social_link, :role_id, :categorie_id)`, &users)
+		INSERT INTO users (name, email, password, active, verified, role_id)
+		VALUES(:name, :email, :password, :active, :verified, :role_id)`,
+		&users)
 
 	if insertErr != nil {
 		res.StatCode = http.StatusConflict
@@ -434,7 +419,7 @@ func (r *usersRepository) GetAllUsersRepository(ctx context.Context, query *dtos
 	countChan := make(chan int)
 
 	go func() {
-		getAllRoles := r.db.SelectContext(ctx, &users, fmt.Sprintf("SELECT id, name, username, email, active, verified, created_at, updated_at, deleted_at FROM users ORDER BY id %s LIMIT $1 OFFSET $2", query.Sort), query.Limit, query.Offset)
+		getAllRoles := r.db.SelectContext(ctx, &users, fmt.Sprintf("SELECT id, name, email, active, verified, created_at, updated_at, deleted_at FROM users ORDER BY id %s LIMIT $1 OFFSET $2", query.Sort), query.Limit, query.Offset)
 		getAllUsersChan <- getAllRoles
 
 		count := 0
@@ -546,11 +531,9 @@ func (r *usersRepository) UpdateUsersByIdRepository(ctx context.Context, body *d
 	}
 
 	users.Name = body.Name
-	users.Username = body.Username
 	users.Email = body.Email
 	users.Active = *body.Active
 	users.RoleId = body.RoleId
-	users.CategorieId = body.CategorieId
 	users.UpdatedAt = time.Now()
 
 	_, updatedRoleErr := r.db.NamedQueryContext(ctx, "UPDATE users SET name = :name, username = :username, email = :email, active = :active WHERE id = :id", &users)

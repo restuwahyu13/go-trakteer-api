@@ -1,7 +1,7 @@
 package dtos
 
 type DTORoles struct {
-	Name string `mod:"trim" validate:"required,alpha" json:"name"`
+	Name string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
 }
 
 type DTORolePagination struct {

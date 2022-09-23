@@ -57,6 +57,7 @@ func (m *authHandler) Middleware(next http.Handler) http.Handler {
 		defer cancel()
 
 		users := models.Users{}
+		customers := models.Customers{}
 		token := models.Token{}
 
 		decodeToken, _ := packages.ParseToken(bearerToken[1])
@@ -65,30 +66,50 @@ func (m *authHandler) Middleware(next http.Handler) http.Handler {
 		encoded, _ := json.Marshal(&decodeToken)
 		json.Unmarshal(encoded, &metadataToken)
 
-		checkUserEmail, checkUserEmailErr := m.db.QueryContext(ctx, `
-			SELECT
-			users.id, users.name, users.email, users.password,
-			roles.id as role_id, roles.name as role_name,
-			categories.id as categorie_id, categories.name as categorie_name
-			FROM users
-			LEFT JOIN roles ON users.role_id = roles.id
-			LEFT JOIN categories ON users.categorie_id = categories.id
-			WHERE users.email = $1
-		`, metadataToken["email"])
-
-		relationErr := carta.Map(checkUserEmail, &users)
-		if relationErr != nil {
-			defer logrus.Errorf("Error Logs: %v", relationErr)
-			return
+		var queryDatabase string
+		if metadataToken["role"] == "customer" {
+			queryDatabase = `SELECT
+				customers.id as customer_id, customers.name as customer_name,
+				roles.id as role_id, roles.name as role_name,
+				categories.id as categorie_id, categories.name as categorie_name
+				FROM customers
+				LEFT JOIN roles ON customers.role_id = roles.id
+				LEFT JOIN categories ON customers.categorie_id = categories.id
+				WHERE customers.id = $1
+			`
+		} else {
+			queryDatabase = `SELECT
+				users.id, users.email,
+				roles.id as role_id, roles.name as role_name
+				FROM users
+				LEFT JOIN roles ON users.role_id = roles.id
+				WHERE users.id = $1
+			`
 		}
 
-		if checkUserEmailErr != nil {
+		checkById, checkByIdErr := m.db.QueryContext(ctx, queryDatabase, metadataToken["id"])
+
+		if checkByIdErr != nil {
 			res.StatCode = http.StatusUnauthorized
 			res.StatMsg = "Metadata accessToken not match with metadataToken from db"
 			helpers.Send(rw, helpers.ApiResponse(res))
 
-			defer logrus.Errorf("Error Logs: %v", checkUserEmailErr)
+			defer logrus.Errorf("Error Logs: %v", checkByIdErr)
 			return
+		}
+
+		if metadataToken["role"] == "customer" {
+			relationErr := carta.Map(checkById, &customers)
+			if relationErr != nil {
+				defer logrus.Errorf("Error Logs: %v", relationErr)
+				return
+			}
+		} else {
+			relationErr := carta.Map(checkById, &users)
+			if relationErr != nil {
+				defer logrus.Errorf("Error Logs: %v", relationErr)
+				return
+			}
 		}
 
 		checkTokenErr := m.db.GetContext(ctx, &token, "SELECT resource_id, resource_type, expired_at FROM token WHERE resource_id = $1 AND resource_type = $2 ORDER BY id DESC", users.Id, "login")
@@ -112,13 +133,20 @@ func (m *authHandler) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		cacheUserData := make(map[string]interface{})
-		cacheUserData["id"] = users.Id
-		cacheUserData["email"] = users.Email
-		cacheUserData["role"] = users.Role.Name
-		cacheUserData["categorie"] = users.Categorie.Name
+		cacheData := make(map[string]interface{})
 
-		_, redisErr := packages.Redis(1).Hset(ctx, fmt.Sprintf("users:%s", users.Email), cacheUserData, time.Duration(helpers.ExpiredAt(1, "days")))
+		if cacheData["role"] == "customer" {
+			cacheData["id"] = customers.Id
+			cacheData["email"] = customers.Email
+			cacheData["role"] = customers.Role.Name
+			cacheData["categorie"] = customers.Categorie.Name
+		} else {
+			cacheData["id"] = users.Id
+			cacheData["email"] = users.Email
+			cacheData["role"] = users.Role.Name
+		}
+
+		_, redisErr := packages.Redis(1).Hset(ctx, fmt.Sprintf("users:%d", users.Id), cacheData, time.Duration(helpers.ExpiredAt(1, "days")))
 		if redisErr != nil {
 			defer logrus.Errorf("Error Logs: %v", redisErr)
 			return

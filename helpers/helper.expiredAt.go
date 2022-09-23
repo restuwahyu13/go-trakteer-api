@@ -4,27 +4,27 @@ import (
 	"time"
 )
 
-func ExpiredAt(timeDuration time.Duration, timeType string) int64 {
+func ExpiredAt(timeDuration time.Duration, timeType string) time.Duration {
 	switch timeType {
 	case "months":
-		return int64(time.Duration(time.Second*24*60*60*30) * timeDuration)
+		return time.Duration(time.Second*24*60*60*30) * timeDuration
 
 	case "days":
-		return int64(time.Duration(time.Second*24*60*60) * timeDuration)
+		return time.Duration(time.Second*24*60*60) * timeDuration
 
 	case "hours":
-		return int64(time.Duration(time.Hour) * timeDuration)
+		return time.Duration(time.Hour) * timeDuration
 
 	case "minute":
-		return int64(time.Duration(time.Minute) * timeDuration)
+		return time.Duration(time.Minute) * timeDuration
 
 	case "second":
-		return int64(time.Duration(time.Second) * timeDuration)
+		return time.Duration(time.Second) * timeDuration
 
 	case "milisecond":
-		return int64(time.Duration(time.Millisecond) * timeDuration)
+		return time.Duration(time.Millisecond) * timeDuration
 
 	default:
-		return int64(time.Duration(time.Nanosecond) * timeDuration)
+		return time.Duration(time.Nanosecond) * timeDuration
 	}
 }
