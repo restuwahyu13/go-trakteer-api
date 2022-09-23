@@ -180,12 +180,10 @@ func (r *customersRepository) LoginRepository(ctx context.Context, body *dtos.DT
 	customers.Email = body.Email
 	customers.Password = body.Password
 
-	checkUserEmail, err := r.db.QueryContext(ctx, `SELECT
-		users.id, users.name, users.email, users.password,
-		roles.id as role_id, roles.name as role_name, roles.created_at as role_created_at, roles.updated_at as role_updated_at
+	checkUserEmail, err := r.db.QueryContext(ctx, `
+		SELECT users.id, users.name, users.email, users.password, roles.id as role_id, roles.name as role_name
 		FROM users INNER JOIN roles ON users.role_id = roles.id WHERE users.email = $1
 	`, body.Email)
-
 	if err != nil {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Users email %v not registered", customers.Email)
