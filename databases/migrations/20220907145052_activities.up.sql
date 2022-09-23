@@ -8,3 +8,4 @@ CREATE TABLE IF NOT EXISTS "activities" (
 );
 
 ALTER TABLE "activities" ADD FOREIGN KEY (user_id) REFERENCES "users" ON DELETE CASCADE;
+ALTER TABLE "activities" ADD FOREIGN KEY (user_id) REFERENCES  "customers" ON DELETE CASCADE;
