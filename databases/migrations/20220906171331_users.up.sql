@@ -1,6 +1,5 @@
 CREATE TABLE IF NOT EXISTS "users" (
   "id" serial PRIMARY KEY,
-  "username" varchar(50) NOT NULL UNIQUE,
   "name" varchar(50) NOT NULL UNIQUE,
   "email" varchar(50) NOT NULL UNIQUE,
   "password" varchar(255) NOT NULL,
