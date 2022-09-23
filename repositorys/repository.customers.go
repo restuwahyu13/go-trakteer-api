@@ -140,7 +140,7 @@ func (r *customersRepository) RegisterRepository(ctx context.Context, body *dtos
 		htmlTemplateRes, htmlTemplateErr := helpers.HtmlRender("template.activationAccount", htmlContent)
 		htmlTemplateErrchan <- htmlTemplateErr
 
-		sendEmailErr := helpers.SmtpEmail([]string{customers.Email}, "Reset Password!", htmlTemplateRes)
+		sendEmailErr := helpers.SmtpEmail([]string{customers.Email}, "Activation Account!", htmlTemplateRes)
 		sendEmailErrChan <- sendEmailErr
 	}()
 
@@ -329,10 +329,10 @@ func (r *customersRepository) ResendActivationRepository(ctx context.Context, bo
 		htmlContent.To = customers.Email
 		htmlContent.Token = helpers.RandomToken()
 
-		htmlTemplateRes, htmlTemplateErr := helpers.HtmlRender("template.resetPassword", htmlContent)
+		htmlTemplateRes, htmlTemplateErr := helpers.HtmlRender("template.activationAccount", htmlContent)
 		htmlTemplateErrchan <- htmlTemplateErr
 
-		sendEmailErr := helpers.SmtpEmail([]string{customers.Email}, "Reset Password!", htmlTemplateRes)
+		sendEmailErr := helpers.SmtpEmail([]string{customers.Email}, "Activation Account!", htmlTemplateRes)
 		sendEmailErrChan <- sendEmailErr
 	}()
 
@@ -353,7 +353,7 @@ func (r *customersRepository) ResendActivationRepository(ctx context.Context, bo
 	}
 
 	token.ResourceId = customers.Id
-	token.ResourceType = "reset password"
+	token.ResourceType = "activation"
 	token.AccessToken = helpers.RandomToken()
 	token.ExpiredAt = time.Now().Add(time.Duration(helpers.ExpiredAt(5, "minutes")))
 
@@ -369,7 +369,7 @@ func (r *customersRepository) ResendActivationRepository(ctx context.Context, bo
 	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = fmt.Sprintf("Reset password success, please check your email %s address", customers.Email)
+	res.StatMsg = fmt.Sprintf("Resend activation success, please check your email %s address", customers.Email)
 	return res
 }
 
