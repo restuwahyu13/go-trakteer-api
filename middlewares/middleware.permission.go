@@ -69,7 +69,7 @@ func (h *permission) Middleware(next http.Handler) http.Handler {
 			mappingRole[v] = i + 1
 		}
 
-		if mappingRole[user.Role] == 0 {
+		if _, ok := mappingRole[user.Role]; !ok {
 			res.StatCode = http.StatusForbidden
 			res.StatMsg = "You role not allowed, access denield"
 			helpers.Send(rw, helpers.ApiResponse(res))

@@ -28,7 +28,7 @@ func NewCustomersController(service services.CustomersService) *customersControl
 * @description RegisterController
 **/
 
-func (ctx *customersController) RegisterController(rw http.ResponseWriter, r *http.Request) {
+func (c *customersController) RegisterController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOCustomersRegister{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -44,7 +44,7 @@ func (ctx *customersController) RegisterController(rw http.ResponseWriter, r *ht
 		return
 	}
 
-	res := ctx.service.RegisterService(&body)
+	res := c.service.RegisterService(r.Context(), &body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -57,7 +57,7 @@ func (ctx *customersController) RegisterController(rw http.ResponseWriter, r *ht
 * @description LoginController
 **/
 
-func (ctx *customersController) LoginController(rw http.ResponseWriter, r *http.Request) {
+func (c *customersController) LoginController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOCustomersLogin{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -73,7 +73,7 @@ func (ctx *customersController) LoginController(rw http.ResponseWriter, r *http.
 		return
 	}
 
-	res := ctx.service.LoginService(&body)
+	res := c.service.LoginService(r.Context(), &body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -86,7 +86,7 @@ func (ctx *customersController) LoginController(rw http.ResponseWriter, r *http.
 * @description ActivationController
 **/
 
-func (ctx *customersController) ActivationController(rw http.ResponseWriter, r *http.Request) {
+func (c *customersController) ActivationController(rw http.ResponseWriter, r *http.Request) {
 	token := chi.URLParam(r, "token")
 	params := dtos.DTOCustomersActivation{Token: token}
 
@@ -96,7 +96,7 @@ func (ctx *customersController) ActivationController(rw http.ResponseWriter, r *
 		return
 	}
 
-	res := ctx.service.ActivationService(&params)
+	res := c.service.ActivationService(r.Context(), &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -109,7 +109,7 @@ func (ctx *customersController) ActivationController(rw http.ResponseWriter, r *
 * @description ResendActivationController
 **/
 
-func (ctx *customersController) ResendActivationController(rw http.ResponseWriter, r *http.Request) {
+func (c *customersController) ResendActivationController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOCustomersResendActivation{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -125,7 +125,7 @@ func (ctx *customersController) ResendActivationController(rw http.ResponseWrite
 		return
 	}
 
-	res := ctx.service.ResendActivationService(&body)
+	res := c.service.ResendActivationService(r.Context(), &body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -138,7 +138,7 @@ func (ctx *customersController) ResendActivationController(rw http.ResponseWrite
 * @description ForgotPasswordController
 **/
 
-func (ctx *customersController) ForgotPasswordController(rw http.ResponseWriter, r *http.Request) {
+func (c *customersController) ForgotPasswordController(rw http.ResponseWriter, r *http.Request) {
 	body := dtos.DTOCustomersForgotPassword{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -154,7 +154,7 @@ func (ctx *customersController) ForgotPasswordController(rw http.ResponseWriter,
 		return
 	}
 
-	res := ctx.service.ForgotPasswordService(&body)
+	res := c.service.ForgotPasswordService(r.Context(), &body)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -167,7 +167,10 @@ func (ctx *customersController) ForgotPasswordController(rw http.ResponseWriter,
 * @description ResetPasswordController
 **/
 
-func (ctx *customersController) ResetPasswordController(rw http.ResponseWriter, r *http.Request) {
+func (c *customersController) ResetPasswordController(rw http.ResponseWriter, r *http.Request) {
+	token := chi.URLParam(r, "token")
+	params := dtos.DTOCustomerResetPasswordToken{Token: token}
+
 	body := dtos.DTOCustomersResetPassword{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -183,7 +186,7 @@ func (ctx *customersController) ResetPasswordController(rw http.ResponseWriter, 
 		return
 	}
 
-	res := ctx.service.ResetPasswordService(&body)
+	res := c.service.ResetPasswordService(r.Context(), &body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -196,7 +199,10 @@ func (ctx *customersController) ResetPasswordController(rw http.ResponseWriter, 
 * @description ChangePasswordController
 **/
 
-func (ctx *customersController) ChangePasswordController(rw http.ResponseWriter, r *http.Request) {
+func (c *customersController) ChangePasswordController(rw http.ResponseWriter, r *http.Request) {
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTOCustomersById{Id: uint(Id)}
+
 	body := dtos.DTOCustomersChangePassword{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
@@ -212,7 +218,7 @@ func (ctx *customersController) ChangePasswordController(rw http.ResponseWriter,
 		return
 	}
 
-	res := ctx.service.ChangePasswordService(&body)
+	res := c.service.ChangePasswordService(r.Context(), &body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -225,9 +231,9 @@ func (ctx *customersController) ChangePasswordController(rw http.ResponseWriter,
 * @description GetProfileController
 **/
 
-func (ctx *customersController) GetProfileByIdController(rw http.ResponseWriter, r *http.Request) {
+func (c *customersController) GetProfileByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
-	params := dtos.DTOCustomersGetProfileById{Id: Id}
+	params := dtos.DTOCustomersGetProfileById{Id: uint(Id)}
 
 	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
 		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
@@ -235,7 +241,7 @@ func (ctx *customersController) GetProfileByIdController(rw http.ResponseWriter,
 		return
 	}
 
-	res := ctx.service.GetProfileByIdService(&params)
+	res := c.service.GetProfileByIdService(r.Context(), &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return
@@ -248,9 +254,9 @@ func (ctx *customersController) GetProfileByIdController(rw http.ResponseWriter,
 * @description UpdateProfileController
 **/
 
-func (ctx *customersController) UpdateProfileByIdController(rw http.ResponseWriter, r *http.Request) {
+func (c *customersController) UpdateProfileByIdController(rw http.ResponseWriter, r *http.Request) {
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
-	params := dtos.DTOCustomersGetProfileById{Id: Id}
+	params := dtos.DTOCustomersGetProfileById{Id: uint(Id)}
 
 	body := dtos.DTOCustomersUpdateProfileById{}
 	err := json.NewDecoder(r.Body).Decode(&body)
@@ -271,7 +277,7 @@ func (ctx *customersController) UpdateProfileByIdController(rw http.ResponseWrit
 		return
 	}
 
-	res := ctx.service.UpdateProfileByIdService(&body, &params)
+	res := c.service.UpdateProfileByIdService(r.Context(), &body, &params)
 	if res.StatCode >= 400 {
 		helpers.Send(rw, helpers.ApiResponse(res))
 		return

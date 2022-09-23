@@ -1,6 +1,8 @@
 package services
 
 import (
+	"context"
+
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
 	"github.com/restuwahyu13/go-trakteer-api/interfaces"
@@ -16,38 +18,38 @@ func NewCustomersService(repository repositorys.CustomersRepository) *customersS
 	return &customersService{repository: repository}
 }
 
-func (ctx *customersService) RegisterService(body *dtos.DTOCustomersRegister) helpers.APIResponse {
-	return ctx.repository.RegisterRepository(body)
+func (s *customersService) RegisterService(ctx context.Context, body *dtos.DTOCustomersRegister) helpers.APIResponse {
+	return s.repository.RegisterRepository(ctx, body)
 }
 
-func (ctx *customersService) LoginService(body *dtos.DTOCustomersLogin) helpers.APIResponse {
-	return ctx.repository.LoginRepository(body)
+func (s *customersService) LoginService(ctx context.Context, body *dtos.DTOCustomersLogin) helpers.APIResponse {
+	return s.repository.LoginRepository(ctx, body)
 }
 
-func (ctx *customersService) ActivationService(params *dtos.DTOCustomersActivation) helpers.APIResponse {
-	return ctx.repository.ActivationRepository(params)
+func (s *customersService) ActivationService(ctx context.Context, params *dtos.DTOCustomersActivation) helpers.APIResponse {
+	return s.repository.ActivationRepository(ctx, params)
 }
 
-func (ctx *customersService) ResendActivationService(body *dtos.DTOCustomersResendActivation) helpers.APIResponse {
-	return ctx.repository.ResendActivationRepository(body)
+func (s *customersService) ResendActivationService(ctx context.Context, body *dtos.DTOCustomersResendActivation) helpers.APIResponse {
+	return s.repository.ResendActivationRepository(ctx, body)
 }
 
-func (ctx *customersService) ForgotPasswordService(body *dtos.DTOCustomersForgotPassword) helpers.APIResponse {
-	return ctx.repository.ForgotPasswordRepository(body)
+func (s *customersService) ForgotPasswordService(ctx context.Context, body *dtos.DTOCustomersForgotPassword) helpers.APIResponse {
+	return s.repository.ForgotPasswordRepository(ctx, body)
 }
 
-func (ctx *customersService) ResetPasswordService(body *dtos.DTOCustomersResetPassword) helpers.APIResponse {
-	return ctx.repository.ResetPasswordRepository(body)
+func (s *customersService) ResetPasswordService(ctx context.Context, body *dtos.DTOCustomersResetPassword, params *dtos.DTOCustomerResetPasswordToken) helpers.APIResponse {
+	return s.repository.ResetPasswordRepository(ctx, body, params)
 }
 
-func (ctx *customersService) ChangePasswordService(body *dtos.DTOCustomersChangePassword) helpers.APIResponse {
-	return ctx.repository.ChangePasswordRepository(body)
+func (s *customersService) ChangePasswordService(ctx context.Context, body *dtos.DTOCustomersChangePassword, params *dtos.DTOCustomersById) helpers.APIResponse {
+	return s.repository.ChangePasswordRepository(ctx, body, params)
 }
 
-func (ctx *customersService) GetProfileByIdService(params *dtos.DTOCustomersGetProfileById) helpers.APIResponse {
-	return ctx.repository.GetProfileByIdRepository(params)
+func (s *customersService) GetProfileByIdService(ctx context.Context, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse {
+	return s.repository.GetProfileByIdRepository(ctx, params)
 }
 
-func (ctx *customersService) UpdateProfileByIdService(body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse {
-	return ctx.repository.UpdateProfileByIdRepository(body, params)
+func (s *customersService) UpdateProfileByIdService(ctx context.Context, body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse {
+	return s.repository.UpdateProfileByIdRepository(ctx, body, params)
 }

@@ -1,15 +1,21 @@
 package repositorys
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/jackskj/carta"
 	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
 	"github.com/restuwahyu13/go-trakteer-api/helpers"
 	"github.com/restuwahyu13/go-trakteer-api/interfaces"
 	"github.com/restuwahyu13/go-trakteer-api/models"
+	"github.com/restuwahyu13/go-trakteer-api/packages"
 )
 
 type CustomersRepository = interfaces.ICustomersRepository
@@ -25,95 +31,247 @@ func NewCustomersRepository(db *sqlx.DB) *customersRepository {
 * @description RegisterRepository
 **/
 
-func (ctx *customersRepository) RegisterRepository(body *dtos.DTOCustomersRegister) helpers.APIResponse {
-	// users := models.Users{}
-	// roles := models.Roles{}
-	// catogories := models.Categories{}
+func (r *customersRepository) RegisterRepository(ctx context.Context, body *dtos.DTOCustomersRegister) helpers.APIResponse {
+	customers := models.Users{}
+	roles := models.Roles{}
+	catogories := models.Categories{}
+	token := models.Token{}
 	res := helpers.APIResponse{}
 
-	// checkUserEmailChan := make(chan error)
-	// checkRoleIdChan := make(chan error)
-	// checkCategorieIdChan := make(chan error)
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
 
-	// users.Name = body.Name
-	// users.Username = body.Username
-	// users.Email = body.Email
-	// users.Password = packages.HashPassword(body.Password)
-	// users.Active = true
-	// users.Verified = false
-	// users.RoleId = body.RoleId
-	// users.CategorieId = body.CategorieId
+	checkUserEmailChan := make(chan error)
+	checkRoleIdChan := make(chan error)
+	checkCategorieIdChan := make(chan error)
 
-	// go (func() {
-	// 	checkUserEmail := ctx.db.Get(&users, "SELECT username, email FROM users WHERE username = $1 OR email = $2", users.Username, users.Email)
-	// 	checkUserEmailChan <- checkUserEmail
+	socialLink := dtos.DTOCustomersSocialLink{}
+	socialLink.GithubLink = ""
+	socialLink.DribbleLink = ""
+	socialLink.YoutubeLink = ""
+	socialLink.FacebookLink = ""
+	socialLink.InstagramLink = ""
+	socialLink.LinkendinLink = ""
+	socialLinkData := helpers.Stringify(socialLink).(string)
 
-	// 	checkRoleId := ctx.db.Get(&roles, "SELECT id FROM roles WHERE id = $1", body.RoleId)
-	// 	checkRoleIdChan <- checkRoleId
+	customers.Name = body.Name
+	customers.Username = body.Username
+	customers.Email = body.Email
+	customers.Password = packages.HashPassword(body.Password)
+	customers.Active = true
+	customers.Verified = false
+	customers.SocialLink = &socialLinkData
+	customers.RoleId = *body.RoleId
+	customers.CategorieId = *body.CategorieId
 
-	// 	checkCategorieId := ctx.db.Get(&catogories, "SELECT id FROM catogories WHERE id = $1", users.CategorieId)
-	// 	checkCategorieIdChan <- checkCategorieId
-	// })()
+	go (func() {
+		checkUserEmail := r.db.GetContext(ctx, &customers, "SELECT username, email FROM users WHERE username = $1 OR email = $2", customers.Username, customers.Email)
+		checkUserEmailChan <- checkUserEmail
 
-	// if <-checkUserEmailChan == nil {
-	// 	res.StatCode = http.StatusConflict
-	// 	res.StatMsg = fmt.Sprintf("Username %v or Email %v already taken", users.Username, users.Email)
-	// 	return res
-	// }
+		checkRoleId := r.db.GetContext(ctx, &roles, "SELECT id, name FROM roles WHERE id = $1", body.RoleId)
+		checkRoleIdChan <- checkRoleId
 
-	// if <-checkRoleIdChan != nil {
-	// 	res.StatCode = http.StatusConflict
-	// 	res.StatMsg = "Role name is not exist"
-	// 	res.Error = <-checkRoleIdChan
-	// 	return res
-	// }
+		checkCategorieId := r.db.GetContext(ctx, &catogories, "SELECT id FROM catogories WHERE id = $1", customers.CategorieId)
+		checkCategorieIdChan <- checkCategorieId
+	})()
 
-	// if <-checkCategorieIdChan != nil {
-	// 	res.StatCode = http.StatusConflict
-	// 	res.StatMsg = "Categorie name is not exist"
-	// 	res.Error = <-checkCategorieIdChan
-	// 	return res
-	// }
+	if <-checkUserEmailChan == nil {
+		res.StatCode = http.StatusConflict
+		res.StatMsg = fmt.Sprintf("Username %v or Email %v already taken", customers.Username, customers.Email)
+		return res
+	}
 
-	// if users.Role.Name != "customer" {
-	// 	res.StatCode = http.StatusBadRequest
-	// 	res.StatMsg = "Your role must be customer"
-	// 	return res
-	// }
+	if err := <-checkRoleIdChan; err != nil {
+		res.StatCode = http.StatusConflict
+		res.StatMsg = fmt.Sprintf("Role data for this id %d not exist", customers.RoleId)
+		defer logrus.Errorf("Error Logs: %v", err)
+		return res
+	}
 
-	// _, err := ctx.db.NamedQuery(`
-	// 	INSERT INTO users (name, username, email, password, active, verified, social_link, role_id, categorie_id)
-	// 	VALUES(:name, :username, :email, :password, :active, :verified, :social_link, :role_id, :categorie_id)`, users)
+	if err := <-checkCategorieIdChan; err != nil {
+		res.StatCode = http.StatusConflict
+		res.StatMsg = fmt.Sprintf("Categorie data for this id %d not exist", customers.RoleId)
+		defer logrus.Errorf("Error Logs: %v", err)
+		return res
+	}
 
-	// if err != nil {
-	// 	res.StatCode = http.StatusConflict
-	// 	res.StatMsg = "Create new customer account failed"
-	// 	res.Error = err
-	// }
+	if roles.Name != "customer" {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Your role must be customer"
+		return res
+	}
+
+	_, insertUserErr := r.db.NamedQueryContext(ctx, `
+		INSERT INTO users (name, username, email, password, active, verified, social_link, role_id, categorie_id)
+		VALUES(:name, :username, :email, :password, :active, :verified, :social_link, :role_id, :categorie_id) RETURNING id, email`, &customers)
+
+	if insertUserErr != nil {
+		res.StatCode = http.StatusConflict
+		res.StatMsg = "Create new customer account failed"
+		defer logrus.Errorf("Error Logs: %v", insertUserErr)
+		return res
+	}
+
+	token.ResourceId = customers.Id
+	token.ResourceType = "activation"
+	token.AccessToken = helpers.RandomToken()
+	token.ExpiredAt = time.Now().Add(time.Duration(helpers.ExpiredAt(5, "minutes")))
+
+	_, insertTokenErr := r.db.NamedQueryContext(ctx, `
+	INSERT INTO token (resource_id, resource_type, access_token, refresh_token, expired_at)
+	VALUES (:resource_id, :resource_type, :access_token, :refresh_token, :expired_at)`, &token)
+
+	if insertTokenErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Insert token into database failed"
+		defer logrus.Errorf("Error Logs: %v", insertTokenErr)
+		return res
+	}
+
+	htmlTemplateErrchan := make(chan error)
+	sendEmailErrChan := make(chan error)
+
+	go func() {
+		htmlContent := helpers.HtmlContent{}
+		htmlContent.Url = viper.GetString("FE_URL")
+		htmlContent.To = customers.Email
+		htmlContent.Token = token.AccessToken
+
+		htmlTemplateRes, htmlTemplateErr := helpers.HtmlRender("template.activationAccount", htmlContent)
+		htmlTemplateErrchan <- htmlTemplateErr
+
+		sendEmailErr := helpers.SmtpEmail([]string{customers.Email}, "Reset Password!", htmlTemplateRes)
+		sendEmailErrChan <- sendEmailErr
+	}()
+
+	if err := <-htmlTemplateErrchan; err != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("Render html template error: %v", err)
+		defer logrus.Errorf("Error Logs: %v", err)
+		defer close(htmlTemplateErrchan)
+		return res
+	}
+
+	if err := <-sendEmailErrChan; err != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("Send smtp email error: %v", err)
+		defer logrus.Errorf("Error Logs: %v", err)
+		defer close(htmlTemplateErrchan)
+		return res
+	}
 
 	res.StatCode = http.StatusCreated
 	res.StatMsg = "Create new customer account success"
 	return res
 }
 
-func (ctx *customersRepository) LoginRepository(body *dtos.DTOCustomersLogin) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from login repository",
-	}
+/**
+* @description LoginRepository
+**/
 
-	return res
-}
-
-func (ctx *customersRepository) ActivationRepository(params *dtos.DTOCustomersActivation) helpers.APIResponse {
-	users := models.Users{}
+func (r *customersRepository) LoginRepository(ctx context.Context, body *dtos.DTOCustomersLogin) helpers.APIResponse {
+	customers := models.Users{}
 	token := models.Token{}
 	res := helpers.APIResponse{}
 
-	checkAccessToken := ctx.db.Get(&token, "SELECT resource_id, expired_at FROM token WHERE access_token = $1 AND resource_type = $2", params.Token, "activation")
-	if checkAccessToken != nil {
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
+
+	customers.Email = body.Email
+	customers.Password = body.Password
+
+	checkUserEmail, err := r.db.QueryContext(ctx, `SELECT
+		users.id, users.name, users.email, users.password,
+		roles.id as role_id, roles.name as role_name, roles.created_at as role_created_at, roles.updated_at as role_updated_at
+		FROM users INNER JOIN roles ON users.role_id = roles.id WHERE users.email = $1
+	`, body.Email)
+
+	if err != nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = "Access token is not match"
+		res.StatMsg = fmt.Sprintf("Users email %v not registered", customers.Email)
+		defer logrus.Errorf("Error Logs: %v", err)
+		return res
+	}
+
+	if err := carta.Map(checkUserEmail, &customers); err != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("Relation between table error: %v", err)
+		defer logrus.Errorf("Error Logs: %v", err)
+		return res
+	}
+
+	if customers.Role.Name != "customer" {
+		res.StatCode = http.StatusForbidden
+		res.StatMsg = "You role not allowed, access denield only for customer"
+		return res
+	}
+
+	comparePassword := packages.ComparePassword(body.Password, customers.Password)
+	if !comparePassword {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("Users password %s miss match", body.Password)
+		return res
+	}
+
+	jwtPayload := make(map[string]interface{})
+	jwtPayload["email"] = customers.Email
+	jwtPayload["role"] = customers.Role.Name
+
+	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
+	timeFormat := time.RFC1123Z
+
+	accessTokenExpired := helpers.ExpiredAt(1, "days")
+	refrehTokenExpired := helpers.ExpiredAt(2, "months")
+	expiredAt := time.Now().Add(time.Duration(accessTokenExpired)).In(jakartaTimeZone)
+
+	accessToken := packages.SignToken(jwtPayload, time.Duration(accessTokenExpired))
+	refrehToken := packages.SignToken(jwtPayload, time.Duration(refrehTokenExpired))
+
+	token.ResourceId = customers.Id
+	token.ResourceType = "login"
+	token.AccessToken = accessToken
+	token.RefreshToken = refrehToken
+	token.ExpiredAt = expiredAt
+
+	_, insertTokenErr := r.db.NamedQueryContext(ctx, `
+	INSERT INTO token (resource_id, resource_type, access_token, refresh_token, expired_at)
+	VALUES (:resource_id, :resource_type, :access_token, :refresh_token, :expired_at)`, &token)
+
+	if insertTokenErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Insert token into database failed"
+		defer logrus.Errorf("Error Logs: %v", insertTokenErr)
+		return res
+	}
+
+	accessTokenPayload := packages.UsersToken{
+		AccessToken:         accessToken,
+		RefreshToken:        refrehToken,
+		AccessTokenExpired:  time.Now().Add(time.Duration(accessTokenExpired)).In(jakartaTimeZone).Format(timeFormat),
+		RefreshTokenExpired: time.Now().Add(time.Duration(refrehTokenExpired)).In(jakartaTimeZone).Format(timeFormat),
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = "Login success"
+	res.Data = accessTokenPayload
+	return res
+}
+
+/**
+* @description ActivationRepository
+**/
+
+func (r *customersRepository) ActivationRepository(ctx context.Context, params *dtos.DTOCustomersActivation) helpers.APIResponse {
+	customers := models.Users{}
+	token := models.Token{}
+	res := helpers.APIResponse{}
+
+	checkAccessTokenErr := r.db.GetContext(ctx, &token, "SELECT resource_id, expired_at FROM token WHERE access_token = $1 AND resource_type = $2", params.Token, "activation")
+	if checkAccessTokenErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Access token not match"
+		defer logrus.Errorf("Error Logs: %s", checkAccessTokenErr)
+		return res
 	}
 
 	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
@@ -123,73 +281,320 @@ func (ctx *customersRepository) ActivationRepository(params *dtos.DTOCustomersAc
 	if token.ExpiredAt.Format(timeFormat) < timeNow {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "Access token expired, please resend new activation token"
+		return res
 	}
 
-	users.Id = token.ResourceId
-	users.Active = true
-	users.Verified = true
+	customers.Id = token.ResourceId
+	customers.Verified = true
 
-	_, updateActiveError := ctx.db.NamedQuery("UPDATE users SET active = :active, verified = :verified WHERE id = :id", &users)
-	if updateActiveError != nil {
+	_, updateVerifiedError := r.db.NamedQueryContext(ctx, "UPDATE users SET verified = :verified WHERE id = :id", &customers)
+	if updateVerifiedError != nil {
 		res.StatCode = http.StatusForbidden
-		res.StatMsg = "Update activation account failed"
+		res.StatMsg = "Verified account failed"
+		defer logrus.Errorf("Error Logs: %s", updateVerifiedError)
+		return res
 	}
 
 	res.StatCode = http.StatusBadRequest
-	res.StatMsg = "Activation account successfully"
+	res.StatMsg = "Verified account success"
 	return res
 }
 
-func (ctx *customersRepository) ResendActivationRepository(body *dtos.DTOCustomersResendActivation) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from resend activation repository",
+/**
+* @description ResendActivationRepository
+**/
+
+func (r *customersRepository) ResendActivationRepository(ctx context.Context, body *dtos.DTOCustomersResendActivation) helpers.APIResponse {
+	customers := models.Users{}
+	token := models.Token{}
+	res := helpers.APIResponse{}
+
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
+
+	customers.Email = body.Email
+	checkUserEmailErr := r.db.GetContext(ctx, &customers, "SELECT id, email FROM users WHERE email = $1", customers.Email)
+
+	if checkUserEmailErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("User email %s not exist", customers.Email)
+		defer logrus.Errorf("Error Logs: %v", checkUserEmailErr)
+		return res
 	}
 
+	htmlTemplateErrchan := make(chan error)
+	sendEmailErrChan := make(chan error)
+
+	go func() {
+		htmlContent := helpers.HtmlContent{}
+		htmlContent.Url = viper.GetString("FE_URL")
+		htmlContent.To = customers.Email
+		htmlContent.Token = helpers.RandomToken()
+
+		htmlTemplateRes, htmlTemplateErr := helpers.HtmlRender("template.resetPassword", htmlContent)
+		htmlTemplateErrchan <- htmlTemplateErr
+
+		sendEmailErr := helpers.SmtpEmail([]string{customers.Email}, "Reset Password!", htmlTemplateRes)
+		sendEmailErrChan <- sendEmailErr
+	}()
+
+	if err := <-htmlTemplateErrchan; err != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("Render html template error: %v", err)
+		defer logrus.Errorf("Error Logs: %v", err)
+		defer close(htmlTemplateErrchan)
+		return res
+	}
+
+	if err := <-sendEmailErrChan; err != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("Send smtp email error: %v", err)
+		defer logrus.Errorf("Error Logs: %v", err)
+		defer close(htmlTemplateErrchan)
+		return res
+	}
+
+	token.ResourceId = customers.Id
+	token.ResourceType = "reset password"
+	token.AccessToken = helpers.RandomToken()
+	token.ExpiredAt = time.Now().Add(time.Duration(helpers.ExpiredAt(5, "minutes")))
+
+	_, insertTokenErr := r.db.NamedQueryContext(ctx, `
+	INSERT INTO token (resource_id, resource_type, access_token, refresh_token, expired_at)
+	VALUES (:resource_id, :resource_type, :access_token, :refresh_token, :expired_at)`, &token)
+
+	if insertTokenErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Insert token into database failed"
+		defer logrus.Errorf("Error Logs: %v", insertTokenErr)
+		return res
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = fmt.Sprintf("Reset password success, please check your email %s address", customers.Email)
 	return res
 }
 
-func (ctx *customersRepository) ForgotPasswordRepository(body *dtos.DTOCustomersForgotPassword) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from forgot password repository",
+/**
+* @description ForgotPasswordRepository
+**/
+
+func (r *customersRepository) ForgotPasswordRepository(ctx context.Context, body *dtos.DTOCustomersForgotPassword) helpers.APIResponse {
+	customers := models.Users{}
+	token := models.Token{}
+	res := helpers.APIResponse{}
+
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
+
+	customers.Email = body.Email
+	checkUserEmailErr := r.db.GetContext(ctx, &customers, "SELECT id, email FROM users WHERE email = $1", customers.Email)
+
+	if checkUserEmailErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("User email %s not exist", customers.Email)
+		defer logrus.Errorf("Error Logs: %v", checkUserEmailErr)
+		return res
 	}
 
+	htmlTemplateErrchan := make(chan error)
+	sendEmailErrChan := make(chan error)
+
+	go func() {
+		htmlContent := helpers.HtmlContent{}
+		htmlContent.Url = viper.GetString("FE_URL")
+		htmlContent.To = customers.Email
+		htmlContent.Token = helpers.RandomToken()
+
+		htmlTemplateRes, htmlTemplateErr := helpers.HtmlRender("template.resetPassword", htmlContent)
+		htmlTemplateErrchan <- htmlTemplateErr
+
+		sendEmailErr := helpers.SmtpEmail([]string{customers.Email}, "Reset Password!", htmlTemplateRes)
+		sendEmailErrChan <- sendEmailErr
+	}()
+
+	if err := <-htmlTemplateErrchan; err != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("Render html template error: %v", err)
+		defer logrus.Errorf("Error Logs: %v", err)
+		defer close(htmlTemplateErrchan)
+		return res
+	}
+
+	if err := <-sendEmailErrChan; err != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("Send smtp email error: %v", err)
+		defer logrus.Errorf("Error Logs: %v", err)
+		defer close(htmlTemplateErrchan)
+		return res
+	}
+
+	token.ResourceId = customers.Id
+	token.ResourceType = "reset password"
+	token.AccessToken = helpers.RandomToken()
+	token.ExpiredAt = time.Now().Add(time.Duration(helpers.ExpiredAt(5, "minutes")))
+
+	_, insertTokenErr := r.db.NamedQueryContext(ctx, `
+	INSERT INTO token (resource_id, resource_type, access_token, refresh_token, expired_at)
+	VALUES (:resource_id, :resource_type, :access_token, :refresh_token, :expired_at)`, &token)
+
+	if insertTokenErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Insert token into database failed"
+		defer logrus.Errorf("Error Logs: %v", insertTokenErr)
+		return res
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = fmt.Sprintf("Reset password success, please check your email %s address", customers.Email)
 	return res
 }
 
-func (ctx *customersRepository) ResetPasswordRepository(body *dtos.DTOCustomersResetPassword) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from reset password repository",
+/**
+* @description ResetPasswordRepository
+**/
+
+func (r *customersRepository) ResetPasswordRepository(ctx context.Context, body *dtos.DTOCustomersResetPassword, params *dtos.DTOCustomerResetPasswordToken) helpers.APIResponse {
+	customers := models.Users{}
+	token := models.Token{}
+	res := helpers.APIResponse{}
+
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
+
+	checkAccessTokenErr := r.db.GetContext(ctx, &token, "SELECT resource_id, expired_at FROM token WHERE access_token = $1 AND resource_type = $2 ORDER BY id DESC", params.Token, "reset password")
+	if checkAccessTokenErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Invalid token format or Token not match"
+		defer logrus.Errorf("Error Logs: %v", checkAccessTokenErr)
+		return res
 	}
 
+	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
+	timeFormat := "2006-01-02 15:04:05"
+	timeNow := time.Now().In(jakartaTimeZone).Format(timeFormat)
+
+	if token.ExpiredAt.Format(timeFormat) < timeNow {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Token expired, please try forgot password"
+	}
+
+	if body.Cpassword != body.Password {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Confirm password not match with password"
+		return res
+	}
+
+	customers.Id = token.ResourceId
+	customers.Password = packages.HashPassword(body.Password)
+
+	_, updatePasswordErr := r.db.NamedQueryContext(ctx, "UPDATE users SET password = :password WHERE id = :id", &customers)
+	if updatePasswordErr != nil {
+		res.StatCode = http.StatusForbidden
+		res.StatMsg = "Update reset password account failed"
+		defer logrus.Errorf("Error Logs: %v", updatePasswordErr)
+		return res
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = "Reset old password to new password success"
 	return res
 }
 
-func (ctx *customersRepository) ChangePasswordRepository(body *dtos.DTOCustomersChangePassword) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from change password repository",
+/**
+* @description ChangePasswordRepository
+**/
+
+func (r *customersRepository) ChangePasswordRepository(ctx context.Context, body *dtos.DTOCustomersChangePassword, params *dtos.DTOCustomersById) helpers.APIResponse {
+	customers := models.Users{}
+	res := helpers.APIResponse{}
+
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
+
+	if body.Cpassword != body.Password {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Confirm password not match with password"
+		return res
 	}
 
+	customers.Id = params.Id
+	customers.Password = packages.HashPassword(body.Password)
+
+	_, updatePasswordErr := r.db.NamedQueryContext(ctx, "UPDATE users SET password = :password WHERE id = :id", &customers)
+	if updatePasswordErr != nil {
+		res.StatCode = http.StatusForbidden
+		res.StatMsg = "Change old password to new password failed"
+		defer logrus.Errorf("Error Logs: %v", updatePasswordErr)
+		return res
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = "Change old password to new password success"
 	return res
 }
 
-func (ctx *customersRepository) GetProfileByIdRepository(params *dtos.DTOCustomersGetProfileById) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from get profile repository",
+/**
+* @description GetProfileByIdRepository
+**/
+
+func (r *customersRepository) GetProfileByIdRepository(ctx context.Context, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse {
+	customers := models.Users{}
+	res := helpers.APIResponse{}
+
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
+
+	customers.Id = params.Id
+	checkUserErr := r.db.GetContext(ctx, &customers, "SELECT id, name, username, email, active, verified, created_at, updated_at, deleted_at FROM users WHERE id = $1", customers.Id)
+
+	if checkUserErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("UserId for this id %d not exist ", customers.Id)
+		defer logrus.Errorf("Error Logs: %v", checkUserErr)
+		return res
 	}
 
+	res.StatCode = http.StatusOK
+	res.StatMsg = "Get profile data success"
+	res.Data = customers
 	return res
 }
 
-func (ctx *customersRepository) UpdateProfileByIdRepository(body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse {
-	res := helpers.APIResponse{
-		StatCode: http.StatusOK,
-		StatMsg:  "Respon from update profile repository",
+/**
+* @description UpdateProfileByIdRepository
+**/
+
+func (r *customersRepository) UpdateProfileByIdRepository(ctx context.Context, body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse {
+	customers := models.Users{}
+	res := helpers.APIResponse{}
+
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
+
+	checkUserErr := r.db.GetContext(ctx, &customers, "SELECT id FROM users WHERE id = $1", params.Id)
+	if checkUserErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("UserId for this id %d not exist ", customers.Id)
+		defer logrus.Errorf("Error Logs: %v", checkUserErr)
+		return res
 	}
 
+	customers.Id = params.Id
+	customers.Name = body.Name
+	customers.Username = body.Username
+	customers.Email = body.Email
+	customers.Active = *body.Active
+
+	_, updateProfileErr := r.db.NamedQueryContext(ctx, "UPDATE users SET name = :name, username = :username, email = :email, active = :active WHERE id = :id", &customers)
+	if updateProfileErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "Update profile failed"
+		defer logrus.Errorf("Error Logs: %v", updateProfileErr)
+		return res
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = "Updated profile success"
 	return res
 }

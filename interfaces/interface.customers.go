@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/restuwahyu13/go-trakteer-api/dtos"
@@ -8,27 +9,27 @@ import (
 )
 
 type ICustomersRepository interface {
-	RegisterRepository(body *dtos.DTOCustomersRegister) helpers.APIResponse
-	LoginRepository(body *dtos.DTOCustomersLogin) helpers.APIResponse
-	ActivationRepository(params *dtos.DTOCustomersActivation) helpers.APIResponse
-	ResendActivationRepository(body *dtos.DTOCustomersResendActivation) helpers.APIResponse
-	ForgotPasswordRepository(body *dtos.DTOCustomersForgotPassword) helpers.APIResponse
-	ResetPasswordRepository(body *dtos.DTOCustomersResetPassword) helpers.APIResponse
-	ChangePasswordRepository(body *dtos.DTOCustomersChangePassword) helpers.APIResponse
-	GetProfileByIdRepository(params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
-	UpdateProfileByIdRepository(body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
+	RegisterRepository(ctx context.Context, body *dtos.DTOCustomersRegister) helpers.APIResponse
+	LoginRepository(ctx context.Context, body *dtos.DTOCustomersLogin) helpers.APIResponse
+	ActivationRepository(ctx context.Context, params *dtos.DTOCustomersActivation) helpers.APIResponse
+	ResendActivationRepository(ctx context.Context, body *dtos.DTOCustomersResendActivation) helpers.APIResponse
+	ForgotPasswordRepository(ctx context.Context, body *dtos.DTOCustomersForgotPassword) helpers.APIResponse
+	ResetPasswordRepository(ctx context.Context, body *dtos.DTOCustomersResetPassword, params *dtos.DTOCustomerResetPasswordToken) helpers.APIResponse
+	ChangePasswordRepository(ctx context.Context, body *dtos.DTOCustomersChangePassword, params *dtos.DTOCustomersById) helpers.APIResponse
+	GetProfileByIdRepository(ctx context.Context, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
+	UpdateProfileByIdRepository(ctx context.Context, body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
 }
 
 type ICustomersService interface {
-	RegisterService(body *dtos.DTOCustomersRegister) helpers.APIResponse
-	LoginService(body *dtos.DTOCustomersLogin) helpers.APIResponse
-	ActivationService(params *dtos.DTOCustomersActivation) helpers.APIResponse
-	ResendActivationService(body *dtos.DTOCustomersResendActivation) helpers.APIResponse
-	ForgotPasswordService(body *dtos.DTOCustomersForgotPassword) helpers.APIResponse
-	ResetPasswordService(body *dtos.DTOCustomersResetPassword) helpers.APIResponse
-	ChangePasswordService(body *dtos.DTOCustomersChangePassword) helpers.APIResponse
-	GetProfileByIdService(params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
-	UpdateProfileByIdService(body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
+	RegisterService(ctx context.Context, body *dtos.DTOCustomersRegister) helpers.APIResponse
+	LoginService(ctx context.Context, body *dtos.DTOCustomersLogin) helpers.APIResponse
+	ActivationService(ctx context.Context, params *dtos.DTOCustomersActivation) helpers.APIResponse
+	ResendActivationService(ctx context.Context, body *dtos.DTOCustomersResendActivation) helpers.APIResponse
+	ForgotPasswordService(ctx context.Context, body *dtos.DTOCustomersForgotPassword) helpers.APIResponse
+	ResetPasswordService(ctx context.Context, body *dtos.DTOCustomersResetPassword, params *dtos.DTOCustomerResetPasswordToken) helpers.APIResponse
+	ChangePasswordService(ctx context.Context, body *dtos.DTOCustomersChangePassword, params *dtos.DTOCustomersById) helpers.APIResponse
+	GetProfileByIdService(ctx context.Context, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
+	UpdateProfileByIdService(ctx context.Context, body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
 }
 
 type ICustomersController interface {

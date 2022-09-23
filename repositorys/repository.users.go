@@ -23,19 +23,6 @@ type usersRepository struct {
 	db *sqlx.DB
 }
 
-type usersRole struct {
-	Name string `json:"name"`
-	Role string `json:"role"`
-}
-
-type usersToken struct {
-	AccessToken         string `json:"access_token"`
-	RefreshToken        string `json:"refresh_token"`
-	AccessTokenExpired  string `json:"access_token_expired"`
-	RefreshTokenExpired string `json:"refresh_token_expired"`
-	User                usersRole
-}
-
 var (
 	min = 10 * time.Second
 	max = 60 * time.Second
@@ -60,14 +47,10 @@ func (r *usersRepository) LoginRepository(ctx context.Context, body *dtos.DTOUse
 	users.Email = body.Email
 	users.Password = body.Password
 
-	checkUserEmail, err := r.db.QueryContext(ctx, `SELECT
-		users.id, users.name, users.email, users.password,
-		roles.id as role_id, roles.name as role_name, roles.created_at as role_created_at, roles.updated_at as role_updated_at
+	checkUserEmail, err := r.db.QueryContext(ctx, `
+		SELECT users.id, users.name, users.email, users.password, roles.id as role_id, roles.name as role_name
 		FROM users INNER JOIN roles ON users.role_id = roles.id WHERE users.email = $1
 	`, body.Email)
-
-	relationErr := carta.Map(checkUserEmail, &users)
-	defer logrus.Errorf("Error Logs: %v", relationErr)
 
 	if err != nil {
 		res.StatCode = http.StatusBadRequest
@@ -76,9 +59,16 @@ func (r *usersRepository) LoginRepository(ctx context.Context, body *dtos.DTOUse
 		return res
 	}
 
-	compare := packages.ComparePassword(body.Password, users.Password)
+	if err := carta.Map(checkUserEmail, &users); err != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("Relation between table error: %v", err)
+		defer logrus.Errorf("Error Logs: %v", err)
+		return res
+	}
 
-	if !compare {
+	comparePassword := packages.ComparePassword(body.Password, users.Password)
+
+	if !comparePassword {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Users password %s miss match", body.Password)
 		return res
@@ -115,12 +105,11 @@ func (r *usersRepository) LoginRepository(ctx context.Context, body *dtos.DTOUse
 		return res
 	}
 
-	accessTokenPayload := usersToken{
+	accessTokenPayload := packages.UsersToken{
 		AccessToken:         accessToken,
 		RefreshToken:        refrehToken,
 		AccessTokenExpired:  time.Now().Add(time.Duration(accessTokenExpired)).In(jakartaTimeZone).Format(timeFormat),
 		RefreshTokenExpired: time.Now().Add(time.Duration(refrehTokenExpired)).In(jakartaTimeZone).Format(timeFormat),
-		User:                usersRole{Name: users.Name, Role: users.Role.Name},
 	}
 
 	res.StatCode = http.StatusOK
@@ -167,18 +156,18 @@ func (r *usersRepository) ForgotPasswordRepository(ctx context.Context, body *dt
 		sendEmailErrChan <- sendEmailErr
 	}()
 
-	if htmlTemplateErr := <-htmlTemplateErrchan; htmlTemplateErr != nil {
+	if err := <-htmlTemplateErrchan; err != nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = fmt.Sprintf("Render html template error: %v", htmlTemplateErr)
-		defer logrus.Errorf("Error Logs: %v", htmlTemplateErr)
+		res.StatMsg = fmt.Sprintf("Render html template error: %v", err)
+		defer logrus.Errorf("Error Logs: %v", err)
 		defer close(htmlTemplateErrchan)
 		return res
 	}
 
-	if sendEmailErr := <-sendEmailErrChan; sendEmailErr != nil {
+	if err := <-sendEmailErrChan; err != nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = fmt.Sprintf("Send smtp email error: %v", sendEmailErr)
-		defer logrus.Errorf("Error Logs: %v", sendEmailErr)
+		res.StatMsg = fmt.Sprintf("Send smtp email error: %v", err)
+		defer logrus.Errorf("Error Logs: %v", err)
 		defer close(htmlTemplateErrchan)
 		return res
 	}
@@ -247,12 +236,6 @@ func (r *usersRepository) ResetPasswordRepository(ctx context.Context, body *dto
 		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Update reset password account failed"
 		defer logrus.Errorf("Error Logs: %v", updatePasswordErr)
-		return res
-	}
-
-	if _, ok := ctx.Deadline(); ok {
-		res.StatCode = http.StatusGatewayTimeout
-		res.StatMsg = "Server timeout, please try again"
 		return res
 	}
 

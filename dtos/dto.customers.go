@@ -1,17 +1,17 @@
 package dtos
 
 type DTOCustomersPagination struct {
-	Limit       string `validate:"required,numeric" json:"limit"`
-	Offset      string `validate:"required,numeric" json:"offset"`
+	Limit       uint   `validate:"required,numeric" json:"limit"`
+	Offset      uint   `validate:"required,numeric" json:"offset"`
 	Sort        string `validate:"required,alpha" json:"sort"`
-	Count       int    `validate:"numeric" json:"count"`
-	CurrentPage string `validate:"required,numeric" json:"current_page"`
-	TotalPage   int    `validate:"numeric" json:"total_page"`
+	Count       uint   `validate:"numeric" json:"count"`
+	CurrentPage uint   `validate:"required,numeric" json:"current_page"`
+	TotalPage   uint   `validate:"numeric" json:"total_page"`
 }
 
 type DTOCustomersRegister struct {
 	Username    string `validate:"required,alphanum" json:"username"`
-	Name        string `validate:"required,alpha" json:"name"`
+	Name        string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
 	Email       string `validate:"required,email" json:"email"`
 	Password    string `validate:"required,alphanumunicode" json:"password"`
 	Active      bool   `validate:"required,boolean" json:"active"`
@@ -26,6 +26,10 @@ type DTOCustomersLogin struct {
 }
 
 type DTOCustomersActivation struct {
+	Token string `validate:"required,base64" json:"token"`
+}
+
+type DTOCustomerResetPasswordToken struct {
 	Token string `validate:"required,base64" json:"token"`
 }
 
@@ -48,12 +52,25 @@ type DTOCustomersChangePassword struct {
 }
 
 type DTOCustomersGetProfileById struct {
-	Id int `validate:"required,numeric,min=1" json:"id"`
+	Id uint `validate:"required,numeric,min=1" json:"id"`
 }
 
 type DTOCustomersUpdateProfileById struct {
 	Email    string `validate:"required,email" json:"email"`
 	Username string `validate:"required,alphanum" json:"username"`
-	Name     string `validate:"required,alpha" json:"name"`
-	Active   bool   `validate:"boolean" json:"active"`
+	Name     string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
+	Active   *bool  `validate:"boolean" json:"active"`
+}
+
+type DTOCustomersSocialLink struct {
+	GithubLink    string `json:"github_link"`
+	DribbleLink   string `json:"dribble_link"`
+	YoutubeLink   string `json:"youtube_link"`
+	FacebookLink  string `json:"facebook_link"`
+	InstagramLink string `json:"instagram_link"`
+	LinkendinLink string `json:"linkendin_link"`
+}
+
+type DTOCustomersById struct {
+	Id uint `validate:"required,numeric,min=1" json:"id"`
 }

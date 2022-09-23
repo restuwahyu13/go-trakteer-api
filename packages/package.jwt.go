@@ -9,6 +9,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+type UsersToken struct {
+	AccessToken         string `json:"access_token"`
+	RefreshToken        string `json:"refresh_token"`
+	AccessTokenExpired  string `json:"access_token_expired"`
+	RefreshTokenExpired string `json:"refresh_token_expired"`
+}
+
 func SignToken(payload map[string]interface{}, expiredAt time.Duration) string {
 	options := jwt.MapClaims{}
 
