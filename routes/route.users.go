@@ -34,6 +34,8 @@ func (r *usersRoute) UsersRoute() {
 			router.Put("/change-password/{id:[0-9]+}", r.controller.ChangePasswordController)
 			router.Get("/profile/{id:[0-9]+}", r.controller.GetProfileByIdController)
 			router.Put("/profile/{id:[0-9]+}", r.controller.UpdateProfileByIdController)
+			router.Get("/health-token/{token}", r.controller.HealthCheckTokenController)
+			router.Post("/refresh-token", r.controller.RefreshTokenController)
 		})
 
 		route.Group(func(router chi.Router) {

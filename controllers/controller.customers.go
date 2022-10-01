@@ -285,3 +285,55 @@ func (c *customersController) UpdateProfileByIdController(rw http.ResponseWriter
 
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
+
+/**
+* @description HealthCheckTokenController
+**/
+
+func (c *customersController) HealthCheckTokenController(rw http.ResponseWriter, r *http.Request) {
+	token := chi.URLParam(r, "token")
+	params := dtos.DTOCustomersHealthToken{Token: token}
+
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	res := c.service.HealthCheckTokenService(r.Context(), &params)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	helpers.Send(rw, helpers.ApiResponse(res))
+}
+
+/**
+* @description HealthCheckTokenController
+**/
+
+func (c *customersController) RefreshTokenController(rw http.ResponseWriter, r *http.Request) {
+	body := dtos.DTOCustomersRefreshToken{}
+	err := json.NewDecoder(r.Body).Decode(&body)
+
+	if err != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: fmt.Sprintf("Parse body to json error: %v", err)}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	if errValidator := gpc.Validator(body); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	res := c.service.RefreshTokenService(r.Context(), &body)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	helpers.Send(rw, helpers.ApiResponse(res))
+}

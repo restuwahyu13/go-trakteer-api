@@ -53,3 +53,11 @@ func (s *customersService) GetProfileByIdService(ctx context.Context, params *dt
 func (s *customersService) UpdateProfileByIdService(ctx context.Context, body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse {
 	return s.repository.UpdateProfileByIdRepository(ctx, body, params)
 }
+
+func (s *customersService) HealthCheckTokenService(ctx context.Context, params *dtos.DTOCustomersHealthToken) helpers.APIResponse {
+	return s.repository.HealthCheckTokenRepository(ctx, params)
+}
+
+func (s *customersService) RefreshTokenService(ctx context.Context, body *dtos.DTOCustomersRefreshToken) helpers.APIResponse {
+	return s.repository.RefreshTokenRepository(ctx, body)
+}

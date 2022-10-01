@@ -18,6 +18,8 @@ type ICustomersRepository interface {
 	ChangePasswordRepository(ctx context.Context, body *dtos.DTOCustomersChangePassword, params *dtos.DTOCustomersById) helpers.APIResponse
 	GetProfileByIdRepository(ctx context.Context, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
 	UpdateProfileByIdRepository(ctx context.Context, body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
+	HealthCheckTokenRepository(ctx context.Context, params *dtos.DTOCustomersHealthToken) helpers.APIResponse
+	RefreshTokenRepository(ctx context.Context, body *dtos.DTOCustomersRefreshToken) helpers.APIResponse
 }
 
 type ICustomersService interface {
@@ -30,6 +32,8 @@ type ICustomersService interface {
 	ChangePasswordService(ctx context.Context, body *dtos.DTOCustomersChangePassword, params *dtos.DTOCustomersById) helpers.APIResponse
 	GetProfileByIdService(ctx context.Context, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
 	UpdateProfileByIdService(ctx context.Context, body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
+	HealthCheckTokenService(ctx context.Context, params *dtos.DTOCustomersHealthToken) helpers.APIResponse
+	RefreshTokenService(ctx context.Context, body *dtos.DTOCustomersRefreshToken) helpers.APIResponse
 }
 
 type ICustomersController interface {
@@ -42,4 +46,6 @@ type ICustomersController interface {
 	ChangePasswordController(rw http.ResponseWriter, r *http.Request)
 	GetProfileByIdController(rw http.ResponseWriter, r *http.Request)
 	UpdateProfileByIdController(rw http.ResponseWriter, r *http.Request)
+	HealthCheckTokenController(rw http.ResponseWriter, r *http.Request)
+	RefreshTokenController(rw http.ResponseWriter, r *http.Request)
 }

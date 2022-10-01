@@ -61,3 +61,11 @@ func (s *usersService) DeleteUsersByIdService(ctx context.Context, params *dtos.
 func (s *usersService) UpdateUsersByIdService(ctx context.Context, body *dtos.DTOUsersUpdate, params *dtos.DTOUsersById) helpers.APIResponse {
 	return s.repository.UpdateUsersByIdRepository(ctx, body, params)
 }
+
+func (s *usersService) HealthCheckTokenService(ctx context.Context, params *dtos.DTOUsersHealthToken) helpers.APIResponse {
+	return s.repository.HealthCheckTokenRepository(ctx, params)
+}
+
+func (s *usersService) RefreshTokenService(ctx context.Context, body *dtos.DTOUsersRefreshToken) helpers.APIResponse {
+	return s.repository.RefreshTokenRepository(ctx, body)
+}

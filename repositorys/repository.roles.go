@@ -73,15 +73,15 @@ func (r *rolesRepository) GetAllRepository(ctx context.Context, query *dtos.DTOR
 	getAllRolesChan := make(chan error)
 	countChan := make(chan int)
 
-	go func() {
+	go func(getAllRolesCh chan error, countCh chan int) {
 		getAllRoles := r.db.SelectContext(ctx, &roles, fmt.Sprintf("SELECT * FROM roles ORDER BY id %s LIMIT $1 OFFSET $2", query.Sort), query.Limit, query.Offset)
-		getAllRolesChan <- getAllRoles
+		getAllRolesCh <- getAllRoles
 
 		count := 0
 		countRoles := r.db.QueryRowContext(ctx, "SELECT COUNT(id) FROM roles")
 		countRoles.Scan(&count)
-		countChan <- count
-	}()
+		countCh <- count
+	}(getAllRolesChan, countChan)
 
 	if err := <-getAllRolesChan; err != nil {
 		res.StatCode = http.StatusBadRequest

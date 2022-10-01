@@ -72,3 +72,11 @@ type DTOCustomersSocialLink struct {
 type DTOCustomersById struct {
 	Id uint `validate:"required,numeric,min=1" json:"id"`
 }
+
+type DTOCustomersHealthToken struct {
+	Token string `validate:"required" json:"access_token"`
+}
+
+type DTOCustomersRefreshToken struct {
+	AccessToken string `validate:"required" json:"access_token"`
+}

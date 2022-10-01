@@ -64,3 +64,11 @@ type DTOUsersUpdate struct {
 	Active *bool  `validate:"required,boolean" json:"active"`
 	RoleId uint   `validate:"required,numeric" json:"role_id"`
 }
+
+type DTOUsersHealthToken struct {
+	Token string `validate:"required" json:"access_token"`
+}
+
+type DTOUsersRefreshToken struct {
+	AccessToken string `validate:"required" json:"access_token"`
+}

@@ -73,15 +73,15 @@ func (r *categoriesRepository) GetAllRepository(ctx context.Context, query *dtos
 	getAllCategoriesChan := make(chan error)
 	countChan := make(chan int)
 
-	go (func() {
+	go func(getAllCategoriesCh chan error, countCh chan int) {
 		getAllCategories := r.db.SelectContext(ctx, &categories, fmt.Sprintf("SELECT * FROM categories ORDER BY id %s LIMIT $1 OFFSET $2", query.Sort), query.Limit, query.Offset)
-		getAllCategoriesChan <- getAllCategories
+		getAllCategoriesCh <- getAllCategories
 
 		count := 0
 		countCategories := r.db.QueryRowContext(ctx, "SELECT COUNT(id) FROM categories")
 		countCategories.Scan(&count)
-		countChan <- count
-	})()
+		countCh <- count
+	}(getAllCategoriesChan, countChan)
 
 	if err := <-getAllCategoriesChan; err != nil {
 		res.StatCode = http.StatusBadRequest

@@ -108,7 +108,7 @@ func (r *customersRepository) RegisterRepository(ctx context.Context, body *dtos
 		VALUES(:name, :username, :email, :password, :active, :verified, :social_link, :role_id, :categorie_id) RETURNING id, email`, &customers)
 
 	if insertUserErr != nil {
-		res.StatCode = http.StatusConflict
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Create new customer account failed"
 		defer logrus.Errorf("Error Logs: %v", insertUserErr)
 		return res
@@ -124,7 +124,7 @@ func (r *customersRepository) RegisterRepository(ctx context.Context, body *dtos
 	VALUES (:resource_id, :resource_type, :access_token, :refresh_token, :expired_at)`, &token)
 
 	if insertTokenErr != nil {
-		res.StatCode = http.StatusBadRequest
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Insert token into database failed"
 		defer logrus.Errorf("Error Logs: %v", insertTokenErr)
 		return res
@@ -242,7 +242,7 @@ func (r *customersRepository) LoginRepository(ctx context.Context, body *dtos.DT
 	VALUES (:resource_id, :resource_type, :access_token, :refresh_token, :expired_at)`, &token)
 
 	if insertTokenErr != nil {
-		res.StatCode = http.StatusBadRequest
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Insert token into database failed"
 		defer logrus.Errorf("Error Logs: %v", insertTokenErr)
 		return res
@@ -369,7 +369,7 @@ func (r *customersRepository) ResendActivationRepository(ctx context.Context, bo
 	VALUES (:resource_id, :resource_type, :access_token, :refresh_token, :expired_at)`, &token)
 
 	if insertTokenErr != nil {
-		res.StatCode = http.StatusBadRequest
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Insert token into database failed"
 		defer logrus.Errorf("Error Logs: %v", insertTokenErr)
 		return res
@@ -445,7 +445,7 @@ func (r *customersRepository) ForgotPasswordRepository(ctx context.Context, body
 	VALUES (:resource_id, :resource_type, :access_token, :refresh_token, :expired_at)`, &token)
 
 	if insertTokenErr != nil {
-		res.StatCode = http.StatusBadRequest
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Insert token into database failed"
 		defer logrus.Errorf("Error Logs: %v", insertTokenErr)
 		return res
@@ -594,7 +594,7 @@ func (r *customersRepository) UpdateProfileByIdRepository(ctx context.Context, b
 
 	_, updateProfileErr := r.db.NamedQueryContext(ctx, "UPDATE customers SET name = :name, username = :username, email = :email, active = :active WHERE id = :id", &customers)
 	if updateProfileErr != nil {
-		res.StatCode = http.StatusBadRequest
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Update profile failed"
 		defer logrus.Errorf("Error Logs: %v", updateProfileErr)
 		return res
@@ -602,5 +602,133 @@ func (r *customersRepository) UpdateProfileByIdRepository(ctx context.Context, b
 
 	res.StatCode = http.StatusOK
 	res.StatMsg = "Updated profile success"
+	return res
+}
+
+/**
+* @description HealthCheckRepository
+**/
+
+func (r *customersRepository) HealthCheckTokenRepository(ctx context.Context, params *dtos.DTOCustomersHealthToken) helpers.APIResponse {
+	res := helpers.APIResponse{}
+	token := models.Token{}
+
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
+
+	checkTokenError := r.db.GetContext(ctx, &token, "SELECT id, resource_id, resource_type, expired_at FROM token WHERE resource_type = $1 AND access_token LIKE $2 ORDER BY id DESC", "login", "%"+params.Token+"%")
+
+	if checkTokenError != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "AccessToken not exist"
+		defer logrus.Errorf("Error Logs: %v", checkTokenError)
+		return res
+	}
+
+	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
+	dateNow := time.Now().In(jakartaTimeZone).String()
+
+	if token.ExpiredAt.String() < dateNow {
+		res.StatCode = http.StatusUnauthorized
+		res.StatMsg = "AccessToken not healthy"
+		return res
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = "AccessToken healthy"
+	return res
+}
+
+/**
+* @description RefreshTokenRepository
+**/
+
+func (r *customersRepository) RefreshTokenRepository(ctx context.Context, body *dtos.DTOCustomersRefreshToken) helpers.APIResponse {
+	res := helpers.APIResponse{}
+	token := models.Token{}
+	customers := models.Customers{}
+
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
+
+	checkTokenError := r.db.GetContext(ctx, &token, "SELECT id, resource_id, resource_type, expired_at FROM token WHERE resource_type = $1 AND access_token LIKE $2 ORDER BY id DESC", "login", "%"+body.AccessToken+"%")
+
+	if checkTokenError != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "AccessToken not exist"
+		defer logrus.Errorf("Error Logs: %v", checkTokenError)
+		return res
+	}
+
+	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
+	dateNow := time.Now().In(jakartaTimeZone).String()
+	timeFormat := time.RFC1123Z
+
+	if token.ExpiredAt.String() > dateNow {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "AccessToken not expired"
+		return res
+	}
+
+	checkUserId, err := r.db.QueryContext(ctx, "SELECT customers.id, roles.id as role_id, roles.name as role_name FROM customers LEFT JOIN roles on customers.id = roles.id WHERE customers.id = $1", token.ResourceId)
+	if checkTokenError != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = "AccessToken not exist"
+		defer logrus.Errorf("Error Logs: %v", err)
+		return res
+	}
+
+	if err != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("Customers for this id %d not registered", token.ResourceId)
+		defer logrus.Errorf("Error Logs: %v", err)
+		return res
+	}
+
+	if err := carta.Map(checkUserId, &customers); err != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("Relation between table error: %v", err)
+		defer logrus.Errorf("Error Logs: %v", err)
+		return res
+	}
+
+	jwtPayload := make(map[string]interface{})
+	jwtPayload["id"] = customers.Id
+	jwtPayload["role"] = customers.Role.Name
+
+	accessTokenExpired := helpers.ExpiredAt(1, "days")
+	refrehTokenExpired := helpers.ExpiredAt(2, "months")
+	expiredAt := time.Now().Add(accessTokenExpired).In(jakartaTimeZone)
+
+	accessToken := packages.SignToken(jwtPayload, accessTokenExpired)
+	refrehToken := packages.SignToken(jwtPayload, refrehTokenExpired)
+
+	token.ResourceId = customers.Id
+	token.ResourceType = "login"
+	token.AccessToken = accessToken
+	token.RefreshToken = refrehToken
+	token.ExpiredAt = expiredAt
+
+	_, insertTokenErr := r.db.NamedQueryContext(ctx, `
+	INSERT INTO token (resource_id, resource_type, access_token, refresh_token, expired_at)
+	VALUES (:resource_id, :resource_type, :access_token, :refresh_token, :expired_at)`, &token)
+
+	if insertTokenErr != nil {
+		res.StatCode = http.StatusForbidden
+		res.StatMsg = "Insert token into database failed"
+		defer logrus.Errorf("Error Logs: %v", insertTokenErr)
+		return res
+	}
+
+	accessTokenPayload := packages.UsersToken{
+		AccessToken:         accessToken,
+		RefreshToken:        refrehToken,
+		AccessTokenExpired:  time.Now().Add(time.Duration(accessTokenExpired)).In(jakartaTimeZone).Format(timeFormat),
+		RefreshTokenExpired: time.Now().Add(time.Duration(refrehTokenExpired)).In(jakartaTimeZone).Format(timeFormat),
+	}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = "Generate new AccessToken and RefreshToken success"
+	res.Data = accessTokenPayload
 	return res
 }

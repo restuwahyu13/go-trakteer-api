@@ -20,6 +20,8 @@ type IUsersRepository interface {
 	GetUsersByIdRepository(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse
 	DeleteUsersByIdRepository(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse
 	UpdateUsersByIdRepository(ctx context.Context, body *dtos.DTOUsersUpdate, params *dtos.DTOUsersById) helpers.APIResponse
+	HealthCheckTokenRepository(ctx context.Context, params *dtos.DTOUsersHealthToken) helpers.APIResponse
+	RefreshTokenRepository(ctx context.Context, body *dtos.DTOUsersRefreshToken) helpers.APIResponse
 }
 
 type IUsersService interface {
@@ -34,6 +36,8 @@ type IUsersService interface {
 	GetUsersByIdService(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse
 	DeleteUsersByIdService(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse
 	UpdateUsersByIdService(ctx context.Context, body *dtos.DTOUsersUpdate, params *dtos.DTOUsersById) helpers.APIResponse
+	HealthCheckTokenService(ctx context.Context, params *dtos.DTOUsersHealthToken) helpers.APIResponse
+	RefreshTokenService(ctx context.Context, body *dtos.DTOUsersRefreshToken) helpers.APIResponse
 }
 
 type IUsersController interface {
@@ -48,4 +52,6 @@ type IUsersController interface {
 	GetUsersByIdController(rw http.ResponseWriter, r *http.Request)
 	DeleteUsersByIdController(rw http.ResponseWriter, r *http.Request)
 	UpdateUsersByIdController(rw http.ResponseWriter, r *http.Request)
+	HealthCheckTokenController(rw http.ResponseWriter, r *http.Request)
+	RefreshTokenController(rw http.ResponseWriter, r *http.Request)
 }
