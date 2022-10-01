@@ -337,3 +337,26 @@ func (c *customersController) RefreshTokenController(rw http.ResponseWriter, r *
 
 	helpers.Send(rw, helpers.ApiResponse(res))
 }
+
+/**
+* @description GetWalletByIdController
+**/
+
+func (c *customersController) GetWalletByIdController(rw http.ResponseWriter, r *http.Request) {
+	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	params := dtos.DTOCustomersById{Id: uint(Id)}
+
+	if errValidator := gpc.Validator(params); errValidator.Errors != nil {
+		res := helpers.APIResponse{StatCode: http.StatusBadRequest, StatMsg: "Go validator Error", Data: errValidator.Errors}
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	res := c.service.GetWalletByIdService(r.Context(), &params)
+	if res.StatCode >= 400 {
+		helpers.Send(rw, helpers.ApiResponse(res))
+		return
+	}
+
+	helpers.Send(rw, helpers.ApiResponse(res))
+}

@@ -732,3 +732,15 @@ func (r *customersRepository) RefreshTokenRepository(ctx context.Context, body *
 	res.Data = accessTokenPayload
 	return res
 }
+
+/**
+* @description GetWalletByIdRepository
+**/
+
+func (r *customersRepository) GetWalletByIdRepository(ctx context.Context, params *dtos.DTOCustomersById) helpers.APIResponse {
+	res := helpers.APIResponse{}
+
+	res.StatCode = http.StatusOK
+	res.StatMsg = "GetWalletByIdRepository"
+	return res
+}

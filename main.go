@@ -44,6 +44,7 @@ func main() {
 	routes.NewCustomersRoute("/api/v1/customers", db, router).CustomersRoute()
 	routes.NewRolesRoute("/api/v1/roles", db, router).RolesRoute()
 	routes.NewCategoriesRoute("/api/v1/categories", db, router).CategoriesRoute()
+	routes.NewWalletsRoute("/api/v1/wallets", db, router).WalletsRoute()
 
 	SetupGraceFullShutDown(router)
 }

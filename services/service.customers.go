@@ -61,3 +61,7 @@ func (s *customersService) HealthCheckTokenService(ctx context.Context, params *
 func (s *customersService) RefreshTokenService(ctx context.Context, body *dtos.DTOCustomersRefreshToken) helpers.APIResponse {
 	return s.repository.RefreshTokenRepository(ctx, body)
 }
+
+func (s *customersService) GetWalletByIdService(ctx context.Context, params *dtos.DTOCustomersById) helpers.APIResponse {
+	return s.repository.GetWalletByIdRepository(ctx, params)
+}

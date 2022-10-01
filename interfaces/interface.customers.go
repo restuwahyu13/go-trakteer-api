@@ -20,6 +20,7 @@ type ICustomersRepository interface {
 	UpdateProfileByIdRepository(ctx context.Context, body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
 	HealthCheckTokenRepository(ctx context.Context, params *dtos.DTOCustomersHealthToken) helpers.APIResponse
 	RefreshTokenRepository(ctx context.Context, body *dtos.DTOCustomersRefreshToken) helpers.APIResponse
+	GetWalletByIdRepository(ctx context.Context, params *dtos.DTOCustomersById) helpers.APIResponse
 }
 
 type ICustomersService interface {
@@ -34,6 +35,7 @@ type ICustomersService interface {
 	UpdateProfileByIdService(ctx context.Context, body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
 	HealthCheckTokenService(ctx context.Context, params *dtos.DTOCustomersHealthToken) helpers.APIResponse
 	RefreshTokenService(ctx context.Context, body *dtos.DTOCustomersRefreshToken) helpers.APIResponse
+	GetWalletByIdService(ctx context.Context, params *dtos.DTOCustomersById) helpers.APIResponse
 }
 
 type ICustomersController interface {
@@ -48,4 +50,5 @@ type ICustomersController interface {
 	UpdateProfileByIdController(rw http.ResponseWriter, r *http.Request)
 	HealthCheckTokenController(rw http.ResponseWriter, r *http.Request)
 	RefreshTokenController(rw http.ResponseWriter, r *http.Request)
+	GetWalletByIdController(rw http.ResponseWriter, r *http.Request)
 }
