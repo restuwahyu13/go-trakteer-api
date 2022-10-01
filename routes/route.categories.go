@@ -25,14 +25,14 @@ func NewCategoriesRoute(prefix string, db *sqlx.DB, router *chi.Mux) *categories
 }
 
 func (r *categoriesRoute) CategoriesRoute() {
-	r.router.Route(r.prefix, func(router chi.Router) {
-		router.Use(middlewares.NewMiddlewareAuth(r.db).Middleware)
-		router.Use(middlewares.NewMiddlewarePermission("super admin", "staff").Middleware)
+	r.router.Route(r.prefix, func(route chi.Router) {
+		route.Use(middlewares.NewMiddlewareAuth(r.db).Middleware)
+		route.Use(middlewares.NewMiddlewarePermission("super admin", "staff").Middleware)
 
-		router.Post("/", r.controller.CreateController)
-		router.Get("/", r.controller.GetAllController)
-		router.Get("/{id:[0-9]+}", r.controller.GetByIdController)
-		router.Delete("/{id:[0-9]+}", r.controller.DeleteByIdController)
-		router.Put("/{id:[0-9]+}", r.controller.UpdatedByIdController)
+		route.Post("/", r.controller.CreateController)
+		route.Get("/", r.controller.GetAllController)
+		route.Get("/{id:[0-9]+}", r.controller.GetByIdController)
+		route.Delete("/{id:[0-9]+}", r.controller.DeleteByIdController)
+		route.Put("/{id:[0-9]+}", r.controller.UpdatedByIdController)
 	})
 }

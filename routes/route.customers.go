@@ -27,7 +27,6 @@ func NewCustomersRoute(prefix string, db *sqlx.DB, router *chi.Mux) *customersRo
 
 func (r *customersRoute) CustomersRoute() {
 	r.router.Route(r.prefix, func(route chi.Router) {
-
 		route.Group(func(router chi.Router) {
 			router.Post("/register", r.controller.RegisterController)
 			router.Post("/login", r.controller.LoginController)
