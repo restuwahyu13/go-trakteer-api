@@ -1,21 +1,20 @@
 package models
 
 import (
-	"encoding/json"
 	"time"
 )
 
 type Streams struct {
-	Id            int             `json:"id" db:"id"`
-	Notification  json.RawMessage `json:"notification" db:"notification"`
-	Leaderboard   json.RawMessage `json:"leaderboard" db:"leaderboard"`
-	LastSupporter json.RawMessage `json:"last_supporter" db:"last_supporter"`
-	Target        json.RawMessage `json:"target" db:"target"`
-	RunningText   json.RawMessage `json:"running_text" db:"running_text"`
-	Subathon      json.RawMessage `json:"subathon" db:"subathon"`
-	Qrcode        json.RawMessage `json:"qrcode" db:"qrcode"`
-	Key           string          `json:"key" db:"key"`
-	CreatedAt     time.Time       `json:"created_at" db:"created_at"`
-	UpdatedAt     time.Time       `json:"updated_at" db:"updated_at"`
-	Goals         []Goal
+	Id            int       `json:"id,omitempty" db:"id"`
+	Notification  string    `json:"notification,omitempty" db:"notification"`
+	Leaderboard   string    `json:"leaderboard,omitempty" db:"leaderboard"`
+	LastSupporter string    `json:"last_supporter,omitempty" db:"last_supporter"`
+	Target        string    `json:"target,omitempty" db:"target"`
+	RunningText   string    `json:"running_text,omitempty" db:"running_text"`
+	Subathon      string    `json:"subathon,omitempty" db:"subathon"`
+	Qrcode        string    `json:"qrcode,omitempty" db:"qrcode"`
+	Key           string    `json:"key,omitempty" db:"key"`
+	CreatedAt     time.Time `json:"created_at,omitempty" db:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at,omitempty" db:"updated_at"`
+	Goals         *[]Goal   `json:"goals,omitempty"`
 }

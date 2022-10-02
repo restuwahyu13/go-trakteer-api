@@ -14,22 +14,22 @@ type CustomersSocialLink struct {
 }
 
 type Customers struct {
-	Id          int         `json:"id" db:"id"`
-	Username    string      `json:"username" db:"username"`
-	Name        string      `json:"name" db:"name"`
+	Id          int         `json:"id,omitempty" db:"id"`
+	Username    string      `json:"username,omitempty" db:"username"`
+	Name        string      `json:"name,omitempty" db:"name"`
 	Email       string      `json:"email,omitempty" db:"email"`
 	Password    string      `json:"password,omitempty" db:"password"`
-	Active      bool        `json:"active" db:"active"`
-	Verified    bool        `json:"verified" db:"verified"`
-	SocialLink  string      `json:"social_link" db:"social_link"`
-	VideoLink   *string     `json:"video_link" db:"video_link"`
-	Banner      *string     `json:"banner" db:"banner"`
-	Photo       *string     `json:"photo" db:"photo"`
-	RoleId      uint        `json:"role_id" db:"role_id"`
-	CategorieId uint        `json:"categorie_id" db:"categorie_id"`
-	CreatedAt   time.Time   `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time   `json:"updated_at" db:"updated_at"`
-	DeletedAt   *time.Time  `json:"deleted_at" db:"deleted_at"`
+	Active      bool        `json:"active,omitempty" db:"active"`
+	Verified    bool        `json:"verified,omitempty" db:"verified"`
+	SocialLink  string      `json:"social_link,omitempty" db:"social_link"`
+	VideoLink   *string     `json:"video_link,omitempty" db:"video_link"`
+	Banner      *string     `json:"banner,omitempty" db:"banner"`
+	Photo       *string     `json:"photo,omitempty" db:"photo"`
+	RoleId      uint        `json:"role_id,omitempty" db:"role_id"`
+	CategorieId uint        `json:"categorie_id,omitempty" db:"categorie_id"`
+	CreatedAt   time.Time   `json:"created_at,omitempty" db:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at,omitempty" db:"updated_at"`
+	DeletedAt   *time.Time  `json:"deleted_at,omitempty" db:"deleted_at"`
 	Role        *Roles      `json:"role,omitempty"`
 	Categorie   *Categories `json:"categorie,omitempty"`
 }
