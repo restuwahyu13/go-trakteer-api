@@ -153,7 +153,14 @@ func (m *authHandler) Middleware(next http.Handler) http.Handler {
 			cacheData["role"] = users.Role.Name
 		}
 
-		_, redisErr := packages.Redis(1).Hset(ctx, fmt.Sprintf("users:%d", users.Id), cacheData, time.Duration(helpers.ExpiredAt(1, "days")))
+		var prefixKey string
+		if metadataToken["role"] == "customer" {
+			prefixKey = metadataToken["role"].(string)
+		} else {
+			prefixKey = "users"
+		}
+
+		_, redisErr := packages.Redis(1).Hset(ctx, fmt.Sprintf("%s:%d", prefixKey, cacheData["id"]), cacheData, time.Duration(helpers.ExpiredAt(1, "days")))
 		if redisErr != nil {
 			defer logrus.Errorf("Error Logs: %v", redisErr)
 			return

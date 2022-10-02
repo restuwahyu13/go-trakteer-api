@@ -52,7 +52,14 @@ func (h *permission) Middleware(next http.Handler) http.Handler {
 		encoded, _ := json.Marshal(&decodeToken)
 		json.Unmarshal(encoded, &metadataToken)
 
-		redisRes, redisErr := packages.Redis(1).HGetAll(r.Context(), fmt.Sprintf("users:%d", uint(float32(metadataToken["id"].(float64)))))
+		var prefixKey string
+		if metadataToken["role"] == "customer" {
+			prefixKey = metadataToken["role"].(string)
+		} else {
+			prefixKey = "users"
+		}
+
+		redisRes, redisErr := packages.Redis(1).HGetAll(r.Context(), fmt.Sprintf("%s:%d", prefixKey, uint(float32(metadataToken["id"].(float64)))))
 
 		if redisErr != nil {
 			res.StatCode = http.StatusForbidden

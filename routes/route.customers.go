@@ -41,7 +41,7 @@ func (r *customersRoute) CustomersRoute() {
 
 		route.Group(func(router chi.Router) {
 			router.Use(middlewares.NewMiddlewareAuth(r.db).Middleware)
-			// router.Use(middlewares.NewMiddlewarePermission("customer").Middleware)
+			router.Use(middlewares.NewMiddlewarePermission("customer").Middleware)
 
 			router.Get("/profile/{id:[0-9]+}", r.controller.GetProfileByIdController)
 			router.Put("/profile/{id:[0-9]+}", r.controller.UpdateProfileByIdController)
