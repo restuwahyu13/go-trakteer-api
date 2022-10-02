@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS "withdraw" (
-  "id" int PRIMARY KEY,
+  "id" serial PRIMARY KEY,
   "balance_id" int NOT NULL,
   "amount" bigint NOT NULL,
   "date_time" timestamp NOT NULL,

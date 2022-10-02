@@ -87,7 +87,7 @@ func (m *authHandler) Middleware(next http.Handler) http.Handler {
 			`
 		}
 
-		checkById, checkByIdErr := m.db.QueryContext(ctx, queryDatabase, metadataToken["id"])
+		checkByIdRows, checkByIdErr := m.db.QueryContext(ctx, queryDatabase, metadataToken["id"])
 
 		if checkByIdErr != nil {
 			res.StatCode = http.StatusUnauthorized
@@ -99,13 +99,13 @@ func (m *authHandler) Middleware(next http.Handler) http.Handler {
 		}
 
 		if metadataToken["role"] == "customer" {
-			relationErr := carta.Map(checkById, &customers)
+			relationErr := carta.Map(checkByIdRows, &customers)
 			if relationErr != nil {
 				defer logrus.Errorf("Error Logs: %v", relationErr)
 				return
 			}
 		} else {
-			relationErr := carta.Map(checkById, &users)
+			relationErr := carta.Map(checkByIdRows, &users)
 			if relationErr != nil {
 				defer logrus.Errorf("Error Logs: %v", relationErr)
 				return

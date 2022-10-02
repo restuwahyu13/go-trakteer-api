@@ -568,9 +568,10 @@ func (r *usersRepository) HealthCheckTokenRepository(ctx context.Context, params
 	}
 
 	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
-	dateNow := time.Now().In(jakartaTimeZone).String()
+	timeFormat := "2006-01-02 15:04:05"
+	timeNow := time.Now().In(jakartaTimeZone).Format(timeFormat)
 
-	if token.ExpiredAt.String() < dateNow {
+	if token.ExpiredAt.Format(timeFormat) < timeNow {
 		res.StatCode = http.StatusUnauthorized
 		res.StatMsg = "AccessToken not healthy"
 		return res
@@ -603,10 +604,10 @@ func (r *usersRepository) RefreshTokenRepository(ctx context.Context, body *dtos
 	}
 
 	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
-	dateNow := time.Now().In(jakartaTimeZone).String()
-	timeFormat := time.RFC1123Z
+	timeFormat := "2006-01-02 15:04:05"
+	timeNow := time.Now().In(jakartaTimeZone).Format(timeFormat)
 
-	if token.ExpiredAt.String() > dateNow {
+	if token.ExpiredAt.Format(timeFormat) > timeNow {
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = "AccessToken not expired"
 		return res
@@ -665,8 +666,8 @@ func (r *usersRepository) RefreshTokenRepository(ctx context.Context, body *dtos
 	accessTokenPayload := packages.UsersToken{
 		AccessToken:         accessToken,
 		RefreshToken:        refrehToken,
-		AccessTokenExpired:  time.Now().Add(time.Duration(accessTokenExpired)).In(jakartaTimeZone).Format(timeFormat),
-		RefreshTokenExpired: time.Now().Add(time.Duration(refrehTokenExpired)).In(jakartaTimeZone).Format(timeFormat),
+		AccessTokenExpired:  time.Now().Add(time.Duration(accessTokenExpired)).In(jakartaTimeZone).Format(time.RFC1123Z),
+		RefreshTokenExpired: time.Now().Add(time.Duration(refrehTokenExpired)).In(jakartaTimeZone).Format(time.RFC1123Z),
 	}
 
 	res.StatCode = http.StatusOK
