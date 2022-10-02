@@ -117,7 +117,7 @@ func (r *customersRepository) RegisterRepository(ctx context.Context, body *dtos
 	timeZoneFormat, _ := time.LoadLocation("Asia/Bangkok")
 	randomToken := helpers.RandomToken()
 
-	token.ResourceId = customers.Id
+	token.ResourceId = uint(customers.Id)
 	token.ResourceType = "activation"
 	token.AccessToken = randomToken
 	token.ExpiredAt = time.Now().Add(helpers.ExpiredAt(5, "minute")).In(timeZoneFormat)
@@ -221,7 +221,7 @@ func (r *customersRepository) LoginRepository(ctx context.Context, body *dtos.DT
 	}
 
 	jwtPayload := make(map[string]interface{})
-	jwtPayload["email"] = customers.Email
+	jwtPayload["id"] = customers.Id
 	jwtPayload["role"] = customers.Role.Name
 
 	jakartaTimeZone, _ := time.LoadLocation("Asia/Bangkok")
@@ -234,7 +234,7 @@ func (r *customersRepository) LoginRepository(ctx context.Context, body *dtos.DT
 	accessToken := packages.SignToken(jwtPayload, accessTokenExpired)
 	refrehToken := packages.SignToken(jwtPayload, refrehTokenExpired)
 
-	token.ResourceId = customers.Id
+	token.ResourceId = uint(customers.Id)
 	token.ResourceType = "login"
 	token.AccessToken = accessToken
 	token.RefreshToken = refrehToken
@@ -291,7 +291,7 @@ func (r *customersRepository) ActivationRepository(ctx context.Context, params *
 		return res
 	}
 
-	customers.Id = token.ResourceId
+	customers.Id = int(token.ResourceId)
 	customers.Verified = true
 
 	_, updateVerifiedError := r.db.NamedQueryContext(ctx, "UPDATE customers SET verified = :verified WHERE id = :id", &customers)
@@ -363,7 +363,7 @@ func (r *customersRepository) ResendActivationRepository(ctx context.Context, bo
 	}
 
 	timeZoneFormat, _ := time.LoadLocation("Asia/Bangkok")
-	token.ResourceId = customers.Id
+	token.ResourceId = uint(customers.Id)
 	token.ResourceType = "activation"
 	token.AccessToken = randomToken
 	token.ExpiredAt = time.Now().Add(helpers.ExpiredAt(5, "minute")).In(timeZoneFormat)
@@ -439,7 +439,7 @@ func (r *customersRepository) ForgotPasswordRepository(ctx context.Context, body
 		return res
 	}
 
-	token.ResourceId = customers.Id
+	token.ResourceId = uint(customers.Id)
 	token.ResourceType = "reset password"
 	token.AccessToken = randomToken
 	token.ExpiredAt = time.Now().Add(helpers.ExpiredAt(5, "minute")).Local()
@@ -495,7 +495,7 @@ func (r *customersRepository) ResetPasswordRepository(ctx context.Context, body 
 		return res
 	}
 
-	customers.Id = token.ResourceId
+	customers.Id = int(token.ResourceId)
 	customers.Password = packages.HashPassword(body.Password)
 
 	_, updatePasswordErr := r.db.NamedQueryContext(ctx, "UPDATE customers SET password = :password WHERE id = :id", &customers)
@@ -528,7 +528,7 @@ func (r *customersRepository) ChangePasswordRepository(ctx context.Context, body
 		return res
 	}
 
-	customers.Id = params.Id
+	customers.Id = int(params.Id)
 	customers.Password = packages.HashPassword(body.Password)
 
 	_, updatePasswordErr := r.db.NamedQueryContext(ctx, "UPDATE customers SET password = :password WHERE id = :id", &customers)
@@ -555,7 +555,7 @@ func (r *customersRepository) GetProfileByIdRepository(ctx context.Context, para
 	ctx, cancel := context.WithTimeout(ctx, min)
 	defer cancel()
 
-	customers.Id = params.Id
+	customers.Id = int(params.Id)
 	checkUserErr := r.db.GetContext(ctx, &customers, "SELECT id, name, username, email, active, verified, created_at, updated_at, deleted_at FROM customers WHERE id = $1", customers.Id)
 
 	if checkUserErr != nil {
@@ -590,7 +590,7 @@ func (r *customersRepository) UpdateProfileByIdRepository(ctx context.Context, b
 		return res
 	}
 
-	customers.Id = params.Id
+	customers.Id = int(params.Id)
 	customers.Name = body.Name
 	customers.Username = body.Username
 	customers.Email = body.Email
@@ -708,7 +708,7 @@ func (r *customersRepository) RefreshTokenRepository(ctx context.Context, body *
 	accessToken := packages.SignToken(jwtPayload, accessTokenExpired)
 	refrehToken := packages.SignToken(jwtPayload, refrehTokenExpired)
 
-	token.ResourceId = customers.Id
+	token.ResourceId = uint(customers.Id)
 	token.ResourceType = "login"
 	token.AccessToken = accessToken
 	token.RefreshToken = refrehToken

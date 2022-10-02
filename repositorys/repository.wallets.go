@@ -147,9 +147,23 @@ func (r *walletsRepository) CreateRepository(ctx context.Context, body *dtos.DTO
 
 func (r *walletsRepository) GetByIdRepository(ctx context.Context, params *dtos.DTOWalletsById) helpers.APIResponse {
 	res := helpers.APIResponse{}
+	wallets := models.Wallets{}
+
+	ctx, cancel := context.WithTimeout(ctx, min)
+	defer cancel()
+
+	checkWalletIdErr := r.db.GetContext(ctx, &wallets, "SELECT * FROM wallet WHERE id = $1", params.Id)
+
+	if checkWalletIdErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("Wallet data for this id %d not exist", params.Id)
+		defer logrus.Errorf("Error Logs: %v", checkWalletIdErr)
+		return res
+	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = "GetWalletsById"
+	res.StatMsg = "Wallet already to use"
+	res.Data = wallets
 	return res
 }
 
@@ -159,8 +173,33 @@ func (r *walletsRepository) GetByIdRepository(ctx context.Context, params *dtos.
 
 func (r *walletsRepository) UpdateByIdRepository(ctx context.Context, body *dtos.DTOWalletsUpdate, params *dtos.DTOWalletsById) helpers.APIResponse {
 	res := helpers.APIResponse{}
+	wallets := models.Wallets{}
+
+	checkWalletIdErr := r.db.GetContext(ctx, &wallets, "SELECT id FROM wallet WHERE id = $1", params.Id)
+
+	if checkWalletIdErr != nil {
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("Wallet data for this id %d not exist", params.Id)
+		defer logrus.Errorf("Error Logs: %v", checkWalletIdErr)
+		return res
+	}
+
+	wallets.Id = int(params.Id)
+	wallets.Name = body.Name
+	wallets.NoRek = body.NoRek
+	wallets.BankName = body.BankName
+	wallets.UpdatedAt = time.Now().Local()
+
+	_, updateWalletErr := r.db.NamedQuery("UPDATE wallet SET name = :name, no_rek = :no_rek, bank_name = :bank_name WHERE id = :id", &wallets)
+
+	if updateWalletErr != nil {
+		res.StatCode = http.StatusForbidden
+		res.StatMsg = "Updated wallet failed"
+		defer logrus.Errorf("Error Logs: %v", checkWalletIdErr)
+		return res
+	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = "UpdateWalletsByIdRepository"
+	res.StatMsg = "Updated wallet success"
 	return res
 }

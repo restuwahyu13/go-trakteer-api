@@ -110,7 +110,6 @@ func (r *categoriesRepository) GetByIdRepository(ctx context.Context, params *dt
 	ctx, cancel := context.WithTimeout(ctx, min)
 	defer cancel()
 
-	catagories.Id = params.Id
 	getRoleIdErr := r.db.GetContext(ctx, &catagories, "SELECT * FROM categories WHERE id = $1", catagories.Id)
 
 	if getRoleIdErr != nil {
@@ -137,7 +136,6 @@ func (r *categoriesRepository) DeleteByIdRepository(ctx context.Context, params 
 	ctx, cancel := context.WithTimeout(ctx, min)
 	defer cancel()
 
-	categories.Id = params.Id
 	checkCategorieIdErr := r.db.GetContext(ctx, &categories, "SELECT * FROM categories WHERE id = $1", categories.Id)
 
 	if checkCategorieIdErr != nil {
@@ -175,7 +173,6 @@ func (r *categoriesRepository) UpdatedByIdRepository(ctx context.Context, body *
 	ctx, cancel := context.WithTimeout(ctx, min)
 	defer cancel()
 
-	catagories.Id = params.Id
 	checkCategorieIdErr := r.db.GetContext(ctx, &catagories, "SELECT id FROM categories WHERE id = $1", catagories.Id)
 
 	if checkCategorieIdErr != nil {

@@ -3,14 +3,14 @@ package models
 import "time"
 
 type Goal struct {
-	ID            uint      `db:"id"`
-	StreamId      uint      `db:"stream_id"`
-	Name          string    `db:"name"`
-	StartDate     time.Time `db:"start_date"`
-	EndDate       time.Time `db:"start_date"`
-	TargetBalance uint64    `db:"target_balance"`
-	Progress      string    `db:"progress"`
-	CreatedAt     time.Time `db:"created_at"`
-	UpdatedAt     time.Time `db:"updated_at"`
+	Id            int       `json:"id" db:"id"`
+	StreamId      uint      `json:"stream_id" db:"stream_id"`
+	Name          string    `json:"name" db:"name"`
+	StartDate     time.Time `json:"start_date" db:"start_date"`
+	EndDate       time.Time `json:"end_date" db:"start_date"`
+	TargetBalance uint64    `json:"target_balance" db:"target_balance"`
+	Progress      string    `json:"progress" db:"progress"`
+	CreatedAt     time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at" db:"updated_at"`
 	Payments      []Payments
 }

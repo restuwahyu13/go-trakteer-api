@@ -3,9 +3,9 @@ package models
 import "time"
 
 type DonationTypes struct {
-	ID        uint      `db:"id"`
-	Name      string    `db:"name"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
-	DeletedAt time.Time `db:"deleted_at"`
+	Id        int       `json:"id" db:"id"`
+	Name      string    `json:"name" db:"name"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+	DeletedAt time.Time `json:"deleted_at" db:"deleted_at"`
 }

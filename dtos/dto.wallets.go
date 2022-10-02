@@ -17,7 +17,7 @@ type DTOWalletsById struct {
 
 type DTOWalletsUpdate struct {
 	Name      string    `validate:"required" json:"name"`
-	NoRek     uint32    `validate:"required" json:"no_rek"`
+	NoRek     uint      `validate:"required" json:"no_rek"`
 	BankName  string    `validate:"required" json:"bank_name"`
 	Amount    uint64    `validate:"required" json:"amount"`
 	CreatedAt time.Time `json:"created_at"`

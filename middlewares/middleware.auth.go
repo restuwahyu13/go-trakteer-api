@@ -69,25 +69,25 @@ func (m *authHandler) Middleware(next http.Handler) http.Handler {
 		var queryDatabase string
 		if metadataToken["role"] == "customer" {
 			queryDatabase = `SELECT
-				customers.id as customer_id, customers.name as customer_name,
+				customers.id, customers.email, customers.active,
 				roles.id as role_id, roles.name as role_name,
 				categories.id as categorie_id, categories.name as categorie_name
 				FROM customers
-				LEFT JOIN roles ON customers.role_id = roles.id
-				LEFT JOIN categories ON customers.categorie_id = categories.id
-				WHERE customers.id = $1
+				INNER JOIN roles ON customers.role_id = roles.id
+				INNER JOIN categories ON customers.categorie_id = categories.id
+				WHERE customers.id = $1 AND customers.active = $2
 			`
 		} else {
 			queryDatabase = `SELECT
-				users.id, users.email,
+				users.id, users.email, users.active,
 				roles.id as role_id, roles.name as role_name
 				FROM users
-				LEFT JOIN roles ON users.role_id = roles.id
-				WHERE users.id = $1
+				INNER JOIN roles ON users.role_id = roles.id
+				WHERE users.id = $1 AND users.active = $2
 			`
 		}
 
-		checkByIdRows, checkByIdErr := m.db.QueryContext(ctx, queryDatabase, metadataToken["id"])
+		checkByIdRows, checkByIdErr := m.db.QueryContext(ctx, queryDatabase, metadataToken["id"], "true")
 
 		if checkByIdErr != nil {
 			res.StatCode = http.StatusUnauthorized
@@ -112,7 +112,14 @@ func (m *authHandler) Middleware(next http.Handler) http.Handler {
 			}
 		}
 
-		checkTokenErr := m.db.GetContext(ctx, &token, "SELECT resource_id, resource_type, expired_at FROM token WHERE resource_id = $1 AND resource_type = $2 ORDER BY id DESC", users.Id, "login")
+		var resourceId int
+		if metadataToken["role"] == "customer" {
+			resourceId = customers.Id
+		} else {
+			resourceId = users.Id
+		}
+
+		checkTokenErr := m.db.GetContext(ctx, &token, "SELECT resource_id, resource_type, expired_at FROM token WHERE resource_id = $1 AND resource_type = $2 ORDER BY id DESC", resourceId, "login")
 		if checkTokenErr != nil {
 			res.StatCode = http.StatusUnauthorized
 			res.StatMsg = "AccessToken not match with accessToken from db"
@@ -135,7 +142,7 @@ func (m *authHandler) Middleware(next http.Handler) http.Handler {
 
 		cacheData := make(map[string]interface{})
 
-		if cacheData["role"] == "customer" {
+		if metadataToken["role"] == "customer" {
 			cacheData["id"] = customers.Id
 			cacheData["email"] = customers.Email
 			cacheData["role"] = customers.Role.Name

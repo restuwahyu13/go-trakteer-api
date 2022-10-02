@@ -3,7 +3,7 @@ package models
 import "time"
 
 type Balances struct {
-	Id        uint      `db:"id"`
-	Amount    uint64    `db:"amount"`
-	CreatedAt time.Time `db:"created_at"`
+	Id        int       `json:"id" db:"id"`
+	Amount    uint64    `json:"amount" db:"amount"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }

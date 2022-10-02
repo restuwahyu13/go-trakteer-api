@@ -84,7 +84,7 @@ func (r *rolesRepository) GetAllRepository(ctx context.Context, query *dtos.DTOR
 	}(getAllRolesChan, countChan)
 
 	if err := <-getAllRolesChan; err != nil {
-		res.StatCode = http.StatusBadRequest
+		res.StatCode = http.StatusOK
 		res.StatMsg = "Roles data not exist"
 		defer logrus.Errorf("Error Logs: %v", err)
 		defer close(getAllRolesChan)
@@ -110,8 +110,7 @@ func (r *rolesRepository) GetByIdRepository(ctx context.Context, params *dtos.DT
 	ctx, cancel := context.WithTimeout(ctx, min)
 	defer cancel()
 
-	roles.Id = params.Id
-	getRoleIdErr := r.db.GetContext(ctx, &roles, "SELECT * FROM roles WHERE id = $1", roles.Id)
+	getRoleIdErr := r.db.GetContext(ctx, &roles, "SELECT * FROM roles WHERE id = $1", params.Id)
 
 	if getRoleIdErr != nil {
 		res.StatCode = http.StatusBadRequest
@@ -137,7 +136,6 @@ func (r *rolesRepository) DeleteByIdRepository(ctx context.Context, params *dtos
 	ctx, cancel := context.WithTimeout(ctx, min)
 	defer cancel()
 
-	roles.Id = params.Id
 	checkRoleIdErr := r.db.GetContext(ctx, &roles, "SELECT id FROM roles WHERE id = $1", roles.Id)
 
 	if checkRoleIdErr != nil {
@@ -176,12 +174,11 @@ func (r *rolesRepository) UpdatedByIdRepository(ctx context.Context, body *dtos.
 	ctx, cancel := context.WithTimeout(ctx, min)
 	defer cancel()
 
-	roles.Id = params.Id
-	checkRoleIdErr := r.db.GetContext(ctx, &roles, "SELECT id FROM roles WHERE id = $1", roles.Id)
+	checkRoleIdErr := r.db.GetContext(ctx, &roles, "SELECT id FROM roles WHERE id = $1", params.Id)
 
 	if checkRoleIdErr != nil {
 		res.StatCode = http.StatusBadRequest
-		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", roles.Id)
+		res.StatMsg = fmt.Sprintf("Role data for this id %d, not exist", params.Id)
 		defer logrus.Errorf("Error Logs: %v", checkRoleIdErr)
 		return res
 	}

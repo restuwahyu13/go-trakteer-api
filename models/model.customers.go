@@ -6,16 +6,16 @@ import (
 )
 
 type CustomersSocialLink struct {
-	FacebookLink  string `db:"facebook_link"`
-	YoutubeLink   string `db:"youtube_link"`
-	InstagramLink string `db:"instagram_link"`
-	LinkendinLink string `db:"linkedin_link"`
-	GithubLink    string `db:"github_link"`
-	DribbleLink   string `db:"dribble_link"`
+	FacebookLink  string `json:"facebook_link" db:"facebook_link"`
+	YoutubeLink   string `json:"youtube_link" db:"youtube_link"`
+	InstagramLink string `json:"instagram_link" db:"instagram_link"`
+	LinkendinLink string `json:"linkendin_link" db:"linkedin_link"`
+	GithubLink    string `json:"github_link" db:"github_link"`
+	DribbleLink   string `json:"dribble_link" db:"dribble_link"`
 }
 
 type Customers struct {
-	Id          uint            `json:"id" db:"id"`
+	Id          int             `json:"id" db:"id"`
 	Username    string          `json:"username" db:"username"`
 	Name        string          `json:"name" db:"name"`
 	Email       string          `json:"email" db:"email"`

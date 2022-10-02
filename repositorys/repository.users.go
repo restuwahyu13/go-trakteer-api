@@ -85,7 +85,7 @@ func (r *usersRepository) LoginRepository(ctx context.Context, body *dtos.DTOUse
 	accessToken := packages.SignToken(jwtPayload, accessTokenExpired)
 	refrehToken := packages.SignToken(jwtPayload, refrehTokenExpired)
 
-	token.ResourceId = users.Id
+	token.ResourceId = uint(users.Id)
 	token.ResourceType = "login"
 	token.AccessToken = accessToken
 	token.RefreshToken = refrehToken
@@ -169,7 +169,7 @@ func (r *usersRepository) ForgotPasswordRepository(ctx context.Context, body *dt
 		return res
 	}
 
-	token.ResourceId = users.Id
+	token.ResourceId = uint(users.Id)
 	token.ResourceType = "reset password"
 	token.AccessToken = helpers.RandomToken()
 	token.ExpiredAt = time.Now().Add(time.Duration(helpers.ExpiredAt(5, "minutes")))
@@ -225,7 +225,7 @@ func (r *usersRepository) ResetPasswordRepository(ctx context.Context, body *dto
 		return res
 	}
 
-	users.Id = token.ResourceId
+	users.Id = int(token.ResourceId)
 	users.Password = packages.HashPassword(body.Password)
 
 	_, updatePasswordErr := r.db.NamedQueryContext(ctx, "UPDATE users SET password = :password WHERE id = :id", &users)
@@ -258,7 +258,7 @@ func (r *usersRepository) ChangePasswordRepository(ctx context.Context, body *dt
 		return res
 	}
 
-	users.Id = params.Id
+	users.Id = int(params.Id)
 	users.Password = packages.HashPassword(body.Password)
 
 	_, updatePasswordErr := r.db.NamedQueryContext(ctx, "UPDATE users SET password = :password WHERE id = :id", &users)
@@ -285,7 +285,7 @@ func (r *usersRepository) GetProfileByIdRepository(ctx context.Context, params *
 	ctx, cancel := context.WithTimeout(ctx, min)
 	defer cancel()
 
-	users.Id = params.Id
+	users.Id = int(params.Id)
 	checkUserErr := r.db.GetContext(ctx, &users, "SELECT id, name, email, active, verified, created_at, updated_at, deleted_at FROM users WHERE id = $1", users.Id)
 
 	if checkUserErr != nil {
@@ -320,7 +320,7 @@ func (r *usersRepository) UpdateProfileByIdRepository(ctx context.Context, body 
 		return res
 	}
 
-	users.Id = params.Id
+	users.Id = int(params.Id)
 	users.Name = body.Name
 	users.Email = body.Email
 	users.Active = *body.Active
@@ -452,7 +452,7 @@ func (r *usersRepository) GetUsersByIdRepository(ctx context.Context, params *dt
 	ctx, cancel := context.WithTimeout(ctx, min)
 	defer cancel()
 
-	users.Id = params.Id
+	users.Id = int(params.Id)
 	getRoleId := r.db.GetContext(ctx, &users, "SELECT id, name, username, email, active, verified, created_at, updated_at, deleted_at FROM users WHERE id = $1", users.Id)
 
 	if getRoleId != nil {
@@ -479,7 +479,7 @@ func (r *usersRepository) DeleteUsersByIdRepository(ctx context.Context, params 
 	ctx, cancel := context.WithTimeout(ctx, min)
 	defer cancel()
 
-	users.Id = params.Id
+	users.Id = int(params.Id)
 	checkRoleId := r.db.GetContext(ctx, &users, "SELECT id FROM users WHERE id = $1", users.Id)
 
 	if checkRoleId != nil {
@@ -517,7 +517,7 @@ func (r *usersRepository) UpdateUsersByIdRepository(ctx context.Context, body *d
 	ctx, cancel := context.WithTimeout(ctx, min)
 	defer cancel()
 
-	users.Id = params.Id
+	users.Id = int(params.Id)
 	checkUserId := r.db.GetContext(ctx, &users, "SELECT id FROM users WHERE id = $1", users.Id)
 
 	if checkUserId != nil {
@@ -646,7 +646,7 @@ func (r *usersRepository) RefreshTokenRepository(ctx context.Context, body *dtos
 	accessToken := packages.SignToken(jwtPayload, accessTokenExpired)
 	refrehToken := packages.SignToken(jwtPayload, refrehTokenExpired)
 
-	token.ResourceId = users.Id
+	token.ResourceId = uint(users.Id)
 	token.ResourceType = "login"
 	token.AccessToken = accessToken
 	token.RefreshToken = refrehToken
