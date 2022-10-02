@@ -62,7 +62,7 @@ func (r *customersRepository) RegisterRepository(ctx context.Context, body *dtos
 	customers.Password = packages.HashPassword(body.Password)
 	customers.Active = true
 	customers.Verified = false
-	customers.SocialLink = json.RawMessage(stringify)
+	customers.SocialLink = string(stringify)
 	customers.RoleId = *body.RoleId
 	customers.CategorieId = *body.CategorieId
 
@@ -739,13 +739,42 @@ func (r *customersRepository) RefreshTokenRepository(ctx context.Context, body *
 }
 
 /**
-* @description GetWalletByIdRepository
+* @description GetBalanceByIdRepository
 **/
 
-func (r *customersRepository) GetWalletByIdRepository(ctx context.Context, params *dtos.DTOCustomersById) helpers.APIResponse {
+func (r *customersRepository) GetBalanceByIdRepository(ctx context.Context, params *dtos.DTOCustomersById) helpers.APIResponse {
 	res := helpers.APIResponse{}
+	customerPayment := models.UsersPayment{}
+
+	getCustomerPaymentRows, getCustomerPaymentErr := r.db.QueryContext(ctx, `
+		SELECT
+		users_payment.id,
+		customers.name as customer_name, customers.active as customer_active,
+		balance.amount as balance_amount, balance.created_at as balance_created_at,
+		wallet.name as wallet_name, wallet.no_rek as wallet_no_rek, wallet.bank_name as wallet_bank_name
+		FROM users_payment
+		LEFT JOIN customers ON users_payment.customer_id = customers.id
+		LEFT JOIN balance ON users_payment.balance_id = balance.id
+		LEFT JOIN wallet ON users_payment.wallet_id = wallet.id
+		WHERE customers.id = $1 AND customers.active = $2
+	`, params.Id, "true")
+
+	if err := getCustomerPaymentErr; err != nil {
+		res.StatCode = http.StatusForbidden
+		res.StatMsg = fmt.Sprintf("Customer data for this id %d not exist", params.Id)
+		defer logrus.Errorf("Error Logs: %v", err)
+		return res
+	}
+
+	if err := carta.Map(getCustomerPaymentRows, &customerPayment); err != nil {
+		res.StatCode = http.StatusForbidden
+		res.StatMsg = "Relation data between table error"
+		defer logrus.Errorf("Error Logs: %v", err)
+		return res
+	}
 
 	res.StatCode = http.StatusOK
-	res.StatMsg = "GetWalletByIdRepository"
+	res.StatMsg = "Balance already to use"
+	res.Data = customerPayment
 	return res
 }

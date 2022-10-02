@@ -20,7 +20,7 @@ type ICustomersRepository interface {
 	UpdateProfileByIdRepository(ctx context.Context, body *dtos.DTOCustomersUpdateProfileById, params *dtos.DTOCustomersGetProfileById) helpers.APIResponse
 	HealthCheckTokenRepository(ctx context.Context, params *dtos.DTOCustomersHealthToken) helpers.APIResponse
 	RefreshTokenRepository(ctx context.Context, body *dtos.DTOCustomersRefreshToken) helpers.APIResponse
-	GetWalletByIdRepository(ctx context.Context, params *dtos.DTOCustomersById) helpers.APIResponse
+	GetBalanceByIdRepository(ctx context.Context, params *dtos.DTOCustomersById) helpers.APIResponse
 }
 
 type ICustomersService interface {

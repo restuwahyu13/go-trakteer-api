@@ -63,5 +63,5 @@ func (s *customersService) RefreshTokenService(ctx context.Context, body *dtos.D
 }
 
 func (s *customersService) GetWalletByIdService(ctx context.Context, params *dtos.DTOCustomersById) helpers.APIResponse {
-	return s.repository.GetWalletByIdRepository(ctx, params)
+	return s.repository.GetBalanceByIdRepository(ctx, params)
 }
