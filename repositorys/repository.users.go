@@ -305,7 +305,7 @@ func (r *usersRepository) GetProfileByIdRepository(ctx context.Context, params *
 * @description UpdateProfileByIdRepository
 **/
 
-func (r *usersRepository) UpdateProfileByIdRepository(ctx context.Context, body *dtos.DTOUsersUpdateProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse {
+func (r *usersRepository) UpdateProfileByIdRepository(ctx context.Context, body *dtos.DTOUsersProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse {
 	users := models.Users{}
 	res := helpers.APIResponse{}
 
@@ -342,7 +342,7 @@ func (r *usersRepository) UpdateProfileByIdRepository(ctx context.Context, body 
 * @description CreateUsersRepository
 **/
 
-func (r *usersRepository) CreateUsersRepository(ctx context.Context, body *dtos.DTOUsersCreate) helpers.APIResponse {
+func (r *usersRepository) CreateUsersRepository(ctx context.Context, body *dtos.DTOUsers) helpers.APIResponse {
 	users := models.Users{}
 	roles := models.Roles{}
 	res := helpers.APIResponse{}
@@ -510,7 +510,7 @@ func (r *usersRepository) DeleteUsersByIdRepository(ctx context.Context, params 
 * @description UpdateUsersByIdRepository
 **/
 
-func (r *usersRepository) UpdateUsersByIdRepository(ctx context.Context, body *dtos.DTOUsersUpdate, params *dtos.DTOUsersById) helpers.APIResponse {
+func (r *usersRepository) UpdateUsersByIdRepository(ctx context.Context, body *dtos.DTOUsers, params *dtos.DTOUsersById) helpers.APIResponse {
 	users := models.Users{}
 	res := helpers.APIResponse{}
 

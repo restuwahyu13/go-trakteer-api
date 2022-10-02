@@ -195,7 +195,7 @@ func (c *usersController) UpdateProfileByIdController(rw http.ResponseWriter, r 
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOUsersGetProfileById{Id: uint(Id)}
 
-	body := dtos.DTOUsersUpdateProfileById{}
+	body := dtos.DTOUsersProfileById{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
@@ -238,7 +238,7 @@ func (c *usersController) UpdateProfileByIdController(rw http.ResponseWriter, r 
 **/
 
 func (c *usersController) CreateUsersController(rw http.ResponseWriter, r *http.Request) {
-	body := dtos.DTOUsersCreate{}
+	body := dtos.DTOUsers{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
@@ -359,7 +359,7 @@ func (c *usersController) UpdateUsersByIdController(rw http.ResponseWriter, r *h
 	Id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	params := dtos.DTOUsersById{Id: uint(Id)}
 
-	body := dtos.DTOUsersUpdate{}
+	body := dtos.DTOUsers{}
 	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {

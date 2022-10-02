@@ -14,12 +14,12 @@ type IUsersRepository interface {
 	ResetPasswordRepository(ctx context.Context, body *dtos.DTOUsersResetPassword, params *dtos.DTOUsersResetPasswordToken) helpers.APIResponse
 	ChangePasswordRepository(ctx context.Context, body *dtos.DTOUsersChangePassword, params *dtos.DTOUsersById) helpers.APIResponse
 	GetProfileByIdRepository(ctx context.Context, params *dtos.DTOUsersGetProfileById) helpers.APIResponse
-	UpdateProfileByIdRepository(ctx context.Context, body *dtos.DTOUsersUpdateProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse
-	CreateUsersRepository(ctx context.Context, body *dtos.DTOUsersCreate) helpers.APIResponse
+	UpdateProfileByIdRepository(ctx context.Context, body *dtos.DTOUsersProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse
+	CreateUsersRepository(ctx context.Context, body *dtos.DTOUsers) helpers.APIResponse
 	GetAllUsersRepository(ctx context.Context, query *dtos.DTOUsersPagination) helpers.APIResponse
 	GetUsersByIdRepository(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse
 	DeleteUsersByIdRepository(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse
-	UpdateUsersByIdRepository(ctx context.Context, body *dtos.DTOUsersUpdate, params *dtos.DTOUsersById) helpers.APIResponse
+	UpdateUsersByIdRepository(ctx context.Context, body *dtos.DTOUsers, params *dtos.DTOUsersById) helpers.APIResponse
 	HealthCheckTokenRepository(ctx context.Context, params *dtos.DTOUsersHealthToken) helpers.APIResponse
 	RefreshTokenRepository(ctx context.Context, body *dtos.DTOUsersRefreshToken) helpers.APIResponse
 }
@@ -30,12 +30,12 @@ type IUsersService interface {
 	ResetPasswordService(ctx context.Context, body *dtos.DTOUsersResetPassword, params *dtos.DTOUsersResetPasswordToken) helpers.APIResponse
 	ChangePasswordService(ctx context.Context, body *dtos.DTOUsersChangePassword, params *dtos.DTOUsersById) helpers.APIResponse
 	GetProfileByIdService(ctx context.Context, params *dtos.DTOUsersGetProfileById) helpers.APIResponse
-	UpdateProfileByIdService(ctx context.Context, body *dtos.DTOUsersUpdateProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse
-	CreateUsersService(ctx context.Context, body *dtos.DTOUsersCreate) helpers.APIResponse
+	UpdateProfileByIdService(ctx context.Context, body *dtos.DTOUsersProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse
+	CreateUsersService(ctx context.Context, body *dtos.DTOUsers) helpers.APIResponse
 	GetAllUsersService(ctx context.Context, query *dtos.DTOUsersPagination) helpers.APIResponse
 	GetUsersByIdService(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse
 	DeleteUsersByIdService(ctx context.Context, params *dtos.DTOUsersById) helpers.APIResponse
-	UpdateUsersByIdService(ctx context.Context, body *dtos.DTOUsersUpdate, params *dtos.DTOUsersById) helpers.APIResponse
+	UpdateUsersByIdService(ctx context.Context, body *dtos.DTOUsers, params *dtos.DTOUsersById) helpers.APIResponse
 	HealthCheckTokenService(ctx context.Context, params *dtos.DTOUsersHealthToken) helpers.APIResponse
 	RefreshTokenService(ctx context.Context, body *dtos.DTOUsersRefreshToken) helpers.APIResponse
 }

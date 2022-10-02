@@ -38,11 +38,11 @@ func (s *usersService) GetProfileByIdService(ctx context.Context, params *dtos.D
 	return s.repository.GetProfileByIdRepository(ctx, params)
 }
 
-func (s *usersService) UpdateProfileByIdService(ctx context.Context, body *dtos.DTOUsersUpdateProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse {
+func (s *usersService) UpdateProfileByIdService(ctx context.Context, body *dtos.DTOUsersProfileById, params *dtos.DTOUsersGetProfileById) helpers.APIResponse {
 	return s.repository.UpdateProfileByIdRepository(ctx, body, params)
 }
 
-func (s *usersService) CreateUsersService(ctx context.Context, body *dtos.DTOUsersCreate) helpers.APIResponse {
+func (s *usersService) CreateUsersService(ctx context.Context, body *dtos.DTOUsers) helpers.APIResponse {
 	return s.repository.CreateUsersRepository(ctx, body)
 }
 
@@ -58,7 +58,7 @@ func (s *usersService) DeleteUsersByIdService(ctx context.Context, params *dtos.
 	return s.repository.DeleteUsersByIdRepository(ctx, params)
 }
 
-func (s *usersService) UpdateUsersByIdService(ctx context.Context, body *dtos.DTOUsersUpdate, params *dtos.DTOUsersById) helpers.APIResponse {
+func (s *usersService) UpdateUsersByIdService(ctx context.Context, body *dtos.DTOUsers, params *dtos.DTOUsersById) helpers.APIResponse {
 	return s.repository.UpdateUsersByIdRepository(ctx, body, params)
 }
 

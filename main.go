@@ -14,12 +14,14 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
 	"github.com/restuwahyu13/go-trakteer-api/configs"
+	"github.com/restuwahyu13/go-trakteer-api/helpers"
 	"github.com/restuwahyu13/go-trakteer-api/packages"
 	"github.com/restuwahyu13/go-trakteer-api/routes"
 )
@@ -45,6 +47,7 @@ func main() {
 	routes.NewRolesRoute("/api/v1/roles", db, router).RolesRoute()
 	routes.NewCategoriesRoute("/api/v1/categories", db, router).CategoriesRoute()
 	routes.NewWalletsRoute("/api/v1/wallets", db, router).WalletsRoute()
+	routes.NewDonationTypeRoute("/api/v1/donation-type", db, router).DonationTypeRoute()
 
 	SetupGraceFullShutDown(router)
 }
@@ -80,12 +83,19 @@ func SetupMiddleware(router *chi.Mux) {
 		router.Use(middleware.Logger)
 	}
 
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:     []string{"*"},
+		AllowedMethods:     []string{"GET", "POST", "PUT", "DELETE", "HEAD"},
+		AllowedHeaders:     []string{"Accept", "Authorization", "Content-Type"},
+		OptionsPassthrough: true,
+		AllowCredentials:   true,
+		MaxAge:             int(time.Now().Add(helpers.ExpiredAt(3600, "second")).Unix()),
+	}))
 	router.Use(middleware.Compress(gzip.BestCompression))
-	router.Use(middleware.AllowContentType("application/json"))
-	router.Use(middleware.AllowContentEncoding("application/json"))
 	router.Use(middleware.ThrottleWithOpts(middleware.ThrottleOpts{Limit: 5, BacklogLimit: 50, BacklogTimeout: time.Duration(5 * time.Minute)}))
 	router.Use(middleware.NoCache)
 	router.Use(middleware.CleanPath)
+	router.Use(middleware.RealIP)
 	router.Use(middleware.RequestID)
 }
 

@@ -40,29 +40,23 @@ type DTOUsersGetProfileById struct {
 	Id uint `validate:"required,numeric,min=1" json:"id"`
 }
 
-type DTOUsersUpdateProfileById struct {
+type DTOUsersProfileById struct {
 	Email    string `mod:"trim" validate:"required,email" json:"email"`
 	Username string `mod:"trim" validate:"required,alphanum" json:"username"`
 	Name     string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
 	Active   *bool  `validate:"boolean" json:"active"`
 }
 
-type DTOUsersCreate struct {
+type DTOUsers struct {
 	Name     string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
 	Email    string `mod:"trim" validate:"required,email" json:"email"`
 	Password string `validate:"required,alphanumunicode" json:"password"`
+	Active   *bool  `validate:"required,boolean" json:"active"`
 	RoleId   uint   `validate:"required,numeric" json:"role_id"`
 }
 
 type DTOUsersById struct {
 	Id uint `validate:"required,numeric,min=1" json:"id"`
-}
-
-type DTOUsersUpdate struct {
-	Name   string `mod:"strip_num_unicode" validate:"required,alpha" json:"name"`
-	Email  string `mod:"trim" validate:"required,email" json:"email"`
-	Active *bool  `validate:"required,boolean" json:"active"`
-	RoleId uint   `validate:"required,numeric" json:"role_id"`
 }
 
 type DTOUsersHealthToken struct {
