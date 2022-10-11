@@ -40,15 +40,17 @@ func (r *walletsRepository) CreateRepository(ctx context.Context, body *dtos.DTO
 	ctx, cancel := context.WithTimeout(ctx, min)
 	defer cancel()
 
+	tx := r.db.MustBeginTx(ctx, nil)
+
 	checkWalletErrChan := make(chan error)
 	checkUserErrChan := make(chan error)
 	checkUserRowsChan := make(chan *sql.Rows)
 
 	go func(checkWalletErrCh chan error, checkUserErrCh chan error, checkUserRowsCh chan *sql.Rows) {
-		checkWalletErr := r.db.GetContext(ctx, &wallets, "SELECT id FROM wallet WHERE no_rek = $1", body.NoRek)
+		checkWalletErr := tx.GetContext(ctx, &wallets, "SELECT id FROM wallet WHERE no_rek = $1 OR name = $2", body.NoRek, body.Name)
 		checkWalletErrCh <- checkWalletErr
 
-		checkUserRows, checkUserErr := r.db.QueryContext(ctx, `SELECT
+		checkUserRows, checkUserErr := tx.QueryContext(ctx, `SELECT
 		customers.id as customer_id, roles.id as role_id, roles.name as role_name FROM customers
 		INNER JOIN roles ON customers.role_id = roles.id
 		WHERE customers.id = $1 AND customers.active = $2 AND roles.name = $3`, body.CustomerId, "true", "customer")
@@ -59,16 +61,20 @@ func (r *walletsRepository) CreateRepository(ctx context.Context, body *dtos.DTO
 	}(checkWalletErrChan, checkUserErrChan, checkUserRowsChan)
 
 	if err := <-checkWalletErrChan; err == nil {
-		res.StatCode = http.StatusBadRequest
-		res.StatMsg = fmt.Sprintf("No rek %d already taken with other user", body.NoRek)
+		defer tx.Rollback()
 		defer logrus.Errorf("Error Logs: %v", err)
+
+		res.StatCode = http.StatusBadRequest
+		res.StatMsg = fmt.Sprintf("No rek %d already taken with other user or User already created wallet", body.NoRek)
 		return res
 	}
 
 	if err := <-checkUserErrChan; err != nil {
+		defer tx.Rollback()
+		defer logrus.Errorf("Error Logs: %v", err)
+
 		res.StatCode = http.StatusBadRequest
 		res.StatMsg = fmt.Sprintf("Customer for this id %d not exist", body.CustomerId)
-		defer logrus.Errorf("Error Logs: %v", err)
 		return res
 	}
 
@@ -97,30 +103,35 @@ func (r *walletsRepository) CreateRepository(ctx context.Context, body *dtos.DTO
 		balanceId int
 	)
 
-	createWalletRows, createWalletErr := r.db.NamedQueryContext(ctx, "INSERT INTO wallet (name, no_rek, bank_name, created_at) VALUES (:name, :no_rek, :bank_name, :created_at) RETURNING id", &wallets)
-	if createWalletRows.Next() {
+	createWalletRows := tx.QueryRowContext(ctx, "INSERT INTO wallet (name, no_rek, bank_name, created_at) VALUES ($1, $2, $3, $4) RETURNING id", wallets.Name, wallets.NoRek, wallets.BankName, wallets.CreatedAt)
+	if createWalletRows.Err() == nil {
 		createWalletRows.Scan(&walletId)
 	}
 
-	if createWalletErr != nil {
-		res.StatCode = http.StatusBadRequest
+	if err := createWalletRows.Err(); err != nil {
+		defer tx.Rollback()
+		defer logrus.Errorf("Error Logs: %v", err)
+
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Created customer wallet failed"
-		defer logrus.Errorf("Error Logs: %v", createWalletErr)
+
 		return res
 	}
 
 	balances.Amount = 0
 	balances.CreatedAt = time.Now().In(formatTimeZone)
 
-	createBalanceRows, createBalanceErr := r.db.NamedQueryContext(ctx, "INSERT INTO balance (amount, created_at) VALUES (:amount, :created_at) RETURNING id", &balances)
-	if createBalanceRows.Next() {
+	createBalanceRows := tx.QueryRowContext(ctx, "INSERT INTO balance (amount, created_at) VALUES ($1, $2) RETURNING id", balances.Amount, balances.CreatedAt)
+	if createBalanceRows.Err() == nil {
 		createBalanceRows.Scan(&balanceId)
 	}
 
-	if createBalanceErr != nil {
-		res.StatCode = http.StatusBadRequest
+	if err := createBalanceRows.Err(); err != nil {
+		defer tx.Rollback()
+		defer logrus.Errorf("Error Logs: %v", err)
+
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Created default balance failed"
-		defer logrus.Errorf("Error Logs: %v", createBalanceErr)
 		return res
 	}
 
@@ -128,11 +139,20 @@ func (r *walletsRepository) CreateRepository(ctx context.Context, body *dtos.DTO
 	usersPayment.BalanceId = uint(balanceId)
 	usersPayment.WalletId = uint(walletId)
 
-	_, createUserPaymentErr := r.db.NamedQueryContext(ctx, "INSERT INTO users_payment (customer_id, balance_id, wallet_id) VALUES (:customer_id, :balance_id, :wallet_id)", &usersPayment)
-	if createUserPaymentErr != nil {
-		res.StatCode = http.StatusBadRequest
+	createUserPaymentRows := tx.QueryRowContext(ctx, "INSERT INTO users_payment (customer_id, balance_id, wallet_id) VALUES ($1, $2, $3)", usersPayment.CustomerId, usersPayment.BalanceId, usersPayment.WalletId)
+	if err := createUserPaymentRows.Err(); err != nil {
+		defer tx.Rollback()
+		defer logrus.Errorf("Error Logs: %v", err)
+
+		res.StatCode = http.StatusForbidden
 		res.StatMsg = "Created customer wallet failed"
-		defer logrus.Errorf("Error Logs: %v", createUserPaymentErr)
+		return res
+	}
+
+	if err := tx.Commit(); err != nil {
+		res.StatCode = http.StatusForbidden
+		res.StatMsg = "Commit transaction failed"
+		defer logrus.Errorf("Error Logs: %v", err)
 		return res
 	}
 
